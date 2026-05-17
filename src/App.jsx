@@ -1,41 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Peer from 'peerjs';
-import { QRCodeSVG } from 'qrcode.react';
+import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw } from 'lucide-react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { QrCode, MonitorSmartphone, Smartphone, Settings, ArrowLeftRight, Video, Sun, Moon } from 'lucide-react';
 
 export default function App() {
+  const [mode, setMode] = useState('home'); 
   const [peerId, setPeerId] = useState('');
-  const [remoteId, setRemoteId] = useState('');
-  const [status, setStatus] = useState('Initializing...');
-  const [isScanning, setIsScanning] = useState(false);
+  const [status, setStatus] = useState('Initializing ZetNet...');
   const [isConnected, setIsConnected] = useState(false);
-  
-  // 1. Detect system theme on initial load!
-  const [isLightMode, setIsLightMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      // If system prefers dark, light mode is false. Otherwise, true.
-      return !window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return false; 
-  });
-  
+
   const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerInstance = useRef(null);
-
-  // 2. Listen for system theme changes in real-time
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e) => setIsLightMode(!e.matches);
-    
-    // Add listener
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
+  const scannerInstanceRef = useRef(null);
 
   useEffect(() => {
-    // Initialize Peer with Free Google STUN Servers
+    if (mode === 'home') {
+      if (peerInstance.current) {
+        peerInstance.current.destroy();
+        peerInstance.current = null;
+      }
+      if (scannerInstanceRef.current) {
+        try { scannerInstanceRef.current.clear(); } catch (e) {}
+        scannerInstanceRef.current = null;
+      }
+      setIsConnected(false);
+      setPeerId('');
+      return;
+    }
+
     const peer = new Peer({
       config: {
         iceServers: [
@@ -47,16 +40,15 @@ export default function App() {
 
     peer.on('open', (id) => {
       setPeerId(id);
-      setStatus('Ready! My ID is: ' + id);
+      setStatus('ZetNet Engine Active');
     });
 
-    // Handle receiving a call (PC Mode)
     peer.on('call', (call) => {
-      setStatus('Receiving call...');
-      call.answer(); 
+      setStatus('Incoming feed detected...');
+      call.answer();
       call.on('stream', (remoteStream) => {
-        setStatus('Connected! Video receiving.');
         setIsConnected(true);
+        setStatus('Streaming Live to PC!');
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = remoteStream;
         }
@@ -65,196 +57,217 @@ export default function App() {
 
     peerInstance.current = peer;
 
-    return () => peer.destroy();
-  }, []);
+    if (mode === 'camera') {
+      setTimeout(() => {
+        const readerElement = document.getElementById('reader');
+        if (!readerElement) return;
 
-  // QR Scanner Initialization
-  useEffect(() => {
-    if (isScanning) {
-      const scanner = new Html5QrcodeScanner(
-        "qr-reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        false
-      );
+        try {
+          const scanner = new Html5QrcodeScanner('reader', {
+            fps: 10,
+            qrbox: { width: 230, height: 230 },
+            rememberLastUsedCamera: true
+          }, false);
 
-      scanner.render(
-        (decodedText) => {
-          setRemoteId(decodedText);
-          setIsScanning(false);
-          scanner.clear();
-        },
-        (errorMessage) => {} // Ignoring hidden scanner errors
-      );
-
-      return () => {
-        scanner.clear().catch(() => {});
-      };
+          scanner.render(
+            (decodedText) => {
+              scanner.clear().then(() => {
+                scannerInstanceRef.current = null;
+                handleConnectToPC(decodedText);
+              }).catch(() => {
+                handleConnectToPC(decodedText);
+              });
+            },
+            () => {}
+          );
+          
+          scannerInstanceRef.current = scanner;
+        } catch (err) {
+          setStatus("Scanner error: " + err.message);
+        }
+      }, 400); 
     }
-  }, [isScanning]);
 
-  // Handle sending a call (Camera Mode)
-  const startCameraAndCall = async () => {
-    setStatus('Starting camera...');
+    return () => {
+      if (peer) peer.destroy();
+      if (scannerInstanceRef.current) {
+        try { scannerInstanceRef.current.clear(); } catch(e) {}
+      }
+    };
+  }, [mode]);
+
+  const handleConnectToPC = async (targetPcId) => {
+    setStatus('Accessing camera hardware...');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      
       if (myVideoRef.current) {
         myVideoRef.current.srcObject = stream;
       }
-
-      setStatus('Calling PC...');
-      const call = peerInstance.current.call(remoteId, stream);
-      
-      call.on('stream', (remoteStream) => {
-        // Catching the stream event
-      });
-
-      setStatus('Streaming to PC!');
+      peerInstance.current.call(targetPcId, stream);
       setIsConnected(true);
+      setStatus('Streaming Live to PC!');
     } catch (err) {
-      setStatus('Camera Error: ' + err.message);
+      setStatus('Hardware Error: ' + err.message);
     }
   };
 
   return (
-    <div className={`min-h-screen font-sans p-4 md:p-8 transition-colors duration-300 ${isLightMode ? 'bg-gray-50 text-gray-900' : 'bg-[#0d0714] text-white'}`}>
+    <div className="min-h-screen w-full bg-[#120d1a] text-white font-sans antialiased p-4 md:p-6 flex flex-col items-center justify-start overflow-x-hidden selection:bg-pink-500/30">
       
-      {/* Header Area */}
-      <div className="flex justify-between items-center mb-8 max-w-4xl mx-auto">
+      {/* FORCE KILL WHITE BORDERS (Direct Style Injection) */}
+      <style>{`
+        html, body, #root {
+          background-color: #120d1a !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+          overflow-x: hidden !important;
+          max-width: 100% !important;
+        }
+        #reader __video {
+          object-fit: cover !important;
+          border-radius: 1rem;
+        }
+      `}</style>
+      
+      {/* Responsive Header */}
+      <header className="w-full max-w-4xl flex justify-between items-center mb-6 border-b border-white/5 pb-4">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-pink-500 animate-pulse"></div>
-          <h1 className={`text-xl font-bold tracking-widest ${isLightMode ? 'text-gray-900' : 'text-white'}`}>
-            ZETCAM <span className="text-purple-500">PRO</span>
+          <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse" />
+          <h1 className="text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
+            ZETCAM PRO <span className="text-[10px] font-normal text-white/30">v2.0</span>
           </h1>
         </div>
-        
-        <div className="flex items-center gap-4">
-          {/* Dynamic Live Badge */}
-          {isConnected && (
-            <div className={`border px-3 py-1 rounded-full text-xs font-medium flex items-center gap-2 backdrop-blur-md ${isLightMode ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-900/50 border-purple-500/30 text-purple-200'}`}>
-              Streaming Live to PC!
-            </div>
-          )}
-
-          {/* Theme Toggle Button */}
+        {mode !== 'home' && (
           <button 
-            onClick={() => setIsLightMode(!isLightMode)}
-            className={`p-2 rounded-full transition-colors ${isLightMode ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' : 'bg-white/10 hover:bg-white/20 text-gray-300'}`}
-            title="Toggle Theme"
+            onClick={() => setMode('home')}
+            className="flex items-center gap-1.5 text-xs text-white/70 hover:text-white bg-white/5 px-3 py-1.5 rounded-full border border-white/10 transition-all"
           >
-            {isLightMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            <ArrowLeft size={14} /> Back
           </button>
-        </div>
-      </div>
+        )}
+      </header>
 
-      <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
-        
-        {/* --- PHONE (SENDER) CARD --- */}
-        <div className={`border rounded-3xl p-6 backdrop-blur-md flex flex-col transition-colors duration-300 ${isLightMode ? 'bg-white border-gray-200 shadow-sm' : 'bg-white/5 border-white/10'}`}>
-          <div className={`flex items-center gap-2 mb-4 ${isLightMode ? 'text-gray-700' : 'text-gray-300'}`}>
-            <Smartphone className="w-5 h-5 text-pink-500" />
-            <h2 className="text-lg font-semibold">Phone (Camera)</h2>
-          </div>
-
-          {/* Local Video Feed */}
-          <div className={`w-full rounded-2xl overflow-hidden aspect-video relative mb-6 border shadow-inner ${isLightMode ? 'bg-gray-100 border-gray-200' : 'bg-black border-white/10 shadow-lg'}`}>
-            {!isConnected && <div className="absolute inset-0 flex items-center justify-center text-gray-400"><Video className="w-12 h-12" /></div>}
-            <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover relative z-10" />
-          </div>
-
-          {/* Controls Box - Disappears when connected! */}
-          {!isConnected && (
-            <div className={`rounded-2xl p-4 border space-y-4 ${isLightMode ? 'bg-gray-50 border-gray-100' : 'bg-black/20 border-white/5'}`}>
-              
-              {/* QR Scanner */}
-              {isScanning ? (
-                <div id="qr-reader" className="w-full overflow-hidden rounded-xl bg-white text-black"></div>
-              ) : (
-                <button 
-                  onClick={() => setIsScanning(true)} 
-                  className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md"
-                >
-                  <QrCode className="w-5 h-5" /> Scan PC Monitor QR Code
-                </button>
-              )}
-
-              <div className={`flex items-center gap-4 text-xs font-medium uppercase tracking-wider my-4 ${isLightMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                <div className={`flex-1 h-px ${isLightMode ? 'bg-gray-200' : 'bg-white/10'}`}></div>
-                OR USE MANUAL ID
-                <div className={`flex-1 h-px ${isLightMode ? 'bg-gray-200' : 'bg-white/10'}`}></div>
-              </div>
-
-              {/* Manual Input */}
-              <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Enter PC's ID..." 
-                  value={remoteId} 
-                  onChange={(e) => setRemoteId(e.target.value)} 
-                  className={`flex-1 border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-colors ${isLightMode ? 'bg-white border-gray-300 text-gray-900 placeholder-gray-400' : 'bg-[#1a1325] border-white/10 text-white placeholder-gray-500'}`}
-                />
-                <button 
-                  onClick={startCameraAndCall} 
-                  className={`px-6 py-3 rounded-xl font-medium transition-colors text-white ${isLightMode ? 'bg-purple-600 hover:bg-purple-700' : 'bg-[#2d1b4e] hover:bg-[#3d256a]'}`}
-                >
-                  Connect
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Bottom Utility Links */}
-          <div className={`flex justify-between items-center mt-6 text-sm ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}>
-            <button className={`flex items-center gap-2 transition-colors ${isLightMode ? 'hover:text-gray-900' : 'hover:text-white'}`}>
-              <ArrowLeftRight className="w-4 h-4" /> Change Mode
-            </button>
-            <button className={`flex items-center gap-2 transition-colors px-3 py-1.5 rounded-lg border ${isLightMode ? 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:text-gray-900' : 'bg-white/5 border-white/5 hover:text-white'}`}>
-              <Settings className="w-4 h-4" /> Video Settings
-            </button>
-          </div>
-        </div>
-
-        {/* --- PC (RECEIVER) CARD --- */}
-        <div className={`border rounded-3xl p-6 backdrop-blur-md flex flex-col transition-colors duration-300 ${isLightMode ? 'bg-white border-gray-200 shadow-sm' : 'bg-white/5 border-white/10'}`}>
-          <div className={`flex items-center gap-2 mb-4 ${isLightMode ? 'text-gray-700' : 'text-gray-300'}`}>
-            <MonitorSmartphone className="w-5 h-5 text-purple-500" />
-            <h2 className="text-lg font-semibold">PC Monitor (Receiver)</h2>
-          </div>
-
-          <div className={`text-sm mb-6 p-3 rounded-xl border ${isLightMode ? 'bg-gray-50 border-gray-100 text-gray-600' : 'bg-black/20 border-white/5 text-gray-400'}`}>
-            <strong>Status:</strong> <span className={isConnected ? "text-green-500 font-medium" : "text-pink-500 font-medium"}>{status}</span>
-          </div>
+      {/* ========================================================= */}
+      {/* 1. HOME SCREEN - PREMIUM SPLIT CARDS                      */}
+      {/* ========================================================= */}
+      {mode === 'home' && (
+        <div className="w-full max-w-2xl flex flex-col sm:flex-row gap-4 justify-center items-stretch my-auto py-6">
           
-          {/* Incoming Video Feed */}
-          <div className={`w-full rounded-2xl overflow-hidden aspect-video relative mb-6 border shadow-inner ${isLightMode ? 'bg-gray-100 border-gray-200' : 'bg-black border-white/10 shadow-lg'}`}>
-            {!isConnected && <div className="absolute inset-0 flex items-center justify-center text-gray-400"><Video className="w-12 h-12" /></div>}
-            <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover relative z-10" />
+          {/* Phone Card */}
+          <button 
+            onClick={() => setMode('camera')}
+            className="flex-1 bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-left transition-all hover:border-pink-500/40 hover:bg-pink-500/[0.01] group relative overflow-hidden"
+          >
+            <div className="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 mb-4 group-hover:scale-105 transition-transform">
+              <Camera size={24} />
+            </div>
+            <h3 className="text-lg font-bold mb-1">I am the Camera</h3>
+            <p className="text-xs text-white/40 leading-relaxed">Turn this phone into a streaming lens. Opens the automatic QR scanner.</p>
+            <div className="absolute -bottom-2 -right-2 text-white/[0.02] group-hover:text-pink-500/[0.05] transition-colors">
+              <Radio size={70} />
+            </div>
+          </button>
+
+          {/* PC Card */}
+          <button 
+            onClick={() => setMode('receiver')}
+            className="flex-1 bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-left transition-all hover:border-purple-500/40 hover:bg-purple-500/[0.01] group relative overflow-hidden"
+          >
+            <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-105 transition-transform">
+              <Monitor size={24} />
+            </div>
+            <h3 className="text-lg font-bold mb-1">I am the PC Monitor</h3>
+            <p className="text-xs text-white/40 leading-relaxed">Host the stream display window. Generates the secure target QR matrix.</p>
+            <div className="absolute -bottom-2 -right-2 text-white/[0.02] group-hover:text-purple-500/[0.05] transition-colors">
+              <CheckCircle size={70} />
+            </div>
+          </button>
+
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 2. SENDER / CAMERA VIEW                                    */}
+      {/* ========================================================= */}
+      {mode === 'camera' && (
+        <div className="w-full max-w-sm flex flex-col items-center gap-4">
+          <div className="w-full bg-white/[0.02] border border-white/5 rounded-xl p-3 text-center">
+            <span className="text-[13px] font-medium text-pink-400 flex items-center justify-center gap-2">
+              <Radio size={14} className="animate-pulse" /> {status}
+            </span>
           </div>
 
-          {/* PC Connection Info - Disappears when connected! */}
-          {!isConnected && (
-            <div className={`flex flex-col items-center justify-center flex-1 rounded-2xl p-6 border ${isLightMode ? 'bg-gray-50 border-gray-100' : 'bg-black/20 border-white/5'}`}>
-              <p className={`mb-4 text-sm font-medium ${isLightMode ? 'text-gray-600' : 'text-gray-400'}`}>Scan this code with your phone:</p>
-              
-              {peerId ? (
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-4">
-                  <QRCodeSVG value={peerId} size={160} />
-                </div>
-              ) : (
-                <div className={`w-[160px] h-[160px] animate-pulse rounded-2xl mb-4 ${isLightMode ? 'bg-gray-200' : 'bg-white/10'}`}></div>
-              )}
-              
-              <div className="text-center w-full">
-                <p className={`text-xs uppercase tracking-wider mb-2 ${isLightMode ? 'text-gray-500' : 'text-gray-500'}`}>Or enter this ID manually:</p>
-                <code className={`block border rounded-xl px-4 py-3 font-mono text-sm break-all ${isLightMode ? 'bg-white border-gray-200 text-purple-600 shadow-sm' : 'bg-[#1a1325] border-white/10 text-pink-400'}`}>
-                  {peerId || 'Generating ID...'}
-                </code>
+          {!isConnected ? (
+            <div className="w-full bg-white/[0.02] border border-white/10 rounded-2xl p-4 text-center">
+              <h4 className="text-md font-bold mb-3">Align Scanner to PC Screen</h4>
+              <div id="reader" className="overflow-hidden rounded-xl bg-black border border-white/5 text-black max-w-full"></div>
+            </div>
+          ) : (
+            <div className="w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative aspect-[3/4]">
+              <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+              <div className="absolute top-3 right-3 bg-emerald-500 text-black text-[10px] font-black uppercase px-2.5 py-1 rounded-full flex items-center gap-1">
+                <CheckCircle size={10} /> Live Link Active
               </div>
             </div>
           )}
         </div>
+      )}
 
-      </div>
+      {/* ========================================================= */}
+      {/* 3. RECEIVER / PC MONITOR VIEW                              */}
+      {/* ========================================================= */}
+      {mode === 'receiver' && (
+        <div className="w-full max-w-4xl flex flex-col items-center gap-4">
+          <div className={`w-full flex flex-col ${isConnected ? 'lg:flex-row' : 'items-center'} gap-4`}>
+            
+            {!isConnected && (
+              <div className="w-full max-w-xs bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-center flex flex-col items-center">
+                <h3 className="text-md font-bold mb-1">Scan to Pair Device</h3>
+                <p className="text-[11px] text-white/40 mb-4">Point your mobile scanner at this code</p>
+                
+                <div className="bg-white p-3 rounded-xl mb-4">
+                  {peerId ? (
+                    <img 
+                      src={`https://chart.googleapis.com/chart?cht=qr&chs=180x180&chl=${peerId}`} 
+                      alt="Pairing QR Code"
+                      className="w-40 h-40 block"
+                    />
+                  ) : (
+                    <div className="w-40 h-40 flex flex-col items-center justify-center text-black/40 gap-1">
+                      <RefreshCw className="animate-spin text-purple-600" size={20} />
+                      <span className="text-[10px]">Generating Key...</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-full bg-black/40 rounded-lg p-2 border border-white/5 max-w-full overflow-hidden">
+                  <code className="text-[10px] text-purple-300 break-all block">{peerId || 'fetching setup...'}</code>
+                </div>
+              </div>
+            )}
+
+            <div className={`flex-1 bg-black rounded-2xl border border-white/10 relative overflow-hidden min-h-[380px] flex items-center justify-center ${isConnected ? 'w-full' : 'max-w-xs'}`}>
+              <video 
+                ref={remoteVideoRef} 
+                autoPlay 
+                playsInline 
+                className="w-full h-full object-contain max-h-[65vh]" 
+              />
+              
+              {!isConnected && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm gap-2 text-center p-4">
+                  <Radio size={24} className="text-white/30 animate-pulse" />
+                  <h4 className="text-sm font-bold">Awaiting Stream Connection</h4>
+                  <p className="text-[11px] text-white/40 max-w-xs leading-relaxed">Video input frames will mount here as soon as the phone reads the authentication matrix.</p>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
