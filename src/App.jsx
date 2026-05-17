@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Peer from 'peerjs';
 import { Camera, Monitor, Settings, QrCode, RefreshCw, X } from 'lucide-react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
 
 export default function App() {
   const [peerId, setPeerId] = useState('');
   const [remoteId, setRemoteId] = useState('');
-  const [status, setStatus] = useState('Initializing ZetNet...');
+  const [status, setStatus] = useState('Initializing ZetCam...');
   const [mode, setMode] = useState(null); // 'pc' or 'phone'
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
@@ -18,7 +18,7 @@ export default function App() {
   const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerInstance = useRef(null);
-  const scannerRef = useRef(null);
+  const html5QrcodeInstance = useRef(null);
 
   useEffect(() => {
     // Initialize Peer with Google STUN Servers for flawless routing
@@ -33,7 +33,7 @@ export default function App() {
 
     peer.on('open', (id) => {
       setPeerId(id);
-      setStatus('ZetNet Ready');
+      setStatus('ZetCam Ready');
     });
 
     peer.on('call', (call) => {
@@ -43,15 +43,18 @@ export default function App() {
         setStatus('Streaming Live');
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = remoteStream;
+          // Force play for mobile/safari compatibility on receiver side
+          remoteVideoRef.current.play().catch(e => console.log("Play error:", e));
         }
       });
     });
 
     peerInstance.current = peer;
+    
     return () => {
       peer.destroy();
-      if (scannerRef.current) {
-        scannerRef.current.clear();
+      if (html5QrcodeInstance.current && html5QrcodeInstance.current.isScanning) {
+        html5QrcodeInstance.current.stop();
       }
     };
   }, []);
@@ -65,7 +68,7 @@ export default function App() {
         width: { ideal: width },
         height: { ideal: height },
         frameRate: { ideal: parseInt(fps) },
-        facingMode: 'environment' // Uses back camera by default
+        facingMode: 'environment' // Uses back camera
       },
       audio: false
     };
@@ -89,34 +92,61 @@ export default function App() {
       }
 
       setStatus('Connecting to PC monitor...');
-      const call = peerInstance.current.call(idToCall, stream);
+      peerInstance.current.call(idToCall, stream);
       setStatus('Streaming Live to PC!');
     } catch (err) {
       setStatus('Camera Error: ' + err.message);
     }
   };
 
-  // Trigger Mobile QR Scanner
-  const startQRScanner = () => {
+  // Trigger Mobile QR Scanner (Skips dropdowns, forces back camera directly)
+  const startQRScanner = async () => {
     setIsScanning(true);
-    setTimeout(() => {
-      const scanner = new Html5QrcodeScanner('qr-reader', {
-        fps: 10,
-        qrbox: { width: 250, height: 250 }
-      }, false);
+    setStatus('Launching QR Scanner...');
+    
+    // Tiny delay to ensure the container element is rendered in DOM
+    setTimeout(async () => {
+      try {
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        html5QrcodeInstance.current = html5QrCode;
 
-      scanner.render((decodedText) => {
-        setRemoteId(decodedText);
+        const qrConfig = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        // Force 'environment' directly to instantly use back camera without menu prompts
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          qrConfig,
+          async (decodedText) => {
+            setStatus('QR Found! Handing over camera...');
+            setRemoteId(decodedText);
+            setIsScanning(false);
+            
+            // CRITICAL FIX: Stop scanner completely and free up the hardware BEFORE starting stream
+            await html5QrCode.stop();
+            
+            // Give the phone OS 300ms to completely release the camera lens
+            setTimeout(() => {
+              startStreaming(decodedText);
+            }, 300);
+          },
+          (errorMessage) => {
+            // Scanning frame update, ignore noisy console logs
+          }
+        );
+      } catch (err) {
+        setStatus('Scanner Error: ' + err.message);
         setIsScanning(false);
-        scanner.clear();
-        // Instantly start stream upon successful scan
-        startStreaming(decodedText);
-      }, (error) => {
-        // Silent catch for scanning frame errors
-      });
-
-      scannerRef.current = scanner;
+      }
     }, 100);
+  };
+
+  // Stop scanner manually via X button
+  const stopQRScannerManually = async () => {
+    if (html5QrcodeInstance.current && html5QrcodeInstance.current.isScanning) {
+      await html5QrcodeInstance.current.stop();
+    }
+    setIsScanning(false);
+    setStatus('Scanner Closed');
   };
 
   // Public QR Code API link generator
@@ -129,7 +159,7 @@ export default function App() {
       <header className="flex justify-between items-center max-w-5xl w-full mx-auto py-2 border-b border-purple-900/30">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-pink-500 animate-pulse" />
-          <h1 className="text-xl font-bold tracking-wider bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent">ZETNET PRO</h1>
+          <h1 className="text-xl font-bold tracking-wider bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent">ZETCAM PRO</h1>
         </div>
         <span className="text-xs px-3 py-1 rounded-full bg-purple-950/50 border border-purple-500/20 text-purple-300 backdrop-blur-sm">
           {status}
@@ -201,7 +231,7 @@ export default function App() {
               )}
               
               <p className="text-xs text-slate-400 px-2">
-                Scan this code using your phone's camera inside the ZetNet app to instantly push your stream here.
+                Scan this code using your phone's camera inside the ZetCam app to instantly push your stream here.
               </p>
             </div>
           </div>
@@ -216,12 +246,12 @@ export default function App() {
               <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
               
               {isScanning && (
-                <div className="absolute inset-0 bg-black/90 p-4 flex flex-col z-20">
+                <div className="absolute inset-0 bg-black/95 p-4 flex flex-col z-20">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-pink-400 font-mono">Scanning QR Code...</span>
-                    <button onClick={() => setIsScanning(false)} className="p-1 rounded-full bg-white/10 text-white"><X size={16} /></button>
+                    <span className="text-xs text-pink-400 font-mono animate-pulse">Scanning QR Code...</span>
+                    <button onClick={stopQRScannerManually} className="p-1 rounded-full bg-white/10 text-white"><X size={16} /></button>
                   </div>
-                  <div id="qr-reader" className="w-full overflow-hidden rounded-xl bg-black"></div>
+                  <div id="qr-reader" className="w-full overflow-hidden rounded-xl bg-black border border-purple-500/20"></div>
                 </div>
               )}
 
@@ -282,7 +312,7 @@ export default function App() {
       {/* REUSABLE PREMIUM MOBILE SETTINGS OVERLAY */}
       {isSettingsOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="w-full sm:max-w-md bg-[#1d1124] border-t sm:border border-purple-500/20 rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-200">
+          <div className="w-full sm:max-w-md bg-[#1d1124] border-t sm:border border-purple-500/20 rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold tracking-wide flex items-center gap-2 text-pink-400">
                 <Settings size={18} /> Stream Configurations
@@ -331,7 +361,6 @@ export default function App() {
               onClick={() => {
                 setIsSettingsOpen(false);
                 if (myVideoRef.current?.srcObject) {
-                  // If streaming, instantly re-apply changes
                   startStreaming();
                 }
               }}
@@ -345,7 +374,7 @@ export default function App() {
 
       {/* FOOTER */}
       <footer className="text-center text-[10px] text-slate-600 tracking-widest pb-safe pt-2">
-        ZETNET STREAMING ENGINE • ULTRA LOW LATENCY WIRELESS WEBCAM
+        ZETCAM STREAMING ENGINE • ULTRA LOW LATENCY WIRELESS WEBCAM
       </footer>
     </div>
   );
