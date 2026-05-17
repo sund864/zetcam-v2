@@ -6,9 +6,10 @@ export default function App() {
   const [remoteId, setRemoteId] = useState('');
   const [status, setStatus] = useState('Initializing...');
   
-  // Here is our "bouncer" tracking the connection!
+  // This is our "Bouncer" variable!
   const [isConnected, setIsConnected] = useState(false);
-  
+  const [isReceiving, setIsReceiving] = useState(false); 
+
   const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerInstance = useRef(null);
@@ -35,7 +36,8 @@ export default function App() {
       call.answer(); 
       call.on('stream', (remoteStream) => {
         setStatus('Connected! Video receiving.');
-        setIsConnected(true); // Hide the controls on the PC!
+        setIsReceiving(true);
+        setIsConnected(true); // Tell the UI we are connected!
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = remoteStream;
         }
@@ -46,8 +48,10 @@ export default function App() {
     return () => peer.destroy();
   }, []);
 
-  // 3. Handle sending a call (Camera Mode)
+  // 3. Handle sending a call (Camera Mode on Phone)
   const startCameraAndCall = async () => {
+    if (!remoteId) return alert("Please enter a PC ID first!");
+    
     setStatus('Starting camera...');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
@@ -60,54 +64,95 @@ export default function App() {
       const call = peerInstance.current.call(remoteId, stream);
       
       call.on('stream', (remoteStream) => {
-        // Catching the stream event just in case
+        // Catching just in case
       });
 
-      setStatus('Streaming to PC!');
-      setIsConnected(true); // Hide the controls on the Phone!
+      // The call was successfully sent, hide the controls!
+      setIsConnected(true); 
+      setStatus('Streaming Live to PC!');
     } catch (err) {
       setStatus('Camera Error: ' + err.message);
     }
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif', color: 'white' }}>
-      <h2>iOS Camera Test</h2>
-      <p><strong>Status:</strong> {status}</p>
+    <div className="min-h-screen bg-[#160a1a] text-white font-sans p-4 flex flex-col">
       
-      {/* PC Section - Only shows the instructions if NOT connected */}
-      <div style={{ marginBottom: '20px', padding: '10px', border: '1px solid #444', borderBottom: isConnected ? 'none' : '1px solid #444' }}>
-        {!isConnected && (
-          <>
-            <h3>I am the PC (Receiver)</h3>
-            <p>Give this ID to the phone: <strong style={{color: '#f472b6'}}>{peerId}</strong></p>
-          </>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6 mt-2">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-pink-500"></div>
+          <h1 className="text-xl font-bold tracking-widest uppercase">Zetcam Pro</h1>
+        </div>
+        
+        {/* Only shows when connected */}
+        {isConnected && (
+          <div className="bg-purple-900/50 text-purple-200 text-xs px-3 py-1 rounded-full border border-purple-500/30">
+            {status}
+          </div>
         )}
-        {/* Video stays visible outside the condition */}
-        <video ref={remoteVideoRef} autoPlay playsInline style={{ width: '300px', backgroundColor: '#333', marginTop: '10px' }} />
       </div>
 
-      {/* Phone Section - Only shows the inputs if NOT connected */}
-      <div style={{ padding: '10px', border: '1px solid #444', borderBottom: isConnected ? 'none' : '1px solid #444' }}>
-        {!isConnected && (
-          <>
-            <h3>I am the Phone (Sender)</h3>
+      {/* PC Status / ID - Only shows when NOT connected */}
+      {!isConnected && (
+        <div className="mb-4 text-center">
+          <p className="text-sm text-gray-400">Your PC ID for receiving:</p>
+          <p className="text-pink-400 font-mono font-bold tracking-wide">{peerId || 'Generating...'}</p>
+        </div>
+      )}
+
+      {/* Video Area */}
+      <div className={`relative bg-black rounded-2xl overflow-hidden mb-6 transition-all duration-500 ${isConnected ? 'flex-grow' : 'h-64'}`}>
+        {/* If we are the PC, show remote video. If we are the phone, show local camera */}
+        {isReceiving ? (
+          <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
+        ) : (
+          <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+        )}
+      </div>
+
+      {/* The Controls - This entire block DISAPPEARS when isConnected is true! */}
+      {!isConnected && (
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-6 shadow-xl">
+          
+          <button className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold py-4 rounded-xl mb-6 shadow-lg shadow-pink-500/20 active:scale-95 transition-transform">
+            Scan PC Monitor QR Code
+          </button>
+
+          <div className="flex items-center gap-4 mb-6">
+            <div className="h-px bg-white/10 flex-grow"></div>
+            <span className="text-xs text-white/40 font-semibold tracking-wider">OR USE MANUAL ID</span>
+            <div className="h-px bg-white/10 flex-grow"></div>
+          </div>
+
+          <div className="flex gap-2">
             <input 
               type="text" 
-              placeholder="Enter PC's ID here" 
-              value={remoteId} 
-              onChange={(e) => setRemoteId(e.target.value)} 
-              style={{ padding: '5px', width: '200px', color: 'black' }}
+              value={remoteId}
+              onChange={(e) => setRemoteId(e.target.value)}
+              placeholder="Enter PC ID here..."
+              className="flex-grow bg-[#0f0714] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-pink-500 transition-colors"
             />
-            <button onClick={startCameraAndCall} style={{ padding: '5px 10px', marginLeft: '10px', color: 'black' }}>
-              Start Camera & Send
+            <button 
+              onClick={startCameraAndCall}
+              className="bg-[#2a1333] hover:bg-[#3a1b47] text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+            >
+              Connect
             </button>
-          </>
-        )}
-        <br/><br/>
-        {/* Video stays visible outside the condition */}
-        <video ref={myVideoRef} autoPlay playsInline muted style={{ width: '150px', backgroundColor: '#333' }} />
-      </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Nav - Also disappears when connected */}
+      {!isConnected && (
+        <div className="flex justify-between items-center text-sm text-white/50 mt-auto pb-safe">
+          <button className="hover:text-white transition-colors">&larr; Change Mode</button>
+          <button className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg transition-colors">
+            Video Settings
+          </button>
+        </div>
+      )}
+
     </div>
   );
 }
