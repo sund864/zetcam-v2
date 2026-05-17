@@ -1,122 +1,97 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useState, useEffect, useRef } from 'react';
+import Peer from 'peerjs';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [peerId, setPeerId] = useState('');
+  const [remoteId, setRemoteId] = useState('');
+  const [status, setStatus] = useState('Initializing...');
+  
+  const myVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+  const peerInstance = useRef(null);
+
+  useEffect(() => {
+    // 1. Initialize Peer with Free Google STUN Servers to bypass basic iOS firewalls
+    const peer = new Peer({
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      }
+    });
+
+    peer.on('open', (id) => {
+      setPeerId(id);
+      setStatus('Ready! My ID is: ' + id);
+    });
+
+    // 2. Handle receiving a call (PC Mode)
+    peer.on('call', (call) => {
+      setStatus('Receiving call...');
+      call.answer(); // Answer without sending our own stream
+      call.on('stream', (remoteStream) => {
+        setStatus('Connected! Video receiving.');
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = remoteStream;
+        }
+      });
+    });
+
+    peerInstance.current = peer;
+
+    return () => peer.destroy();
+  }, []);
+
+  // 3. Handle sending a call (Camera Mode)
+  const startCameraAndCall = async () => {
+    setStatus('Starting camera...');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      
+      if (myVideoRef.current) {
+        myVideoRef.current.srcObject = stream;
+      }
+
+      setStatus('Calling PC...');
+      const call = peerInstance.current.call(remoteId, stream);
+      
+      call.on('stream', (remoteStream) => {
+        // We aren't expecting video back, but catching it just in case
+      });
+
+      setStatus('Streaming to PC!');
+    } catch (err) {
+      setStatus('Camera Error: ' + err.message);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
+    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+      <h2>iOS Camera Test</h2>
+      <p><strong>Status:</strong> {status}</p>
+      
+      <div style={{ marginBottom: '20px', padding: '10px', border: '1px solid black' }}>
+        <h3>I am the PC (Receiver)</h3>
+        <p>Give this ID to the phone: <strong>{peerId}</strong></p>
+        <video ref={remoteVideoRef} autoPlay playsInline style={{ width: '300px', backgroundColor: '#eee' }} />
+      </div>
+
+      <div style={{ padding: '10px', border: '1px solid black' }}>
+        <h3>I am the Phone (Sender)</h3>
+        <input 
+          type="text" 
+          placeholder="Enter PC's ID here" 
+          value={remoteId} 
+          onChange={(e) => setRemoteId(e.target.value)} 
+          style={{ padding: '5px', width: '200px' }}
+        />
+        <button onClick={startCameraAndCall} style={{ padding: '5px 10px', marginLeft: '10px' }}>
+          Start Camera & Send
         </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <br/><br/>
+        <video ref={myVideoRef} autoPlay playsInline muted style={{ width: '150px', backgroundColor: '#eee' }} />
+      </div>
+    </div>
+  );
 }
-
-export default App
