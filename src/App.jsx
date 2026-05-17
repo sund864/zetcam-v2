@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Peer from 'peerjs';
-import QRCode from 'react-qr-code';
+import { QRCodeSVG } from 'qrcode.react'; // Swapped to the stable package!
 import { Html5QrcodeScanner } from 'html5-qrcode';
 
 export default function App() {
@@ -63,7 +63,7 @@ export default function App() {
           scanner.clear();
         },
         (errorMessage) => {
-          // The scanner constantly throws hidden errors while searching for a QR code; we ignore them.
+          // The scanner constantly throws hidden errors while searching; we ignore them.
         }
       );
 
@@ -108,7 +108,7 @@ export default function App() {
         {/* Render the QR Code only when the peerId is successfully generated */}
         {peerId && (
           <div style={{ background: 'white', padding: '10px', display: 'inline-block', marginBottom: '10px' }}>
-            <QRCode value={peerId} size={150} />
+            <QRCodeSVG value={peerId} size={150} />
           </div>
         )}
         
