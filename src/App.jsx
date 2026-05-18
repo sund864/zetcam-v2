@@ -11,7 +11,8 @@ export default function App() {
     myVideoRef, remoteVideoRef,
     handleGoHome, executeManualConnect,
     isTorchOn, toggleTorch,
-    facingMode, toggleLens // NEW: Extracted from engine
+    facingMode, toggleLens,
+    exposureLevel, adjustExposure // NEW: Extracted from engine
   } = useZetcam();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -94,7 +95,6 @@ export default function App() {
                   </div>
                 </button>
 
-                {/* NEW: Connected Lens Switcher UI */}
                 <button 
                   onClick={toggleLens}
                   className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group active:scale-95"
@@ -117,11 +117,19 @@ export default function App() {
                   <span className="text-[10px] text-white/40 group-hover:text-white/70">{uiRotation}°</span>
                 </button>
 
+                {/* NEW: Connected Exposure Slider */}
                 <div className="flex flex-col gap-2 w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
                   <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                    <Sun size={14} className="text-orange-400" /> Exposure
+                    <Sun size={14} className={exposureLevel > 50 ? "text-orange-400" : "text-white/40"} /> Exposure
                   </div>
-                  <input type="range" min="0" max="100" defaultValue="50" className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer" />
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="100" 
+                    value={exposureLevel}
+                    onChange={(e) => adjustExposure(e.target.value)}
+                    className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-orange-400" 
+                  />
                 </div>
 
                 <div className="h-px bg-white/5 w-full my-1"></div>

@@ -9,8 +9,10 @@ export function useZetcam() {
   const [isConnected, setIsConnected] = useState(false);
   const [remoteId, setRemoteId] = useState('');
 
+  // Hardware States
   const [isTorchOn, setIsTorchOn] = useState(false);
   const [facingMode, setFacingMode] = useState('environment'); 
+  const [exposureLevel, setExposureLevel] = useState(50); // NEW: Default to middle exposure
 
   const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -50,6 +52,7 @@ export function useZetcam() {
     setRemoteId('');
     setIsTorchOn(false); 
     setFacingMode('environment'); 
+    setExposureLevel(50); // Reset exposure on exit
     setMode('home');
   };
 
@@ -195,56 +198,61 @@ export function useZetcam() {
   };
 
   const toggleTorch = async () => {
-    if (!myVideoRef.current || !myVideoRef.current.srcObject) {
-      setStatus("Error: Camera not active.");
-      return;
-    }
+    if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
     const track = myVideoRef.current.srcObject.getVideoTracks()[0];
     try {
       const capabilities = track.getCapabilities ? track.getCapabilities() : {};
-      if (!capabilities.torch) {
-        setStatus("Hardware Error: Torch not supported on this device/browser.");
-        return;
-      }
+      if (!capabilities.torch) return;
       await track.applyConstraints({ advanced: [{ torch: !isTorchOn }] });
       setIsTorchOn(!isTorchOn);
-    } catch (err) {
-      setStatus("Hardware Error: Could not toggle torch.");
-    }
+    } catch (err) {}
   };
 
-  // FIXED: Explicitly unlock hardware before requesting new lens
   const toggleLens = async () => {
     if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
-
     setStatus('Switching lenses...');
     const newMode = facingMode === 'environment' ? 'user' : 'environment';
-
     try {
-      // 1. Kill the current camera feed to unlock the physical hardware
       myVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
-      
-      // 2. Force the OS to wait 300ms so it fully registers that the lens is free
       await new Promise(resolve => setTimeout(resolve, 300));
-
-      // 3. Request the new lens
       const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newMode }, audio: false });
-
       myVideoRef.current.srcObject = newStream;
       setFacingMode(newMode);
       setIsTorchOn(false); 
-
-      // 4. Inject the new feed into the active PC connection
+      setExposureLevel(50); // Reset exposure on lens switch to avoid blinding
+      
       if (currentCallRef.current && currentCallRef.current.peerConnection) {
         const newVideoTrack = newStream.getVideoTracks()[0];
         const sender = currentCallRef.current.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-        if (sender) {
-          sender.replaceTrack(newVideoTrack);
-        }
+        if (sender) sender.replaceTrack(newVideoTrack);
       }
       setStatus('Streaming Live to PC!');
     } catch (err) {
       setStatus('Hardware Error: Could not switch lens. ' + err.message);
+    }
+  };
+
+  // NEW: Hardware Exposure Translation Math
+  const adjustExposure = async (sliderValue) => {
+    setExposureLevel(sliderValue);
+    if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
+    
+    const track = myVideoRef.current.srcObject.getVideoTracks()[0];
+    try {
+      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+      if (capabilities.exposureCompensation) {
+        // Find hardware limits (e.g. -3 to +3)
+        const min = capabilities.exposureCompensation.min || -3;
+        const max = capabilities.exposureCompensation.max || 3;
+        // Translate 0-100 slider to hardware values
+        const hwValue = min + ((sliderValue / 100) * (max - min));
+        
+        await track.applyConstraints({ 
+          advanced: [{ exposureCompensation: hwValue }] 
+        });
+      }
+    } catch (err) {
+      // Silently catch errors so the UI slider doesn't freeze if a specific Android lens denies access
     }
   };
 
@@ -255,6 +263,7 @@ export function useZetcam() {
     myVideoRef, remoteVideoRef,
     handleGoHome, executeManualConnect,
     isTorchOn, toggleTorch,
-    facingMode, toggleLens 
+    facingMode, toggleLens,
+    exposureLevel, adjustExposure // NEW: Expose to UI
   };
 }
