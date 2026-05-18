@@ -16,7 +16,6 @@ export default function App() {
   const peerInstance = useRef(null);
   const scannerInstanceRef = useRef(null);
 
-  // --- NEW: Safely turn off physical camera hardware ---
   const stopMediaTracks = () => {
     if (myVideoRef.current && myVideoRef.current.srcObject) {
       const tracks = myVideoRef.current.srcObject.getTracks();
@@ -29,9 +28,8 @@ export default function App() {
   };
 
   useEffect(() => {
-    // 1. Full Cleanup when returning Home
     if (mode === 'home') {
-      stopMediaTracks(); // Turn off camera light
+      stopMediaTracks(); 
       
       if (peerInstance.current) {
         peerInstance.current.destroy();
@@ -55,7 +53,6 @@ export default function App() {
       return;
     }
 
-    // 2. Initialize PeerJS Engine
     const peer = new Peer({
       config: {
         iceServers: [
@@ -88,7 +85,6 @@ export default function App() {
 
     peerInstance.current = peer;
 
-    // 3. Initialize Headless Scanner
     if (mode === 'camera') {
       setTimeout(() => {
         const readerElement = document.getElementById('reader');
@@ -121,7 +117,7 @@ export default function App() {
                   handleConnectToPC(decodedText);
                 });
               },
-              () => {} // Ignore frame errors
+              () => {} 
             ).then(() => {
               setStatus("Scanner Active. Point at PC.");
             }).catch(() => {
@@ -165,7 +161,6 @@ export default function App() {
     }
   };
 
-  // --- NEW: Guard against empty IDs ---
   const executeManualConnect = () => {
     if (!remoteId.trim()) {
       setStatus("Please enter a valid PC ID.");
@@ -234,112 +229,4 @@ export default function App() {
 
           <button 
             onClick={() => setMode('receiver')}
-            className="flex-1 bg-white/[0.02] border border-white/10 rounded-3xl p-8 text-left transition-all hover:border-purple-500/40 hover:bg-purple-500/[0.01] group relative overflow-hidden"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6 group-hover:scale-105 transition-transform">
-              <Monitor size={28} />
-            </div>
-            <h3 className="text-xl font-bold mb-2">I am the PC Monitor</h3>
-            <p className="text-sm text-white/40 leading-relaxed">Host the stream display window. Generates the secure target QR matrix.</p>
-            <div className="absolute -bottom-4 -right-4 text-white/[0.02] group-hover:text-purple-500/[0.05] transition-colors">
-              <CheckCircle size={90} />
-            </div>
-          </button>
-        </div>
-      )}
-
-      {mode === 'camera' && (
-        <div className="w-full max-w-md flex flex-col items-center gap-4">
-          <div className="w-full bg-white/[0.02] border border-white/5 rounded-xl p-3 text-center">
-            <span className="text-[13px] font-medium text-pink-400 flex items-center justify-center gap-2">
-              <Radio size={14} className="animate-pulse" /> {status}
-            </span>
-          </div>
-
-          <div className={`w-full bg-white/[0.02] border border-white/10 rounded-2xl p-4 text-center flex flex-col gap-3 ${isConnected ? 'hidden' : 'block'}`}>
-            <h4 className="text-md font-bold">Align Scanner to PC Screen</h4>
-            
-            <div id="reader" className="overflow-hidden rounded-xl bg-black/50 border border-white/5 text-white max-w-full min-h-[280px] flex items-center justify-center relative">
-               <span className="text-xs text-white/30 absolute z-0">Loading Scanner...</span>
-            </div>
-            
-            <div className="text-xs text-white/30 my-1">— OR USE MANUAL BACKUP —</div>
-            
-            <div className="flex gap-2 w-full">
-              <input 
-                type="text" 
-                placeholder="Paste PC Raw ID String" 
-                value={remoteId} 
-                onChange={(e) => setRemoteId(e.target.value)}
-                className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-pink-500"
-              />
-              <button 
-                onClick={executeManualConnect}
-                className="bg-pink-500 text-black font-bold text-xs px-4 py-2 rounded-lg hover:bg-pink-400 active:scale-95 transition-all"
-              >
-                Connect
-              </button>
-            </div>
-          </div>
-
-          <div className={`w-full bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 relative aspect-[3/4] ${!isConnected ? 'hidden' : 'block'}`}>
-            <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-            <div className="absolute top-4 right-4 bg-emerald-500 text-black text-[10px] font-black uppercase px-3 py-1.5 rounded-full flex items-center gap-1">
-              <CheckCircle size={12} /> Live Link Active
-            </div>
-          </div>
-        </div>
-      )}
-
-      {mode === 'receiver' && (
-        <div className="w-full max-w-5xl flex flex-col items-center gap-6">
-          <div className="w-full flex flex-col md:flex-row items-stretch justify-center gap-6">
-            
-            {!isConnected && (
-              <div className="w-full md:w-1/3 bg-white/[0.02] border border-white/10 rounded-3xl p-6 text-center flex flex-col items-center justify-center shrink-0">
-                <h3 className="text-lg font-bold mb-2">Scan to Pair Device</h3>
-                <p className="text-[12px] text-white/40 mb-6">Point your mobile scanner at this code</p>
-                
-                <div className="bg-white p-4 rounded-2xl mb-6 flex justify-center items-center min-h-[180px] min-w-[180px]">
-                  {peerId ? (
-                    <QRCodeSVG value={peerId} size={160} />
-                  ) : (
-                    <div className="w-40 h-40 flex flex-col items-center justify-center text-black/40 gap-2">
-                      <RefreshCw className="animate-spin text-purple-600" size={24} />
-                      <span className="text-xs">Generating Key...</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="w-full bg-black/40 rounded-xl p-3 border border-white/5 max-w-full overflow-hidden">
-                  <code className="text-xs text-purple-300 break-all block">{peerId || 'fetching setup...'}</code>
-                </div>
-              </div>
-            )}
-
-            <div className={`bg-black rounded-3xl border border-white/10 relative overflow-hidden flex items-center justify-center ${isConnected ? 'w-full min-h-[60vh]' : 'w-full md:w-2/3 min-h-[400px]'}`}>
-              <video 
-                ref={remoteVideoRef} 
-                autoPlay 
-                playsInline 
-                className="w-full h-full object-contain" 
-              />
-              
-              {!isConnected && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md gap-4 text-center p-6">
-                  <div className="p-5 bg-white/5 rounded-full border border-white/10 text-white/40 animate-pulse">
-                    <Radio size={40} />
-                  </div>
-                  <h4 className="text-lg font-bold">Awaiting Stream Connection</h4>
-                  <p className="text-sm text-white/40 max-w-sm leading-relaxed">Video input frames will mount here as soon as the phone reads the authentication matrix.</p>
-                </div>
-              )}
-            </div>
-
-          </div>
-        </div>
-      )}
-
-    </div>
-  );
-}
+            className="flex-1 bg-white/[0.02] border border-white/10 rounded-3xl p-8 text-left transition-all hover:border-purple-500/40 hover:bg-purple-500/[0.01] group
