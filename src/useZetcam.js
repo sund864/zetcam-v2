@@ -9,7 +9,6 @@ export function useZetcam() {
   const [isConnected, setIsConnected] = useState(false);
   const [remoteId, setRemoteId] = useState('');
 
-  // Hardware States (Local Mobile) - using Refs to prevent stale data in event listeners
   const [isTorchOn, _setIsTorchOn] = useState(false);
   const isTorchOnRef = useRef(false);
   const setIsTorchOn = (val) => { isTorchOnRef.current = val; _setIsTorchOn(val); };
@@ -20,7 +19,6 @@ export function useZetcam() {
   const exposureLevelRef = useRef(50);
   const setExposureLevel = (val) => { exposureLevelRef.current = val; _setExposureLevel(val); };
 
-  // Hardware States (Remote PC)
   const [remoteTorch, setRemoteTorch] = useState(false);
   const [remoteExposure, setRemoteExposure] = useState(50);
 
@@ -29,7 +27,7 @@ export function useZetcam() {
   const peerInstance = useRef(null);
   const scannerInstanceRef = useRef(null);
   const currentCallRef = useRef(null); 
-  const dataConnRef = useRef(null); // NEW: The bidirectional data channel
+  const dataConnRef = useRef(null); 
 
   const handleGoHome = async () => {
     setStatus('Safely powering down camera...');
@@ -74,14 +72,12 @@ export function useZetcam() {
     setMode('home');
   };
 
-  // Sync state from Phone to PC
   const broadcastState = (torch, exp) => {
     if (dataConnRef.current && dataConnRef.current.open) {
       dataConnRef.current.send({ type: 'STATE', torch, exposure: exp });
     }
   };
 
-  // Send command from PC to Phone
   const sendRemoteCommand = (action, value) => {
     if (dataConnRef.current && dataConnRef.current.open) {
       dataConnRef.current.send({ type: action, value });
@@ -113,7 +109,6 @@ export function useZetcam() {
       myVideoRef.current.srcObject = newStream;
       setFacingMode(newMode);
       
-      // Hardware resets settings when swapping lens, so we must sync that reset to the PC
       setIsTorchOn(false); 
       setExposureLevel(50);
       broadcastState(false, 50);
@@ -132,7 +127,7 @@ export function useZetcam() {
   const adjustExposure = async (sliderValue) => {
     const val = parseInt(sliderValue, 10);
     setExposureLevel(val);
-    broadcastState(isTorchOnRef.current, val); // Immediately update PC UI
+    broadcastState(isTorchOnRef.current, val); 
     
     if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
     const track = myVideoRef.current.srcObject.getVideoTracks()[0];
@@ -145,6 +140,21 @@ export function useZetcam() {
         await track.applyConstraints({ advanced: [{ exposureCompensation: hwValue }] });
       }
     } catch (err) {}
+  };
+
+  // NEW: Native Picture-in-Picture Control
+  const togglePiP = async () => {
+    if (remoteVideoRef.current && document.pictureInPictureEnabled) {
+      try {
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        } else {
+          await remoteVideoRef.current.requestPictureInPicture();
+        }
+      } catch (err) {
+        console.error("PiP failed to initialize", err);
+      }
+    }
   };
 
   useEffect(() => {
@@ -173,7 +183,6 @@ export function useZetcam() {
       setStatus("Engine Error: " + err.type);
     });
 
-    // PC HOST ENGINE: Receives stream and data channel
     peer.on('call', (call) => {
       setStatus('Incoming feed detected...');
       currentCallRef.current = call; 
@@ -191,7 +200,6 @@ export function useZetcam() {
     peer.on('connection', (conn) => {
       dataConnRef.current = conn;
       conn.on('data', (data) => {
-        // When phone sends state update, update PC UI
         if (data.type === 'STATE') {
           setRemoteTorch(data.torch);
           setRemoteExposure(data.exposure);
@@ -276,21 +284,17 @@ export function useZetcam() {
         myVideoRef.current.srcObject = stream;
       }
       
-      // 1. Establish the video call
       const call = peerInstance.current.call(targetPcId, stream);
       currentCallRef.current = call; 
       
-      // 2. Establish the invisible data channel
       const conn = peerInstance.current.connect(targetPcId);
       dataConnRef.current = conn;
       
       conn.on('open', () => {
-        // Push initial hardware state to the PC
         conn.send({ type: 'STATE', torch: isTorchOnRef.current, exposure: exposureLevelRef.current });
       });
       
       conn.on('data', (data) => {
-        // Execute commands received from PC
         if (data.type === 'CMD_TORCH') toggleTorch();
         if (data.type === 'CMD_EXPOSURE') adjustExposure(data.value);
       });
@@ -327,7 +331,7 @@ export function useZetcam() {
     isTorchOn, toggleTorch,
     facingMode, toggleLens,
     exposureLevel, adjustExposure,
-    // NEW: Exports for PC bidirectional control
-    remoteTorch, remoteExposure, sendRemoteCommand
+    remoteTorch, remoteExposure, sendRemoteCommand,
+    togglePiP // NEW: Exported to UI
   };
 }

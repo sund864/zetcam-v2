@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw, Scan, Settings, Zap, Repeat, Sun, LogOut } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw, Scan, Settings, Zap, Repeat, Sun, LogOut, Maximize, Minimize, PictureInPicture } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react'; 
 import { useZetcam } from './useZetcam';
 
@@ -13,16 +13,37 @@ export default function App() {
     isTorchOn, toggleTorch,
     facingMode, toggleLens,
     exposureLevel, adjustExposure,
-    remoteTorch, remoteExposure, sendRemoteCommand 
+    remoteTorch, remoteExposure, sendRemoteCommand,
+    togglePiP // NEW
   } = useZetcam();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [uiRotation, setUiRotation] = useState(0); 
   
+  // NEW: Fullscreen & Auto-hide states
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fsControlsVisible, setFsControlsVisible] = useState(true);
+  
   const isStreamActive = isConnected;
-
   const displayTorch = mode === 'camera' ? isTorchOn : remoteTorch;
   const displayExposure = mode === 'camera' ? exposureLevel : remoteExposure;
+
+  // Auto-hide timer logic for Fullscreen mode
+  useEffect(() => {
+    let timeout;
+    if (isFullscreen && fsControlsVisible && !isSettingsOpen) {
+      timeout = setTimeout(() => {
+        setFsControlsVisible(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timeout);
+  }, [isFullscreen, fsControlsVisible, isSettingsOpen]);
+
+  const handleFsInteraction = () => {
+    if (isFullscreen) {
+      setFsControlsVisible(true);
+    }
+  };
 
   const handleTorchToggle = () => {
     if (mode === 'camera') toggleTorch();
@@ -37,8 +58,103 @@ export default function App() {
   const executeExit = () => {
     setIsSettingsOpen(false);
     setUiRotation(0);
+    setIsFullscreen(false);
     handleGoHome();
   };
+
+  // Extracted Settings Menu so it can be rendered in both Normal and Fullscreen states cleanly
+  const renderSettingsDropdown = () => (
+    <div className="absolute top-12 right-0 w-56 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50">
+      <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">
+        {mode === 'camera' ? 'Local Controls' : 'Remote Controls'}
+      </div>
+      
+      <button 
+        onClick={handleTorchToggle}
+        className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+      >
+        <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+          <Zap size={14} className={displayTorch ? "text-yellow-400" : "text-white/40 group-hover:text-yellow-400/50"} /> Flashlight
+        </div>
+        <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${displayTorch ? 'bg-pink-500' : 'bg-white/10'}`}>
+          <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${displayTorch ? 'left-4' : 'left-0 bg-white/40'}`}></div>
+        </div>
+      </button>
+
+      {mode === 'camera' && (
+        <button 
+          onClick={toggleLens}
+          className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group active:scale-95"
+        >
+          <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+            <Repeat size={14} className="text-blue-400 group-hover:rotate-180 transition-transform duration-500" /> Switch Lens
+          </div>
+          <span className="text-[10px] text-white/40 group-hover:text-white/70 uppercase font-bold tracking-wider">
+            {facingMode === 'environment' ? 'Back' : 'Front'}
+          </span>
+        </button>
+      )}
+
+      {mode === 'receiver' && (
+        <>
+          <button 
+            onClick={() => setUiRotation((prev) => (prev + 90) % 360)}
+            className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+          >
+            <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+              <Monitor size={14} className="text-emerald-400" /> UI Rotation
+            </div>
+            <span className="text-[10px] text-white/40 group-hover:text-white/70">{uiRotation}°</span>
+          </button>
+          
+          <button 
+            onClick={() => { setIsSettingsOpen(false); togglePiP(); }}
+            className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+          >
+            <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+              <PictureInPicture size={14} className="text-blue-400" /> Pop-out Player
+            </div>
+            <span className="text-[10px] text-white/40 group-hover:text-white/70">PiP Mode</span>
+          </button>
+
+          {!isFullscreen && (
+            <button 
+              onClick={() => { setIsSettingsOpen(false); setIsFullscreen(true); }}
+              className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+            >
+              <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                <Maximize size={14} className="text-pink-400" /> Theater Mode
+              </div>
+              <span className="text-[10px] text-white/40 group-hover:text-white/70">Full Screen</span>
+            </button>
+          )}
+        </>
+      )}
+
+      <div className="flex flex-col gap-2 w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
+        <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+          <Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Exposure
+        </div>
+        <input 
+          type="range" 
+          min="0" 
+          max="100" 
+          value={displayExposure}
+          onChange={(e) => handleExposureChange(e.target.value)}
+          className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-orange-400" 
+        />
+      </div>
+
+      <div className="h-px bg-white/5 w-full my-1"></div>
+
+      <button 
+        onClick={executeExit}
+        className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-red-500/10 text-red-400 transition-colors group"
+      >
+        <LogOut size={14} /> <span className="text-xs font-bold">Terminate Connection</span>
+      </button>
+    </div>
+  );
 
   return (
     <div className={
@@ -52,121 +168,61 @@ export default function App() {
         #reader video { object-fit: cover !important; border-radius: 1rem !important; width: 100% !important; height: 100% !important; }
       `}</style>
 
-      <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-pink-600/15 blur-[120px] pointer-events-none z-0 transition-opacity duration-1000"></div>
-      <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-600/15 blur-[120px] pointer-events-none z-0 transition-opacity duration-1000"></div>
+      {/* Hide Orbs if in fullscreen mode */}
+      {!isFullscreen && (
+        <>
+          <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-pink-600/15 blur-[120px] pointer-events-none z-0 transition-opacity duration-1000"></div>
+          <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-600/15 blur-[120px] pointer-events-none z-0 transition-opacity duration-1000"></div>
+        </>
+      )}
       
-      <header className={
-        "shrink-0 w-full max-w-5xl flex justify-between items-center mb-3 md:mb-6 " +
-        "border-b border-white/5 pb-3 z-20 relative"
-      }>
-        
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,1)] animate-pulse" />
-            <h1 className="text-lg md:text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg">
-              ZETCAM PRO <span className="text-[10px] font-normal text-white/30 ml-1 drop-shadow-none">v2.1.1</span>
-            </h1>
+      {/* NORMAL HEADER: Hides completely when Fullscreen is active */}
+      {!isFullscreen && (
+        <header className={
+          "shrink-0 w-full max-w-5xl flex justify-between items-center mb-3 md:mb-6 " +
+          "border-b border-white/5 pb-3 z-20 relative"
+        }>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,1)] animate-pulse" />
+              <h1 className="text-lg md:text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg">
+                ZETCAM PRO <span className="text-[10px] font-normal text-white/30 ml-1 drop-shadow-none">v2.1.1</span>
+              </h1>
+            </div>
+            <div className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase ml-[18px] text-transparent bg-clip-text bg-gradient-to-r from-gray-100 via-white to-gray-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+              ZetNet Architecture
+            </div>
           </div>
-          <div className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase ml-[18px] text-transparent bg-clip-text bg-gradient-to-r from-gray-100 via-white to-gray-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-            ZetNet Architecture
-          </div>
-        </div>
 
-        {mode !== 'home' && (
-          <div className="relative">
-            {!isStreamActive ? (
-              <button 
-                onClick={executeExit}
-                className={
-                  "flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs font-medium text-white/70 hover:text-white " +
-                  "bg-white/5 backdrop-blur-xl px-3 md:px-4 py-2 rounded-full border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)]"
-                }
-              >
-                <ArrowLeft size={14} /> Exit
-              </button>
-            ) : (
-              <button 
-                onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                className={
-                  "flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs font-bold text-white " +
-                  "bg-pink-500/20 backdrop-blur-xl px-3 md:px-4 py-2 rounded-full border border-pink-500/30 hover:border-pink-400 hover:bg-pink-500/30 transition-all shadow-[0_0_15px_rgba(236,72,153,0.3)]"
-                }
-              >
-                <Settings size={14} className={isSettingsOpen ? "animate-spin-slow" : ""} /> Settings
-              </button>
-            )}
-
-            {isSettingsOpen && (
-              <div className="absolute top-12 right-0 w-56 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50">
-                <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">
-                  {mode === 'camera' ? 'Local Controls' : 'Remote Controls'}
-                </div>
-                
-                <button 
-                  onClick={handleTorchToggle}
-                  className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
-                >
-                  <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                    <Zap size={14} className={displayTorch ? "text-yellow-400" : "text-white/40 group-hover:text-yellow-400/50"} /> Flashlight
-                  </div>
-                  <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${displayTorch ? 'bg-pink-500' : 'bg-white/10'}`}>
-                    <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${displayTorch ? 'left-4' : 'left-0 bg-white/40'}`}></div>
-                  </div>
-                </button>
-
-                {mode === 'camera' && (
-                  <button 
-                    onClick={toggleLens}
-                    className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group active:scale-95"
-                  >
-                    <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                      <Repeat size={14} className="text-blue-400 group-hover:rotate-180 transition-transform duration-500" /> Switch Lens
-                    </div>
-                    <span className="text-[10px] text-white/40 group-hover:text-white/70 uppercase font-bold tracking-wider">
-                      {facingMode === 'environment' ? 'Back' : 'Front'}
-                    </span>
-                  </button>
-                )}
-
-                {mode === 'receiver' && (
-                  <button 
-                    onClick={() => setUiRotation((prev) => (prev + 90) % 360)}
-                    className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
-                  >
-                    <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                      <Monitor size={14} className="text-emerald-400" /> UI Rotation
-                    </div>
-                    <span className="text-[10px] text-white/40 group-hover:text-white/70">{uiRotation}°</span>
-                  </button>
-                )}
-
-                <div className="flex flex-col gap-2 w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
-                  <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                    <Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Exposure
-                  </div>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="100" 
-                    value={displayExposure}
-                    onChange={(e) => handleExposureChange(e.target.value)}
-                    className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-orange-400" 
-                  />
-                </div>
-
-                <div className="h-px bg-white/5 w-full my-1"></div>
-
+          {mode !== 'home' && (
+            <div className="relative">
+              {!isStreamActive ? (
                 <button 
                   onClick={executeExit}
-                  className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-red-500/10 text-red-400 transition-colors group"
+                  className={
+                    "flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs font-medium text-white/70 hover:text-white " +
+                    "bg-white/5 backdrop-blur-xl px-3 md:px-4 py-2 rounded-full border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)]"
+                  }
                 >
-                  <LogOut size={14} /> <span className="text-xs font-bold">Terminate Connection</span>
+                  <ArrowLeft size={14} /> Exit
                 </button>
-              </div>
-            )}
-          </div>
-        )}
-      </header>
+              ) : (
+                <button 
+                  onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                  className={
+                    "flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs font-bold text-white " +
+                    "bg-pink-500/20 backdrop-blur-xl px-3 md:px-4 py-2 rounded-full border border-pink-500/30 hover:border-pink-400 hover:bg-pink-500/30 transition-all shadow-[0_0_15px_rgba(236,72,153,0.3)]"
+                  }
+                >
+                  <Settings size={14} className={isSettingsOpen ? "animate-spin-slow" : ""} /> Settings
+                </button>
+              )}
+
+              {isSettingsOpen && renderSettingsDropdown()}
+            </div>
+          )}
+        </header>
+      )}
 
       {mode === 'home' && (
         <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-8 md:gap-10 justify-center items-center flex-1 min-h-0 z-10 relative pb-2 md:pb-6">
@@ -307,10 +363,16 @@ export default function App() {
               </div>
             )}
 
-            <div className={
-              "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] "
-            }>
-              {/* CSS Rotation is now exclusively applied to the Video Tag! */}
+            {/* DYNAMIC RECEIVER CONTAINER: Transitions to full screen when isFullscreen is true */}
+            <div 
+              className={
+                isFullscreen 
+                  ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default" 
+                  : "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] "
+              }
+              onMouseMove={handleFsInteraction}
+              onClick={handleFsInteraction}
+            >
               <video 
                 ref={remoteVideoRef} 
                 autoPlay 
@@ -318,6 +380,30 @@ export default function App() {
                 className="w-full h-full object-contain" 
                 style={{ transform: `rotate(${uiRotation}deg)`, transition: 'transform 0.3s ease-in-out' }}
               />
+
+              {/* OVERLAY CONTROLS FOR FULLSCREEN */}
+              {isFullscreen && (
+                <div 
+                  className={`absolute top-6 right-6 flex items-center gap-3 transition-opacity duration-500 ${fsControlsVisible || isSettingsOpen ? 'opacity-100' : 'opacity-0'}`}
+                >
+                  <div className="relative">
+                    <button 
+                      onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                      className="flex items-center gap-2 text-xs font-bold text-white bg-black/60 backdrop-blur-md px-4 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition-all shadow-lg"
+                    >
+                      <Settings size={16} className={isSettingsOpen ? "animate-spin-slow" : ""} /> Settings
+                    </button>
+                    {isSettingsOpen && renderSettingsDropdown()}
+                  </div>
+
+                  <button 
+                    onClick={() => setIsFullscreen(false)}
+                    className="flex items-center gap-2 text-xs font-bold text-white bg-red-500/20 backdrop-blur-md px-4 py-3 rounded-xl border border-red-500/30 hover:bg-red-500/40 hover:border-red-400 transition-all shadow-lg"
+                  >
+                    <Minimize size={16} /> Exit Theater
+                  </button>
+                </div>
+              )}
               
               {!isConnected && (
                 <div className="absolute inset-0 flex flex-row md:flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-4 md:gap-6 text-left md:text-center p-4 md:p-8">
