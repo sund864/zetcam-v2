@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Peer from 'peerjs';
 import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw } from 'lucide-react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import QRCode from 'react-qr-code'; 
+import { QRCodeSVG } from 'qrcode.react'; // <-- FIX: Vite-compatible QR library
 
 export default function App() {
   const [mode, setMode] = useState('home'); 
@@ -239,7 +239,8 @@ export default function App() {
                 
                 <div className="bg-white p-3 rounded-xl mb-4 flex justify-center items-center min-h-[160px] min-w-[160px]">
                   {peerId ? (
-                    <QRCode value={peerId} size={150} />
+                    {/* --- FIX: Using the Vite-safe QRCodeSVG --- */}
+                    <QRCodeSVG value={peerId} size={150} />
                   ) : (
                     <div className="w-40 h-40 flex flex-col items-center justify-center text-black/40 gap-1">
                       <RefreshCw className="animate-spin text-purple-600" size={20} />
