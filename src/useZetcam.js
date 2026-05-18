@@ -2,6 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import Peer from 'peerjs';
 import { Html5Qrcode } from 'html5-qrcode'; 
 
+const VIDEO_RESOLUTIONS = {
+  '720p': { width: { ideal: 1280 }, height: { ideal: 720 } },
+  '1080p': { width: { ideal: 1920 }, height: { ideal: 1080 } },
+  '1440p': { width: { ideal: 2560 }, height: { ideal: 1440 } },
+  '4K': { width: { ideal: 3840 }, height: { ideal: 2160 } }
+};
+
 export function useZetcam() {
   const [mode, setMode] = useState('home'); 
   const [peerId, setPeerId] = useState('');
@@ -14,6 +21,7 @@ export function useZetcam() {
   const setIsTorchOn = (val) => { isTorchOnRef.current = val; _setIsTorchOn(val); };
 
   const [facingMode, setFacingMode] = useState('environment'); 
+  const [videoQuality, setVideoQuality] = useState('1080p'); // NEW: Quality tracking
 
   const [exposureLevel, _setExposureLevel] = useState(50);
   const exposureLevelRef = useRef(50);
@@ -28,9 +36,19 @@ export function useZetcam() {
   const scannerInstanceRef = useRef(null);
   const currentCallRef = useRef(null); 
   const dataConnRef = useRef(null); 
+  
+  const isDisconnectingRef = useRef(false); // Prevents infinite disconnect loops
 
+  // UPDATED: Synchronized Disconnection Logic
   const handleGoHome = async () => {
+    if (isDisconnectingRef.current) return;
+    isDisconnectingRef.current = true;
     setStatus('Safely powering down camera...');
+
+    // Tell the other side to disconnect immediately
+    if (dataConnRef.current && dataConnRef.current.open) {
+      dataConnRef.current.send({ type: 'CMD_DISCONNECT' });
+    }
 
     if (myVideoRef.current && myVideoRef.current.srcObject) {
       myVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
@@ -66,10 +84,14 @@ export function useZetcam() {
     setRemoteId('');
     setIsTorchOn(false); 
     setFacingMode('environment'); 
+    setVideoQuality('1080p');
     setExposureLevel(50); 
     setRemoteTorch(false);
     setRemoteExposure(50);
     setMode('home');
+    
+    // Release the lock after a short delay
+    setTimeout(() => { isDisconnectingRef.current = false; }, 500);
   };
 
   const broadcastState = (torch, exp) => {
@@ -105,7 +127,8 @@ export function useZetcam() {
     try {
       myVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
       await new Promise(resolve => setTimeout(resolve, 300));
-      const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newMode }, audio: false });
+      // Respect current quality constraint when swapping lens
+      const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newMode, ...VIDEO_RESOLUTIONS[videoQuality] }, audio: false });
       myVideoRef.current.srcObject = newStream;
       setFacingMode(newMode);
       
@@ -121,6 +144,36 @@ export function useZetcam() {
       setStatus('Streaming Live to PC!');
     } catch (err) {
       setStatus('Hardware Error: Could not switch lens. ' + err.message);
+    }
+  };
+
+  // NEW: Dynamic Quality Swapper
+  const changeQuality = async (newQuality) => {
+    if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
+    setStatus(`Switching resolution to ${newQuality}...`);
+    try {
+      // 1. Release the current hardware lock
+      myVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // 2. Request new stream with the forced pixel constraints
+      const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode, ...VIDEO_RESOLUTIONS[newQuality] }, audio: false });
+      myVideoRef.current.srcObject = newStream;
+      setVideoQuality(newQuality);
+      
+      setIsTorchOn(false); 
+      setExposureLevel(50);
+      broadcastState(false, 50);
+
+      // 3. Hot-swap the track seamlessly to the PC
+      if (currentCallRef.current && currentCallRef.current.peerConnection) {
+        const newVideoTrack = newStream.getVideoTracks()[0];
+        const sender = currentCallRef.current.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender) sender.replaceTrack(newVideoTrack);
+      }
+      setStatus('Streaming Live to PC!');
+    } catch (err) {
+      setStatus('Hardware Error: Device does not support ' + newQuality);
     }
   };
 
@@ -142,7 +195,6 @@ export function useZetcam() {
     } catch (err) {}
   };
 
-  // NEW: Native Picture-in-Picture Control
   const togglePiP = async () => {
     if (remoteVideoRef.current && document.pictureInPictureEnabled) {
       try {
@@ -151,9 +203,7 @@ export function useZetcam() {
         } else {
           await remoteVideoRef.current.requestPictureInPicture();
         }
-      } catch (err) {
-        console.error("PiP failed to initialize", err);
-      }
+      } catch (err) {}
     }
   };
 
@@ -187,6 +237,7 @@ export function useZetcam() {
       setStatus('Incoming feed detected...');
       currentCallRef.current = call; 
       call.answer();
+      
       call.on('stream', (remoteStream) => {
         if (!isActive) return;
         setIsConnected(true);
@@ -194,6 +245,11 @@ export function useZetcam() {
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = remoteStream;
         }
+      });
+
+      // Synchronize drop if call closes unexpectedly
+      call.on('close', () => {
+        if (!isDisconnectingRef.current) handleGoHome();
       });
     });
 
@@ -204,6 +260,15 @@ export function useZetcam() {
           setRemoteTorch(data.torch);
           setRemoteExposure(data.exposure);
         }
+        // Catch the explicit disconnect signal from the other device
+        if (data.type === 'CMD_DISCONNECT') {
+          handleGoHome();
+        }
+      });
+      
+      // Synchronize drop if data channel drops
+      conn.on('close', () => {
+        if (!isDisconnectingRef.current) handleGoHome();
       });
     });
 
@@ -279,13 +344,18 @@ export function useZetcam() {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: false });
+      // Force the default 1080p resolution right on startup
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode, ...VIDEO_RESOLUTIONS[videoQuality] }, audio: false });
       if (myVideoRef.current) {
         myVideoRef.current.srcObject = stream;
       }
       
       const call = peerInstance.current.call(targetPcId, stream);
       currentCallRef.current = call; 
+      
+      call.on('close', () => {
+        if (!isDisconnectingRef.current) handleGoHome();
+      });
       
       const conn = peerInstance.current.connect(targetPcId);
       dataConnRef.current = conn;
@@ -297,6 +367,11 @@ export function useZetcam() {
       conn.on('data', (data) => {
         if (data.type === 'CMD_TORCH') toggleTorch();
         if (data.type === 'CMD_EXPOSURE') adjustExposure(data.value);
+        if (data.type === 'CMD_DISCONNECT') handleGoHome();
+      });
+
+      conn.on('close', () => {
+        if (!isDisconnectingRef.current) handleGoHome();
       });
 
       setIsConnected(true);
@@ -332,6 +407,7 @@ export function useZetcam() {
     facingMode, toggleLens,
     exposureLevel, adjustExposure,
     remoteTorch, remoteExposure, sendRemoteCommand,
-    togglePiP // NEW: Exported to UI
+    togglePiP,
+    videoQuality, changeQuality // NEW: Exported to UI
   };
 }

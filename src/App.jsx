@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw, Scan, Settings, Zap, Repeat, Sun, LogOut, Maximize, Minimize, PictureInPicture } from 'lucide-react';
+import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw, Scan, Settings, Zap, Repeat, Sun, LogOut, Maximize, Minimize, PictureInPicture, Video } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react'; 
 import { useZetcam } from './useZetcam';
 
@@ -14,13 +14,13 @@ export default function App() {
     facingMode, toggleLens,
     exposureLevel, adjustExposure,
     remoteTorch, remoteExposure, sendRemoteCommand,
-    togglePiP // NEW
+    togglePiP,
+    videoQuality, changeQuality // NEW
   } = useZetcam();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [uiRotation, setUiRotation] = useState(0); 
   
-  // NEW: Fullscreen & Auto-hide states
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fsControlsVisible, setFsControlsVisible] = useState(true);
   
@@ -28,7 +28,6 @@ export default function App() {
   const displayTorch = mode === 'camera' ? isTorchOn : remoteTorch;
   const displayExposure = mode === 'camera' ? exposureLevel : remoteExposure;
 
-  // Auto-hide timer logic for Fullscreen mode
   useEffect(() => {
     let timeout;
     if (isFullscreen && fsControlsVisible && !isSettingsOpen) {
@@ -62,12 +61,30 @@ export default function App() {
     handleGoHome();
   };
 
-  // Extracted Settings Menu so it can be rendered in both Normal and Fullscreen states cleanly
   const renderSettingsDropdown = () => (
     <div className="absolute top-12 right-0 w-56 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50">
       <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">
         {mode === 'camera' ? 'Local Controls' : 'Remote Controls'}
       </div>
+
+      {/* NEW: Camera Quality Dropdown (Visible ONLY on Mobile) */}
+      {mode === 'camera' && (
+        <div className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
+          <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+            <Video size={14} className="text-indigo-400" /> Resolution
+          </div>
+          <select 
+            value={videoQuality}
+            onChange={(e) => changeQuality(e.target.value)}
+            className="bg-black/60 border border-white/10 rounded-lg text-[10px] text-white/80 font-bold px-2 py-1 outline-none focus:border-indigo-500/50 cursor-pointer"
+          >
+            <option value="720p">720p</option>
+            <option value="1080p">1080p (HD)</option>
+            <option value="1440p">1440p (2K)</option>
+            <option value="4K">4K (Ultra)</option>
+          </select>
+        </div>
+      )}
       
       <button 
         onClick={handleTorchToggle}
@@ -168,7 +185,6 @@ export default function App() {
         #reader video { object-fit: cover !important; border-radius: 1rem !important; width: 100% !important; height: 100% !important; }
       `}</style>
 
-      {/* Hide Orbs if in fullscreen mode */}
       {!isFullscreen && (
         <>
           <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-pink-600/15 blur-[120px] pointer-events-none z-0 transition-opacity duration-1000"></div>
@@ -176,7 +192,6 @@ export default function App() {
         </>
       )}
       
-      {/* NORMAL HEADER: Hides completely when Fullscreen is active */}
       {!isFullscreen && (
         <header className={
           "shrink-0 w-full max-w-5xl flex justify-between items-center mb-3 md:mb-6 " +
@@ -363,7 +378,6 @@ export default function App() {
               </div>
             )}
 
-            {/* DYNAMIC RECEIVER CONTAINER: Transitions to full screen when isFullscreen is true */}
             <div 
               className={
                 isFullscreen 
@@ -381,7 +395,6 @@ export default function App() {
                 style={{ transform: `rotate(${uiRotation}deg)`, transition: 'transform 0.3s ease-in-out' }}
               />
 
-              {/* OVERLAY CONTROLS FOR FULLSCREEN */}
               {isFullscreen && (
                 <div 
                   className={`absolute top-6 right-6 flex items-center gap-3 transition-opacity duration-500 ${fsControlsVisible || isSettingsOpen ? 'opacity-100' : 'opacity-0'}`}
