@@ -15,7 +15,7 @@ export default function App() {
   const [remoteId, setRemoteId] = useState('');
 
   const [showSettings, setShowSettings] = useState(false);
-  const [facingMode, setFacingMode] = useState('environment'); 
+  const [facingMode, setFacingMode] = useState('environment'); // Forces Back Camera by default
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [activeStream, setActiveStream] = useState(null);
@@ -95,22 +95,40 @@ export default function App() {
         if (!readerElement) return;
 
         try {
+          // Setting up scanner to heavily prefer environment (back) camera
           const scanner = new Html5QrcodeScanner('reader', {
             fps: 10,
             qrbox: { width: 230, height: 230 },
-            rememberLastUsedCamera: true
+            rememberLastUsedCamera: true,
+            videoConstraints: { facingMode: "environment" } 
           }, false);
+
+          let isScanProcessed = false; // Lock variable to prevent duplicate scan crashes
 
           scanner.render(
             (decodedText) => {
+              // 1. If we already scanned, ignore any extra frames
+              if (isScanProcessed) return; 
+              isScanProcessed = true;
+              setStatus('Target locked! Releasing scanner...');
+
+              // 2. Shut down the scanner cleanly
               scanner.clear().then(() => {
                 scannerInstanceRef.current = null;
-                handleConnectToPC(decodedText);
+                
+                // 3. THE FIX: Wait 800ms for Android hardware to physically release the camera lens
+                setTimeout(() => {
+                  handleConnectToPC(decodedText);
+                }, 800);
+
               }).catch(() => {
-                handleConnectToPC(decodedText);
+                // Fallback timeout in case clear() throws a silent error
+                setTimeout(() => {
+                  handleConnectToPC(decodedText);
+                }, 800);
               });
             },
-            () => {}
+            () => {} // Suppress continuous scanning warnings
           );
           
           scannerInstanceRef.current = scanner;
@@ -124,8 +142,9 @@ export default function App() {
   }, [mode]);
 
   const handleConnectToPC = async (targetPcId) => {
-    setStatus('Accessing hardware...');
+    setStatus('Mounting Live Stream...');
     try {
+      // Strictly request the facingMode state (defaults to 'environment' / back camera)
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: facingMode }, 
         audio: false 
@@ -141,6 +160,10 @@ export default function App() {
       setStatus('Streaming Live to PC!');
     } catch (err) {
       setStatus('Hardware Error: ' + err.message);
+      // Helpful fallback alert for Android debugging
+      if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        alert("Android camera lock detected. Please refresh the page and try again.");
+      }
     }
   };
 
@@ -229,7 +252,6 @@ export default function App() {
             </button>
           )}
 
-          {/* Settings Gear Toggle */}
           <div className="relative">
             <button 
               onClick={() => setShowSettings(!showSettings)}
@@ -238,7 +260,6 @@ export default function App() {
               <Settings size={18} className={showSettings ? "rotate-90 transition-transform" : "transition-transform"} />
             </button>
 
-            {/* Dropdown Menu - Aligned to right */}
             {showSettings && (
               <div className="absolute top-12 right-0 w-48 bg-[#1a1226] border border-white/10 shadow-2xl rounded-xl p-2 flex flex-col gap-1 origin-top-right animate-in fade-in zoom-in-95">
                 
@@ -332,7 +353,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 3. RECEIVER VIEW (Now with dynamic fullscreen stretching) */}
+      {/* 3. RECEIVER VIEW */}
       {mode === 'receiver' && (
         <div className={isConnected ? "fixed inset-0 w-full h-full bg-black z-0 flex items-center justify-center" : "w-full max-w-4xl flex flex-col lg:flex-row items-center gap-6"}>
           
