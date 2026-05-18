@@ -14,9 +14,8 @@ export default function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [remoteId, setRemoteId] = useState('');
 
-  // --- NEW: Premium Feature States ---
   const [showSettings, setShowSettings] = useState(false);
-  const [facingMode, setFacingMode] = useState('environment'); // Defaults to back camera
+  const [facingMode, setFacingMode] = useState('environment'); 
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [activeStream, setActiveStream] = useState(null);
@@ -27,7 +26,6 @@ export default function App() {
   const peerInstance = useRef(null);
   const scannerInstanceRef = useRef(null);
 
-  // --- WebRTC Setup & Hard Reset Logic ---
   const resetSystem = () => {
     if (activeStream) {
       activeStream.getTracks().forEach(t => t.stop());
@@ -91,7 +89,6 @@ export default function App() {
 
     peerInstance.current = peer;
 
-    // Strict isolation: Scanner ONLY runs if you are the Camera
     if (mode === 'camera') {
       setTimeout(() => {
         const readerElement = document.getElementById('reader');
@@ -126,7 +123,6 @@ export default function App() {
     return () => resetSystem();
   }, [mode]);
 
-  // --- CONNECTING THE CAMERA ---
   const handleConnectToPC = async (targetPcId) => {
     setStatus('Accessing hardware...');
     try {
@@ -148,9 +144,6 @@ export default function App() {
     }
   };
 
-  // --- PREMIUM FEATURE CONTROLS ---
-
-  // 1. Lag-Free Camera Switch (WebRTC ReplaceTrack)
   const toggleCamera = async () => {
     if (!activeStream) return;
     const newFacingMode = facingMode === 'environment' ? 'user' : 'environment';
@@ -165,7 +158,6 @@ export default function App() {
       
       const newVideoTrack = newStream.getVideoTracks()[0];
 
-      // Inject new feed into the live connection instantly without dropping
       if (currentCall && currentCall.peerConnection) {
         const sender = currentCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
         if (sender) sender.replaceTrack(newVideoTrack);
@@ -175,13 +167,12 @@ export default function App() {
       
       activeStream.getTracks().forEach(t => t.stop());
       setActiveStream(newStream);
-      setIsFlashOn(false); // Reset flash on camera switch
+      setIsFlashOn(false); 
     } catch (err) {
       console.error("Camera switch failed", err);
     }
   };
 
-  // 2. Hardware Flashlight Toggle
   const toggleFlash = async () => {
     if (!activeStream) return;
     const track = activeStream.getVideoTracks()[0];
@@ -200,13 +191,11 @@ export default function App() {
     setShowSettings(false);
   };
 
-  // 3. UI Rotation
   const handleRotate = () => {
     setRotation(prev => (prev + 90) % 360);
     setShowSettings(false);
   };
 
-  // 4. Hard Disconnect
   const handleDisconnect = () => {
     resetSystem();
     setMode('home');
@@ -223,22 +212,35 @@ export default function App() {
         #reader __video { border-radius: 1rem; }
       `}</style>
       
-      {/* HEADER WITH SETTINGS MENU */}
-      <header className="w-full max-w-4xl flex justify-between items-center mb-6 border-b border-white/5 pb-4 relative z-50">
+      {/* HEADER WITH DYNAMIC SPACING */}
+      <header className={`w-full max-w-4xl flex justify-between items-center relative z-50 transition-all ${mode === 'receiver' && isConnected ? 'mb-0 mt-2' : 'mb-6 border-b border-white/5 pb-4'}`}>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse" />
+          <h1 className="text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 flex items-center gap-2">
+            ZETCAM PRO <span className="text-[10px] font-normal text-white/30 tracking-normal mt-1">v2.0</span>
+          </h1>
+        </div>
+
+        {/* RIGHT ALIGNED CONTROLS */}
         <div className="flex items-center gap-3">
-          
+          {mode !== 'home' && (
+            <button onClick={handleDisconnect} className="flex items-center gap-1.5 text-xs text-white/70 hover:text-white bg-white/5 px-3 py-1.5 rounded-full border border-white/10 transition-all shadow-lg backdrop-blur-sm">
+              <ArrowLeft size={14} /> Home
+            </button>
+          )}
+
           {/* Settings Gear Toggle */}
           <div className="relative">
             <button 
               onClick={() => setShowSettings(!showSettings)}
-              className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors border border-white/10 text-white/70 hover:text-white"
+              className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors border border-white/10 text-white/70 hover:text-white shadow-lg backdrop-blur-sm"
             >
               <Settings size={18} className={showSettings ? "rotate-90 transition-transform" : "transition-transform"} />
             </button>
 
-            {/* Dropdown Menu */}
+            {/* Dropdown Menu - Aligned to right */}
             {showSettings && (
-              <div className="absolute top-12 left-0 w-48 bg-[#1a1226] border border-white/10 shadow-2xl rounded-xl p-2 flex flex-col gap-1 origin-top-left animate-in fade-in zoom-in-95">
+              <div className="absolute top-12 right-0 w-48 bg-[#1a1226] border border-white/10 shadow-2xl rounded-xl p-2 flex flex-col gap-1 origin-top-right animate-in fade-in zoom-in-95">
                 
                 {mode === 'camera' && isConnected && (
                   <>
@@ -270,19 +272,7 @@ export default function App() {
               </div>
             )}
           </div>
-
-          <div>
-            <h1 className="text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 flex items-center gap-2">
-              ZETCAM PRO <span className="text-[10px] font-normal text-white/30 tracking-normal mt-1">v2.0</span>
-            </h1>
-          </div>
         </div>
-
-        {mode !== 'home' && (
-          <button onClick={handleDisconnect} className="flex items-center gap-1.5 text-xs text-white/70 hover:text-white bg-white/5 px-3 py-1.5 rounded-full border border-white/10 transition-all">
-            <ArrowLeft size={14} /> Home
-          </button>
-        )}
       </header>
 
       {/* 1. HOME SCREEN */}
@@ -342,43 +332,41 @@ export default function App() {
         </div>
       )}
 
-      {/* 3. RECEIVER VIEW */}
+      {/* 3. RECEIVER VIEW (Now with dynamic fullscreen stretching) */}
       {mode === 'receiver' && (
-        <div className="w-full max-w-4xl flex flex-col items-center gap-4">
-          <div className={`w-full flex flex-col ${isConnected ? 'lg:flex-row' : 'items-center'} gap-4`}>
-            
+        <div className={isConnected ? "fixed inset-0 w-full h-full bg-black z-0 flex items-center justify-center" : "w-full max-w-4xl flex flex-col lg:flex-row items-center gap-6"}>
+          
+          {!isConnected && (
+            <div className="w-full max-w-xs bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-center flex flex-col items-center z-10">
+              <h3 className="text-md font-bold mb-1">Scan to Pair Device</h3>
+              <p className="text-[11px] text-white/40 mb-4">Point your mobile scanner at this code</p>
+              <div className="bg-white p-3 rounded-xl mb-4 flex justify-center items-center min-h-[160px] min-w-[160px]">
+                {peerId ? <QRCodeSVG value={peerId} size={150} /> : <div className="flex flex-col items-center gap-1 text-black/40"><RefreshCw className="animate-spin text-purple-600" size={20}/><span className="text-[10px]">Generating Key...</span></div>}
+              </div>
+              <div className="w-full bg-black/40 rounded-lg p-2 border border-white/5 overflow-hidden">
+                <span className="text-[9px] text-white/30 block uppercase tracking-wider mb-0.5">Manual Entry Code</span>
+                <code className="text-xl tracking-widest font-black text-purple-400 block">{peerId || '...'}</code>
+              </div>
+            </div>
+          )}
+
+          <div className={isConnected ? "w-full h-full" : "flex-1 bg-black rounded-2xl border border-white/10 relative overflow-hidden min-h-[380px] w-full flex items-center justify-center z-10"}>
+            <video 
+              ref={remoteVideoRef} 
+              autoPlay 
+              playsInline 
+              className={`w-full h-full object-contain transition-transform duration-300 ${isConnected ? '' : 'max-h-[75vh]'}`}
+              style={{ transform: `rotate(${rotation}deg)` }} 
+            />
             {!isConnected && (
-              <div className="w-full max-w-xs bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-center flex flex-col items-center">
-                <h3 className="text-md font-bold mb-1">Scan to Pair Device</h3>
-                <p className="text-[11px] text-white/40 mb-4">Point your mobile scanner at this code</p>
-                <div className="bg-white p-3 rounded-xl mb-4 flex justify-center items-center min-h-[160px] min-w-[160px]">
-                  {peerId ? <QRCodeSVG value={peerId} size={150} /> : <div className="flex flex-col items-center gap-1 text-black/40"><RefreshCw className="animate-spin text-purple-600" size={20}/><span className="text-[10px]">Generating Key...</span></div>}
-                </div>
-                <div className="w-full bg-black/40 rounded-lg p-2 border border-white/5 overflow-hidden">
-                  <span className="text-[9px] text-white/30 block uppercase tracking-wider mb-0.5">Manual Entry Code</span>
-                  <code className="text-xl tracking-widest font-black text-purple-400 block">{peerId || '...'}</code>
-                </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm gap-2 text-center p-4">
+                <Radio size={24} className="text-white/30 animate-pulse" />
+                <h4 className="text-sm font-bold">Awaiting Stream Connection</h4>
+                <p className="text-[11px] text-white/40 max-w-xs leading-relaxed">Video input frames will mount here as soon as the phone reads the authentication matrix.</p>
               </div>
             )}
-
-            <div className={`flex-1 bg-black rounded-2xl border border-white/10 relative overflow-hidden min-h-[380px] flex items-center justify-center ${isConnected ? 'w-full' : 'max-w-xs'}`}>
-              <video 
-                ref={remoteVideoRef} 
-                autoPlay 
-                playsInline 
-                className="w-full h-full object-contain max-h-[75vh] transition-transform duration-300"
-                style={{ transform: `rotate(${rotation}deg)` }} 
-              />
-              {!isConnected && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm gap-2 text-center p-4">
-                  <Radio size={24} className="text-white/30 animate-pulse" />
-                  <h4 className="text-sm font-bold">Awaiting Stream Connection</h4>
-                  <p className="text-[11px] text-white/40 max-w-xs leading-relaxed">Video input frames will mount here as soon as the phone reads the authentication matrix.</p>
-                </div>
-              )}
-            </div>
-
           </div>
+
         </div>
       )}
 
