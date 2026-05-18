@@ -9,16 +9,27 @@ export function useZetcam() {
   const [isConnected, setIsConnected] = useState(false);
   const [remoteId, setRemoteId] = useState('');
 
-  // Hardware States
-  const [isTorchOn, setIsTorchOn] = useState(false);
+  // Hardware States (Local Mobile) - using Refs to prevent stale data in event listeners
+  const [isTorchOn, _setIsTorchOn] = useState(false);
+  const isTorchOnRef = useRef(false);
+  const setIsTorchOn = (val) => { isTorchOnRef.current = val; _setIsTorchOn(val); };
+
   const [facingMode, setFacingMode] = useState('environment'); 
-  const [exposureLevel, setExposureLevel] = useState(50); // NEW: Default to middle exposure
+
+  const [exposureLevel, _setExposureLevel] = useState(50);
+  const exposureLevelRef = useRef(50);
+  const setExposureLevel = (val) => { exposureLevelRef.current = val; _setExposureLevel(val); };
+
+  // Hardware States (Remote PC)
+  const [remoteTorch, setRemoteTorch] = useState(false);
+  const [remoteExposure, setRemoteExposure] = useState(50);
 
   const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerInstance = useRef(null);
   const scannerInstanceRef = useRef(null);
   const currentCallRef = useRef(null); 
+  const dataConnRef = useRef(null); // NEW: The bidirectional data channel
 
   const handleGoHome = async () => {
     setStatus('Safely powering down camera...');
@@ -41,6 +52,11 @@ export function useZetcam() {
       scannerInstanceRef.current = null;
     }
 
+    if (dataConnRef.current) {
+      dataConnRef.current.close();
+      dataConnRef.current = null;
+    }
+
     if (peerInstance.current) {
       peerInstance.current.destroy();
       peerInstance.current = null;
@@ -52,8 +68,83 @@ export function useZetcam() {
     setRemoteId('');
     setIsTorchOn(false); 
     setFacingMode('environment'); 
-    setExposureLevel(50); // Reset exposure on exit
+    setExposureLevel(50); 
+    setRemoteTorch(false);
+    setRemoteExposure(50);
     setMode('home');
+  };
+
+  // Sync state from Phone to PC
+  const broadcastState = (torch, exp) => {
+    if (dataConnRef.current && dataConnRef.current.open) {
+      dataConnRef.current.send({ type: 'STATE', torch, exposure: exp });
+    }
+  };
+
+  // Send command from PC to Phone
+  const sendRemoteCommand = (action, value) => {
+    if (dataConnRef.current && dataConnRef.current.open) {
+      dataConnRef.current.send({ type: action, value });
+    }
+  };
+
+  const toggleTorch = async () => {
+    if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
+    const track = myVideoRef.current.srcObject.getVideoTracks()[0];
+    try {
+      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+      if (!capabilities.torch) return;
+      
+      const newState = !isTorchOnRef.current;
+      await track.applyConstraints({ advanced: [{ torch: newState }] });
+      setIsTorchOn(newState);
+      broadcastState(newState, exposureLevelRef.current);
+    } catch (err) {}
+  };
+
+  const toggleLens = async () => {
+    if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
+    setStatus('Switching lenses...');
+    const newMode = facingMode === 'environment' ? 'user' : 'environment';
+    try {
+      myVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      await new Promise(resolve => setTimeout(resolve, 300));
+      const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newMode }, audio: false });
+      myVideoRef.current.srcObject = newStream;
+      setFacingMode(newMode);
+      
+      // Hardware resets settings when swapping lens, so we must sync that reset to the PC
+      setIsTorchOn(false); 
+      setExposureLevel(50);
+      broadcastState(false, 50);
+      
+      if (currentCallRef.current && currentCallRef.current.peerConnection) {
+        const newVideoTrack = newStream.getVideoTracks()[0];
+        const sender = currentCallRef.current.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender) sender.replaceTrack(newVideoTrack);
+      }
+      setStatus('Streaming Live to PC!');
+    } catch (err) {
+      setStatus('Hardware Error: Could not switch lens. ' + err.message);
+    }
+  };
+
+  const adjustExposure = async (sliderValue) => {
+    const val = parseInt(sliderValue, 10);
+    setExposureLevel(val);
+    broadcastState(isTorchOnRef.current, val); // Immediately update PC UI
+    
+    if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
+    const track = myVideoRef.current.srcObject.getVideoTracks()[0];
+    try {
+      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+      if (capabilities.exposureCompensation) {
+        const min = capabilities.exposureCompensation.min || -3;
+        const max = capabilities.exposureCompensation.max || 3;
+        const hwValue = min + ((val / 100) * (max - min));
+        await track.applyConstraints({ advanced: [{ exposureCompensation: hwValue }] });
+      }
+    } catch (err) {}
   };
 
   useEffect(() => {
@@ -82,6 +173,7 @@ export function useZetcam() {
       setStatus("Engine Error: " + err.type);
     });
 
+    // PC HOST ENGINE: Receives stream and data channel
     peer.on('call', (call) => {
       setStatus('Incoming feed detected...');
       currentCallRef.current = call; 
@@ -92,6 +184,17 @@ export function useZetcam() {
         setStatus('Streaming Live to PC!');
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = remoteStream;
+        }
+      });
+    });
+
+    peer.on('connection', (conn) => {
+      dataConnRef.current = conn;
+      conn.on('data', (data) => {
+        // When phone sends state update, update PC UI
+        if (data.type === 'STATE') {
+          setRemoteTorch(data.torch);
+          setRemoteExposure(data.exposure);
         }
       });
     });
@@ -172,8 +275,26 @@ export function useZetcam() {
       if (myVideoRef.current) {
         myVideoRef.current.srcObject = stream;
       }
+      
+      // 1. Establish the video call
       const call = peerInstance.current.call(targetPcId, stream);
       currentCallRef.current = call; 
+      
+      // 2. Establish the invisible data channel
+      const conn = peerInstance.current.connect(targetPcId);
+      dataConnRef.current = conn;
+      
+      conn.on('open', () => {
+        // Push initial hardware state to the PC
+        conn.send({ type: 'STATE', torch: isTorchOnRef.current, exposure: exposureLevelRef.current });
+      });
+      
+      conn.on('data', (data) => {
+        // Execute commands received from PC
+        if (data.type === 'CMD_TORCH') toggleTorch();
+        if (data.type === 'CMD_EXPOSURE') adjustExposure(data.value);
+      });
+
       setIsConnected(true);
       setStatus('Streaming Live to PC!');
     } catch (err) {
@@ -197,65 +318,6 @@ export function useZetcam() {
     handleConnectToPC(remoteId.trim());
   };
 
-  const toggleTorch = async () => {
-    if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
-    const track = myVideoRef.current.srcObject.getVideoTracks()[0];
-    try {
-      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
-      if (!capabilities.torch) return;
-      await track.applyConstraints({ advanced: [{ torch: !isTorchOn }] });
-      setIsTorchOn(!isTorchOn);
-    } catch (err) {}
-  };
-
-  const toggleLens = async () => {
-    if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
-    setStatus('Switching lenses...');
-    const newMode = facingMode === 'environment' ? 'user' : 'environment';
-    try {
-      myVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newMode }, audio: false });
-      myVideoRef.current.srcObject = newStream;
-      setFacingMode(newMode);
-      setIsTorchOn(false); 
-      setExposureLevel(50); // Reset exposure on lens switch to avoid blinding
-      
-      if (currentCallRef.current && currentCallRef.current.peerConnection) {
-        const newVideoTrack = newStream.getVideoTracks()[0];
-        const sender = currentCallRef.current.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-        if (sender) sender.replaceTrack(newVideoTrack);
-      }
-      setStatus('Streaming Live to PC!');
-    } catch (err) {
-      setStatus('Hardware Error: Could not switch lens. ' + err.message);
-    }
-  };
-
-  // NEW: Hardware Exposure Translation Math
-  const adjustExposure = async (sliderValue) => {
-    setExposureLevel(sliderValue);
-    if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
-    
-    const track = myVideoRef.current.srcObject.getVideoTracks()[0];
-    try {
-      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
-      if (capabilities.exposureCompensation) {
-        // Find hardware limits (e.g. -3 to +3)
-        const min = capabilities.exposureCompensation.min || -3;
-        const max = capabilities.exposureCompensation.max || 3;
-        // Translate 0-100 slider to hardware values
-        const hwValue = min + ((sliderValue / 100) * (max - min));
-        
-        await track.applyConstraints({ 
-          advanced: [{ exposureCompensation: hwValue }] 
-        });
-      }
-    } catch (err) {
-      // Silently catch errors so the UI slider doesn't freeze if a specific Android lens denies access
-    }
-  };
-
   return {
     mode, setMode,
     peerId, status, isConnected,
@@ -264,6 +326,8 @@ export function useZetcam() {
     handleGoHome, executeManualConnect,
     isTorchOn, toggleTorch,
     facingMode, toggleLens,
-    exposureLevel, adjustExposure // NEW: Expose to UI
+    exposureLevel, adjustExposure,
+    // NEW: Exports for PC bidirectional control
+    remoteTorch, remoteExposure, sendRemoteCommand
   };
 }

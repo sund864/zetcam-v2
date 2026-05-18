@@ -12,13 +12,30 @@ export default function App() {
     handleGoHome, executeManualConnect,
     isTorchOn, toggleTorch,
     facingMode, toggleLens,
-    exposureLevel, adjustExposure // NEW: Extracted from engine
+    exposureLevel, adjustExposure,
+    remoteTorch, remoteExposure, sendRemoteCommand // Extracted from bidirectional engine
   } = useZetcam();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [uiRotation, setUiRotation] = useState(0); 
   
-  const isCameraLive = mode === 'camera' && isConnected;
+  // Both sides can open settings when the stream is actively linked
+  const isStreamActive = isConnected;
+
+  // Dynamically pull data based on who is holding the screen
+  const displayTorch = mode === 'camera' ? isTorchOn : remoteTorch;
+  const displayExposure = mode === 'camera' ? exposureLevel : remoteExposure;
+
+  // Unified execution functions
+  const handleTorchToggle = () => {
+    if (mode === 'camera') toggleTorch();
+    else sendRemoteCommand('CMD_TORCH');
+  };
+
+  const handleExposureChange = (val) => {
+    if (mode === 'camera') adjustExposure(val);
+    else sendRemoteCommand('CMD_EXPOSURE', val);
+  };
 
   const executeExit = () => {
     setIsSettingsOpen(false);
@@ -57,7 +74,7 @@ export default function App() {
 
         {mode !== 'home' && (
           <div className="relative">
-            {!isCameraLive ? (
+            {!isStreamActive ? (
               <button 
                 onClick={executeExit}
                 className={
@@ -81,53 +98,62 @@ export default function App() {
 
             {isSettingsOpen && (
               <div className="absolute top-12 right-0 w-56 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50">
-                <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">Hardware Controls</div>
+                <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">
+                  {mode === 'camera' ? 'Local Controls' : 'Remote Controls'}
+                </div>
                 
+                {/* 1. Flashlight (Visible on both) */}
                 <button 
-                  onClick={toggleTorch}
+                  onClick={handleTorchToggle}
                   className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
                 >
                   <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                    <Zap size={14} className={isTorchOn ? "text-yellow-400" : "text-white/40 group-hover:text-yellow-400/50"} /> Flashlight
+                    <Zap size={14} className={displayTorch ? "text-yellow-400" : "text-white/40 group-hover:text-yellow-400/50"} /> Flashlight
                   </div>
-                  <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${isTorchOn ? 'bg-pink-500' : 'bg-white/10'}`}>
-                    <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${isTorchOn ? 'left-4' : 'left-0 bg-white/40'}`}></div>
+                  <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${displayTorch ? 'bg-pink-500' : 'bg-white/10'}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${displayTorch ? 'left-4' : 'left-0 bg-white/40'}`}></div>
                   </div>
                 </button>
 
-                <button 
-                  onClick={toggleLens}
-                  className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group active:scale-95"
-                >
-                  <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                    <Repeat size={14} className="text-blue-400 group-hover:rotate-180 transition-transform duration-500" /> Switch Lens
-                  </div>
-                  <span className="text-[10px] text-white/40 group-hover:text-white/70 uppercase font-bold tracking-wider">
-                    {facingMode === 'environment' ? 'Back' : 'Front'}
-                  </span>
-                </button>
+                {/* 2. Switch Lens (Visible ONLY on Mobile) */}
+                {mode === 'camera' && (
+                  <button 
+                    onClick={toggleLens}
+                    className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group active:scale-95"
+                  >
+                    <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                      <Repeat size={14} className="text-blue-400 group-hover:rotate-180 transition-transform duration-500" /> Switch Lens
+                    </div>
+                    <span className="text-[10px] text-white/40 group-hover:text-white/70 uppercase font-bold tracking-wider">
+                      {facingMode === 'environment' ? 'Back' : 'Front'}
+                    </span>
+                  </button>
+                )}
 
-                <button 
-                  onClick={() => setUiRotation((prev) => (prev + 90) % 360)}
-                  className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
-                >
-                  <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                    <Monitor size={14} className="text-emerald-400" /> UI Rotation
-                  </div>
-                  <span className="text-[10px] text-white/40 group-hover:text-white/70">{uiRotation}°</span>
-                </button>
+                {/* 3. UI Rotation (Visible ONLY on PC) */}
+                {mode === 'receiver' && (
+                  <button 
+                    onClick={() => setUiRotation((prev) => (prev + 90) % 360)}
+                    className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                      <Monitor size={14} className="text-emerald-400" /> UI Rotation
+                    </div>
+                    <span className="text-[10px] text-white/40 group-hover:text-white/70">{uiRotation}°</span>
+                  </button>
+                )}
 
-                {/* NEW: Connected Exposure Slider */}
+                {/* 4. Exposure Slider (Visible on both) */}
                 <div className="flex flex-col gap-2 w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
                   <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                    <Sun size={14} className={exposureLevel > 50 ? "text-orange-400" : "text-white/40"} /> Exposure
+                    <Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Exposure
                   </div>
                   <input 
                     type="range" 
                     min="0" 
                     max="100" 
-                    value={exposureLevel}
-                    onChange={(e) => adjustExposure(e.target.value)}
+                    value={displayExposure}
+                    onChange={(e) => handleExposureChange(e.target.value)}
                     className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-orange-400" 
                   />
                 </div>
@@ -237,12 +263,11 @@ export default function App() {
             </div>
           </div>
 
+          {/* Cleaned Camera Video Container (No CSS Rotation applied here) */}
           <div className={
             "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
             (!isConnected ? 'hidden' : 'block')
-          }
-          style={{ transform: `rotate(${uiRotation}deg)`, transition: 'transform 0.3s ease-in-out' }}
-          >
+          }>
             <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
             <div className={
               "absolute top-4 right-4 bg-black/50 backdrop-blur-xl border border-white/10 text-emerald-400 text-[10px] md:text-[11px] font-bold " +
@@ -290,9 +315,12 @@ export default function App() {
               </div>
             )}
 
+            {/* Rotated Receiver Video Container */}
             <div className={
               "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] "
-            }>
+            }
+            style={{ transform: `rotate(${uiRotation}deg)`, transition: 'transform 0.3s ease-in-out' }}
+            >
               <video 
                 ref={remoteVideoRef} 
                 autoPlay 
