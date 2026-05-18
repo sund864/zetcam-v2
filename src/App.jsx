@@ -13,20 +13,17 @@ export default function App() {
     isTorchOn, toggleTorch,
     facingMode, toggleLens,
     exposureLevel, adjustExposure,
-    remoteTorch, remoteExposure, sendRemoteCommand // Extracted from bidirectional engine
+    remoteTorch, remoteExposure, sendRemoteCommand 
   } = useZetcam();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [uiRotation, setUiRotation] = useState(0); 
   
-  // Both sides can open settings when the stream is actively linked
   const isStreamActive = isConnected;
 
-  // Dynamically pull data based on who is holding the screen
   const displayTorch = mode === 'camera' ? isTorchOn : remoteTorch;
   const displayExposure = mode === 'camera' ? exposureLevel : remoteExposure;
 
-  // Unified execution functions
   const handleTorchToggle = () => {
     if (mode === 'camera') toggleTorch();
     else sendRemoteCommand('CMD_TORCH');
@@ -62,13 +59,18 @@ export default function App() {
         "shrink-0 w-full max-w-5xl flex justify-between items-center mb-3 md:mb-6 " +
         "border-b border-white/5 pb-3 z-20 relative"
       }>
+        
+        {/* UPDATED LOGO SECTION */}
         <div className="flex flex-col">
-          <div className="text-[9px] md:text-[10px] font-bold text-pink-400 tracking-widest uppercase mb-1 drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]">ZetNet Architecture</div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-0.5">
             <span className="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,1)] animate-pulse" />
             <h1 className="text-lg md:text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg">
               ZETCAM PRO <span className="text-[10px] font-normal text-white/30 ml-1 drop-shadow-none">v2.1.1</span>
             </h1>
+          </div>
+          {/* Moved below logo, changed to metallic white, aligned slightly right to clear the pink orb */}
+          <div className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase ml-[18px] text-transparent bg-clip-text bg-gradient-to-r from-gray-100 via-white to-gray-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+            ZetNet Architecture
           </div>
         </div>
 
@@ -102,7 +104,6 @@ export default function App() {
                   {mode === 'camera' ? 'Local Controls' : 'Remote Controls'}
                 </div>
                 
-                {/* 1. Flashlight (Visible on both) */}
                 <button 
                   onClick={handleTorchToggle}
                   className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
@@ -115,7 +116,6 @@ export default function App() {
                   </div>
                 </button>
 
-                {/* 2. Switch Lens (Visible ONLY on Mobile) */}
                 {mode === 'camera' && (
                   <button 
                     onClick={toggleLens}
@@ -130,7 +130,6 @@ export default function App() {
                   </button>
                 )}
 
-                {/* 3. UI Rotation (Visible ONLY on PC) */}
                 {mode === 'receiver' && (
                   <button 
                     onClick={() => setUiRotation((prev) => (prev + 90) % 360)}
@@ -143,7 +142,6 @@ export default function App() {
                   </button>
                 )}
 
-                {/* 4. Exposure Slider (Visible on both) */}
                 <div className="flex flex-col gap-2 w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
                   <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
                     <Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Exposure
@@ -263,7 +261,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Cleaned Camera Video Container (No CSS Rotation applied here) */}
           <div className={
             "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
             (!isConnected ? 'hidden' : 'block')
@@ -315,7 +312,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Rotated Receiver Video Container */}
             <div className={
               "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] "
             }
