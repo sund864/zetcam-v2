@@ -9,15 +9,14 @@ export function useZetcam() {
   const [isConnected, setIsConnected] = useState(false);
   const [remoteId, setRemoteId] = useState('');
 
-  // Hardware States
   const [isTorchOn, setIsTorchOn] = useState(false);
-  const [facingMode, setFacingMode] = useState('environment'); // NEW: Track active lens
+  const [facingMode, setFacingMode] = useState('environment'); 
 
   const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerInstance = useRef(null);
   const scannerInstanceRef = useRef(null);
-  const currentCallRef = useRef(null); // NEW: Keeps track of the active connection for hot-swapping
+  const currentCallRef = useRef(null); 
 
   const handleGoHome = async () => {
     setStatus('Safely powering down camera...');
@@ -50,7 +49,7 @@ export function useZetcam() {
     setPeerId('');
     setRemoteId('');
     setIsTorchOn(false); 
-    setFacingMode('environment'); // Reset to back camera on exit
+    setFacingMode('environment'); 
     setMode('home');
   };
 
@@ -82,7 +81,7 @@ export function useZetcam() {
 
     peer.on('call', (call) => {
       setStatus('Incoming feed detected...');
-      currentCallRef.current = call; // Store the call reference
+      currentCallRef.current = call; 
       call.answer();
       call.on('stream', (remoteStream) => {
         if (!isActive) return;
@@ -166,13 +165,12 @@ export function useZetcam() {
     }
 
     try {
-      // Use the current facingMode state when initializing connection
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: false });
       if (myVideoRef.current) {
         myVideoRef.current.srcObject = stream;
       }
       const call = peerInstance.current.call(targetPcId, stream);
-      currentCallRef.current = call; // Store the call reference
+      currentCallRef.current = call; 
       setIsConnected(true);
       setStatus('Streaming Live to PC!');
     } catch (err) {
@@ -215,7 +213,7 @@ export function useZetcam() {
     }
   };
 
-  // NEW: Safely Hot-Swap Camera Lenses
+  // FIXED: Explicitly unlock hardware before requesting new lens
   const toggleLens = async () => {
     if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
 
@@ -223,17 +221,20 @@ export function useZetcam() {
     const newMode = facingMode === 'environment' ? 'user' : 'environment';
 
     try {
+      // 1. Kill the current camera feed to unlock the physical hardware
+      myVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      
+      // 2. Force the OS to wait 300ms so it fully registers that the lens is free
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // 3. Request the new lens
       const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newMode }, audio: false });
 
-      // Stop old hardware tracks to free up the physical camera
-      myVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
-
-      // Attach new stream to local preview
       myVideoRef.current.srcObject = newStream;
       setFacingMode(newMode);
-      setIsTorchOn(false); // Hardware safely turns off torch when switching lenses
+      setIsTorchOn(false); 
 
-      // The WebRTC Magic: Hot-swap the video track to the PC without dropping the call
+      // 4. Inject the new feed into the active PC connection
       if (currentCallRef.current && currentCallRef.current.peerConnection) {
         const newVideoTrack = newStream.getVideoTracks()[0];
         const sender = currentCallRef.current.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
@@ -243,7 +244,7 @@ export function useZetcam() {
       }
       setStatus('Streaming Live to PC!');
     } catch (err) {
-      setStatus('Hardware Error: Could not switch lens.');
+      setStatus('Hardware Error: Could not switch lens. ' + err.message);
     }
   };
 
@@ -254,6 +255,6 @@ export function useZetcam() {
     myVideoRef, remoteVideoRef,
     handleGoHome, executeManualConnect,
     isTorchOn, toggleTorch,
-    facingMode, toggleLens // NEW: Expose to UI
+    facingMode, toggleLens 
   };
 }
