@@ -194,7 +194,7 @@ export default function App() {
         }
       `}</style>
       
-      <header className="w-full max-w-5xl flex justify-between items-center mb-6 border-b border-white/5 pb-4">
+      <header className="w-full max-w-4xl flex justify-between items-center mb-6 border-b border-white/5 pb-4">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse" />
           <h1 className="text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
@@ -229,4 +229,32 @@ export default function App() {
 
           <button 
             onClick={() => setMode('receiver')}
-            className="flex-1 bg-white/[0.02] border border-white/10 rounded-3xl p-8 text-left transition-all hover:border-purple-500/40 hover:bg-purple-500/[0.01] group
+            className={
+              "flex-1 bg-white/[0.02] border border-white/10 rounded-3xl p-8 text-left " +
+              "transition-all hover:border-purple-500/40 hover:bg-purple-500/[0.01] group relative overflow-hidden"
+            }
+          >
+            <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6 group-hover:scale-105 transition-transform">
+              <Monitor size={28} />
+            </div>
+            <h3 className="text-xl font-bold mb-2">I am the PC Monitor</h3>
+            <p className="text-sm text-white/40 leading-relaxed">Host the stream display window. Generates the secure target QR matrix.</p>
+            <div className="absolute -bottom-4 -right-4 text-white/[0.02] group-hover:text-purple-500/[0.05] transition-colors">
+              <CheckCircle size={90} />
+            </div>
+          </button>
+        </div>
+      )}
+
+      {mode === 'camera' && (
+        <div className="w-full max-w-md flex flex-col items-center gap-4">
+          <div className="w-full bg-white/[0.02] border border-white/5 rounded-xl p-3 text-center">
+            <span className="text-[13px] font-medium text-pink-400 flex items-center justify-center gap-2">
+              <Radio size={14} className="animate-pulse" /> {status}
+            </span>
+          </div>
+
+          <div className={`w-full bg-white/[0.02] border border-white/10 rounded-2xl p-4 text-center flex flex-col gap-3 ${isConnected ? 'hidden' : 'block'}`}>
+            <h4 className="text-md font-bold">Align Scanner to PC Screen</h4>
+            
+            <div id="reader" className="overflow-hidden rounded-xl
