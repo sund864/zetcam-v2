@@ -16,42 +16,49 @@ export default function App() {
   const peerInstance = useRef(null);
   const scannerInstanceRef = useRef(null);
 
-  const stopMediaTracks = () => {
+  // --- THE FIX: Asynchronous hardware shutdown before changing screens ---
+  const handleGoHome = async () => {
+    setStatus('Safely powering down camera...');
+
+    // 1. Stop any active live streams
     if (myVideoRef.current && myVideoRef.current.srcObject) {
-      const tracks = myVideoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop());
+      myVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
       myVideoRef.current.srcObject = null;
     }
     if (remoteVideoRef.current && remoteVideoRef.current.srcObject) {
       remoteVideoRef.current.srcObject = null;
     }
+
+    // 2. Wait for the QR Scanner hardware to completely power off
+    if (scannerInstanceRef.current) {
+      try {
+        if (scannerInstanceRef.current.isScanning) {
+          await scannerInstanceRef.current.stop(); // Pauses React until lens is off
+        }
+        scannerInstanceRef.current.clear();
+      } catch (e) {
+        console.log("Scanner shutdown skipped or already closed.");
+      }
+      scannerInstanceRef.current = null;
+    }
+
+    // 3. Close the network connection
+    if (peerInstance.current) {
+      peerInstance.current.destroy();
+      peerInstance.current = null;
+    }
+
+    // 4. Finally, return to the home screen safely
+    setIsConnected(false);
+    setPeerId('');
+    setRemoteId('');
+    setMode('home');
   };
 
   useEffect(() => {
-    if (mode === 'home') {
-      stopMediaTracks(); 
-      
-      if (peerInstance.current) {
-        peerInstance.current.destroy();
-        peerInstance.current = null;
-      }
-      if (scannerInstanceRef.current) {
-        try { 
-          if (scannerInstanceRef.current.isScanning) {
-            scannerInstanceRef.current.stop().then(() => {
-              scannerInstanceRef.current.clear();
-            }).catch(() => {});
-          } else {
-            scannerInstanceRef.current.clear();
-          }
-        } catch (e) {}
-        scannerInstanceRef.current = null;
-      }
-      setIsConnected(false);
-      setPeerId('');
-      setRemoteId('');
-      return;
-    }
+    let isActive = true; // Prevents zombie states if user clicks too fast
+
+    if (mode === 'home') return; // Completely idle on the home screen
 
     const peer = new Peer({
       config: {
@@ -63,11 +70,13 @@ export default function App() {
     });
 
     peer.on('open', (id) => {
+      if (!isActive) return;
       setPeerId(id);
       setStatus('Zetcam Engine Active');
     });
 
     peer.on('error', (err) => {
+      if (!isActive) return;
       setStatus("Engine Error: " + err.type);
     });
 
@@ -75,6 +84,7 @@ export default function App() {
       setStatus('Incoming feed detected...');
       call.answer();
       call.on('stream', (remoteStream) => {
+        if (!isActive) return;
         setIsConnected(true);
         setStatus('Streaming Live to PC!');
         if (remoteVideoRef.current) {
@@ -87,6 +97,7 @@ export default function App() {
 
     if (mode === 'camera') {
       setTimeout(() => {
+        if (!isActive) return;
         const readerElement = document.getElementById('reader');
         if (!readerElement || scannerInstanceRef.current) return;
 
@@ -95,6 +106,7 @@ export default function App() {
         setStatus("Requesting camera permissions...");
 
         Html5Qrcode.getCameras().then(devices => {
+          if (!isActive) return;
           if (devices && devices.length) {
             let selectedCameraId = devices[0].id; 
             for (let i = 0; i < devices.length; i++) {
@@ -109,7 +121,9 @@ export default function App() {
               selectedCameraId,
               { fps: 10, qrbox: { width: 220, height: 220 } },
               (decodedText) => {
+                // Instantly power off scanner on successful read
                 html5QrCode.stop().then(() => {
+                  scannerInstanceRef.current.clear();
                   scannerInstanceRef.current = null;
                   handleConnectToPC(decodedText);
                 }).catch(() => {
@@ -119,6 +133,11 @@ export default function App() {
               },
               () => {} 
             ).then(() => {
+              if (!isActive) {
+                // Failsafe: if user clicked Back while camera was booting
+                html5QrCode.stop().catch(()=>{});
+                return;
+              }
               setStatus("Scanner Active. Point at PC.");
             }).catch(() => {
               setStatus("Camera blocked. Check browser settings.");
@@ -135,21 +154,13 @@ export default function App() {
     }
 
     return () => {
-      if (peer) peer.destroy();
-      if (scannerInstanceRef.current) {
-        try { 
-          if (scannerInstanceRef.current.isScanning) {
-            scannerInstanceRef.current.stop().catch(()=>{}); 
-          }
-        } catch(e) {}
-      }
+      isActive = false; 
     };
   }, [mode]);
 
   const handleConnectToPC = async (targetPcId) => {
     setStatus('Accessing camera hardware...');
     
-    // Safety Net: Ensure the browser environment actually supports media devices
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setStatus('System Error: Browser blocked camera access. HTTPS required.');
       return;
@@ -168,19 +179,20 @@ export default function App() {
     }
   };
 
-  const executeManualConnect = () => {
+  const executeManualConnect = async () => {
     if (!remoteId.trim()) {
       setStatus("Please enter a valid PC ID.");
       return;
     }
     
     if (scannerInstanceRef.current && scannerInstanceRef.current.isScanning) {
-      scannerInstanceRef.current.stop().then(() => {
-        handleConnectToPC(remoteId.trim());
-      }).catch(() => handleConnectToPC(remoteId.trim()));
-    } else {
-      handleConnectToPC(remoteId.trim());
+      try {
+        await scannerInstanceRef.current.stop();
+        scannerInstanceRef.current.clear();
+      } catch (e) {}
+      scannerInstanceRef.current = null;
     }
+    handleConnectToPC(remoteId.trim());
   };
 
   return (
@@ -216,7 +228,7 @@ export default function App() {
         </div>
         {mode !== 'home' && (
           <button 
-            onClick={() => setMode('home')}
+            onClick={handleGoHome}
             className={
               "flex items-center gap-1.5 text-xs text-white/70 hover:text-white " +
               "bg-white/5 px-3 py-1.5 rounded-full border border-white/10 transition-all"
