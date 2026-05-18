@@ -9,6 +9,9 @@ export function useZetcam() {
   const [isConnected, setIsConnected] = useState(false);
   const [remoteId, setRemoteId] = useState('');
 
+  // NEW: Hardware State
+  const [isTorchOn, setIsTorchOn] = useState(false);
+
   const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerInstance = useRef(null);
@@ -43,6 +46,7 @@ export function useZetcam() {
     setIsConnected(false);
     setPeerId('');
     setRemoteId('');
+    setIsTorchOn(false); // Reset torch on exit
     setMode('home');
   };
 
@@ -50,7 +54,9 @@ export function useZetcam() {
     let isActive = true; 
     if (mode === 'home') return; 
 
-    const peer = new Peer({
+    const custom6DigitPin = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const peer = new Peer(custom6DigitPin, {
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
@@ -155,7 +161,7 @@ export function useZetcam() {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false, facingMode: 'environment' });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
       if (myVideoRef.current) {
         myVideoRef.current.srcObject = stream;
       }
@@ -183,7 +189,33 @@ export function useZetcam() {
     handleConnectToPC(remoteId.trim());
   };
 
-  // Expose exactly what the UI needs, nothing more.
+  // NEW: Safely Toggle Hardware Flashlight
+  const toggleTorch = async () => {
+    if (!myVideoRef.current || !myVideoRef.current.srcObject) {
+      setStatus("Error: Camera not active.");
+      return;
+    }
+    
+    const track = myVideoRef.current.srcObject.getVideoTracks()[0];
+    
+    try {
+      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+      
+      if (!capabilities.torch) {
+        setStatus("Hardware Error: Torch not supported on this device/browser.");
+        return;
+      }
+
+      await track.applyConstraints({
+        advanced: [{ torch: !isTorchOn }]
+      });
+      
+      setIsTorchOn(!isTorchOn);
+    } catch (err) {
+      setStatus("Hardware Error: Could not toggle torch.");
+    }
+  };
+
   return {
     mode, setMode,
     peerId,
@@ -193,6 +225,8 @@ export function useZetcam() {
     myVideoRef,
     remoteVideoRef,
     handleGoHome,
-    executeManualConnect
+    executeManualConnect,
+    isTorchOn,    // Expose to UI
+    toggleTorch   // Expose to UI
   };
 }

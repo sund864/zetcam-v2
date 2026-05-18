@@ -24,7 +24,7 @@ export default function App() {
         #reader video { object-fit: cover !important; border-radius: 1rem !important; width: 100% !important; height: 100% !important; }
       `}</style>
 
-      {/* PREMIUM AESTHETICS: Ambient Glowing Orbs (Restored & Enhanced) */}
+      {/* PREMIUM AESTHETICS: Ambient Glowing Orbs */}
       <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-pink-600/15 blur-[120px] pointer-events-none z-0 transition-opacity duration-1000"></div>
       <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-600/15 blur-[120px] pointer-events-none z-0 transition-opacity duration-1000"></div>
       
@@ -57,11 +57,11 @@ export default function App() {
 
       {/* HOME SCREEN */}
       {mode === 'home' && (
-        <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-stretch flex-1 min-h-0 z-10 relative pb-2 md:pb-6">
+        <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-8 md:gap-10 justify-center items-center flex-1 min-h-0 z-10 relative pb-2 md:pb-6">
           <button 
             onClick={() => setMode('camera')}
             className={
-              "flex-1 flex flex-col justify-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-left " +
+              "w-full sm:flex-1 h-fit flex flex-col justify-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-left " +
               "transition-all duration-300 hover:border-pink-500/40 hover:bg-pink-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(236,72,153,0.25)] group relative overflow-hidden"
             }
           >
@@ -78,7 +78,7 @@ export default function App() {
           <button 
             onClick={() => setMode('receiver')}
             className={
-              "flex-1 flex flex-col justify-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-left " +
+              "w-full sm:flex-1 h-fit flex flex-col justify-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-left " +
               "transition-all duration-300 hover:border-purple-500/40 hover:bg-purple-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.25)] group relative overflow-hidden"
             }
           >
