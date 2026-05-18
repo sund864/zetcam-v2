@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw, Scan, Settings, Zap, Repeat, Sun, LogOut, Maximize, Minimize, PictureInPicture, Video } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw, Scan, Settings, Zap, Repeat, Sun, LogOut, Maximize, Minimize, PictureInPicture, Video, Smartphone, Battery } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react'; 
 import { useZetcam } from './useZetcam';
 
@@ -15,7 +15,9 @@ export default function App() {
     exposureLevel, adjustExposure,
     remoteTorch, remoteExposure, sendRemoteCommand,
     togglePiP,
-    videoQuality, changeQuality // NEW
+    videoQuality, changeQuality,
+    stayAwake, toggleStayAwake,
+    batterySaver, toggleBatterySaver
   } = useZetcam();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -62,12 +64,11 @@ export default function App() {
   };
 
   const renderSettingsDropdown = () => (
-    <div className="absolute top-12 right-0 w-56 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50">
+    <div className="absolute top-12 right-0 w-64 bg-black/90 backdrop-blur-3xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50 max-h-[80dvh] overflow-y-auto custom-scrollbar">
       <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">
         {mode === 'camera' ? 'Local Controls' : 'Remote Controls'}
       </div>
 
-      {/* NEW: Camera Quality Dropdown (Visible ONLY on Mobile) */}
       {mode === 'camera' && (
         <div className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
           <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
@@ -112,6 +113,35 @@ export default function App() {
         </button>
       )}
 
+      {mode === 'camera' && (
+        <>
+          <div className="h-px bg-white/5 w-full my-1"></div>
+          <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">Advanced Mode</div>
+          
+          <button 
+            onClick={toggleStayAwake}
+            className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+          >
+            <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+              <Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40 group-hover:text-emerald-400/50"} /> Stay Awake
+            </div>
+            <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${stayAwake ? 'bg-emerald-500' : 'bg-white/10'}`}>
+              <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${stayAwake ? 'left-4' : 'left-0 bg-white/40'}`}></div>
+            </div>
+          </button>
+
+          <button 
+            onClick={() => { setIsSettingsOpen(false); toggleBatterySaver(); }}
+            className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+          >
+            <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+              <Battery size={14} className="text-gray-400 group-hover:text-white" /> Battery Saver
+            </div>
+            <span className="text-[10px] text-white/40 group-hover:text-white/70">OLED Blackout</span>
+          </button>
+        </>
+      )}
+
       {mode === 'receiver' && (
         <>
           <button 
@@ -148,6 +178,8 @@ export default function App() {
         </>
       )}
 
+      <div className="h-px bg-white/5 w-full my-1"></div>
+
       <div className="flex flex-col gap-2 w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
         <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
           <Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Exposure
@@ -183,7 +215,21 @@ export default function App() {
         html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
         #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
         #reader video { object-fit: cover !important; border-radius: 1rem !important; width: 100% !important; height: 100% !important; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
       `}</style>
+
+      {/* OLED BLACKOUT OVERLAY */}
+      {batterySaver && (
+        <div 
+          className="fixed inset-0 bg-black z-[999] flex flex-col items-center justify-center text-white/10 cursor-pointer"
+          onClick={toggleBatterySaver}
+        >
+          <Battery size={48} className="mb-4 opacity-20" />
+          <p className="text-xs uppercase tracking-widest opacity-20 font-bold mb-2">Battery Saver Active</p>
+          <p className="text-[10px] opacity-10">Tap anywhere to wake screen</p>
+        </div>
+      )}
 
       {!isFullscreen && (
         <>
