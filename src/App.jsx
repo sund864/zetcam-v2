@@ -31,7 +31,10 @@ export default function App() {
       return;
     }
 
-    const peer = new Peer({
+    // FIX: Generate a short 6-digit ID locally to skip the cloud server's automatic delay
+    const localId = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const peer = new Peer(localId, {
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
@@ -204,7 +207,7 @@ export default function App() {
               <div className="flex gap-2 w-full">
                 <input 
                   type="text" 
-                  placeholder="Paste PC Raw ID String" 
+                  placeholder="Enter 6-Digit PC Code" 
                   value={remoteId} 
                   onChange={(e) => setRemoteId(e.target.value)}
                   className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-pink-500"
@@ -249,7 +252,8 @@ export default function App() {
                 </div>
 
                 <div className="w-full bg-black/40 rounded-lg p-2 border border-white/5 max-w-full overflow-hidden">
-                  <code className="text-[10px] text-purple-300 break-all block">{peerId || 'fetching setup...'}</code>
+                  <span className="text-[9px] text-white/30 block uppercase tracking-wider mb-0.5">Manual Entry Code</span>
+                  <code className="text-sm tracking-widest font-black text-purple-300 block">{peerId || '...'}</code>
                 </div>
               </div>
             )}
