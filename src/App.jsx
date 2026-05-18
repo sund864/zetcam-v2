@@ -1,5 +1,5 @@
-import React from 'react';
-import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw, Scan } from 'lucide-react';
+import React, { useState } from 'react';
+import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw, Scan, Settings, Zap, Repeat, Sun, LogOut } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react'; 
 import { useZetcam } from './useZetcam';
 
@@ -9,8 +9,20 @@ export default function App() {
     peerId, status, isConnected,
     remoteId, setRemoteId,
     myVideoRef, remoteVideoRef,
-    handleGoHome, executeManualConnect
+    handleGoHome, executeManualConnect,
+    isTorchOn, toggleTorch // NEW: Extracted from engine
   } = useZetcam();
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [uiRotation, setUiRotation] = useState(0); 
+  
+  const isCameraLive = mode === 'camera' && isConnected;
+
+  const executeExit = () => {
+    setIsSettingsOpen(false);
+    setUiRotation(0);
+    handleGoHome();
+  };
 
   return (
     <div className={
@@ -24,13 +36,12 @@ export default function App() {
         #reader video { object-fit: cover !important; border-radius: 1rem !important; width: 100% !important; height: 100% !important; }
       `}</style>
 
-      {/* PREMIUM AESTHETICS: Ambient Glowing Orbs */}
       <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-pink-600/15 blur-[120px] pointer-events-none z-0 transition-opacity duration-1000"></div>
       <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-600/15 blur-[120px] pointer-events-none z-0 transition-opacity duration-1000"></div>
       
       <header className={
         "shrink-0 w-full max-w-5xl flex justify-between items-center mb-3 md:mb-6 " +
-        "border-b border-white/5 pb-3 z-10 relative"
+        "border-b border-white/5 pb-3 z-20 relative"
       }>
         <div className="flex flex-col">
           <div className="text-[9px] md:text-[10px] font-bold text-pink-400 tracking-widest uppercase mb-1 drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]">ZetNet Architecture</div>
@@ -43,19 +54,84 @@ export default function App() {
         </div>
 
         {mode !== 'home' && (
-          <button 
-            onClick={handleGoHome}
-            className={
-              "flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs font-medium text-white/70 hover:text-white " +
-              "bg-white/5 backdrop-blur-xl px-3 md:px-4 py-2 rounded-full border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)]"
-            }
-          >
-            <ArrowLeft size={14} /> Exit
-          </button>
+          <div className="relative">
+            {!isCameraLive ? (
+              <button 
+                onClick={executeExit}
+                className={
+                  "flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs font-medium text-white/70 hover:text-white " +
+                  "bg-white/5 backdrop-blur-xl px-3 md:px-4 py-2 rounded-full border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)]"
+                }
+              >
+                <ArrowLeft size={14} /> Exit
+              </button>
+            ) : (
+              <button 
+                onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                className={
+                  "flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs font-bold text-white " +
+                  "bg-pink-500/20 backdrop-blur-xl px-3 md:px-4 py-2 rounded-full border border-pink-500/30 hover:border-pink-400 hover:bg-pink-500/30 transition-all shadow-[0_0_15px_rgba(236,72,153,0.3)]"
+                }
+              >
+                <Settings size={14} className={isSettingsOpen ? "animate-spin-slow" : ""} /> Settings
+              </button>
+            )}
+
+            {isSettingsOpen && (
+              <div className="absolute top-12 right-0 w-56 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50">
+                <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">Hardware Controls</div>
+                
+                {/* NEW: Connected Torch UI logic */}
+                <button 
+                  onClick={toggleTorch}
+                  className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+                >
+                  <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                    <Zap size={14} className={isTorchOn ? "text-yellow-400" : "text-white/40 group-hover:text-yellow-400/50"} /> Flashlight
+                  </div>
+                  <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${isTorchOn ? 'bg-pink-500' : 'bg-white/10'}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${isTorchOn ? 'left-4' : 'left-0 bg-white/40'}`}></div>
+                  </div>
+                </button>
+
+                <button className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
+                  <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                    <Repeat size={14} className="text-blue-400" /> Switch Lens
+                  </div>
+                  <span className="text-[10px] text-white/40 group-hover:text-white/70">Back</span>
+                </button>
+
+                <button 
+                  onClick={() => setUiRotation((prev) => (prev + 90) % 360)}
+                  className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+                >
+                  <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                    <Monitor size={14} className="text-emerald-400" /> UI Rotation
+                  </div>
+                  <span className="text-[10px] text-white/40 group-hover:text-white/70">{uiRotation}°</span>
+                </button>
+
+                <div className="flex flex-col gap-2 w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
+                  <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                    <Sun size={14} className="text-orange-400" /> Exposure
+                  </div>
+                  <input type="range" min="0" max="100" defaultValue="50" className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer" />
+                </div>
+
+                <div className="h-px bg-white/5 w-full my-1"></div>
+
+                <button 
+                  onClick={executeExit}
+                  className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-red-500/10 text-red-400 transition-colors group"
+                >
+                  <LogOut size={14} /> <span className="text-xs font-bold">Terminate Connection</span>
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </header>
 
-      {/* HOME SCREEN */}
       {mode === 'home' && (
         <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-8 md:gap-10 justify-center items-center flex-1 min-h-0 z-10 relative pb-2 md:pb-6">
           <button 
@@ -94,7 +170,6 @@ export default function App() {
         </div>
       )}
 
-      {/* CAMERA SCREEN */}
       {mode === 'camera' && (
         <div className="w-full max-w-md flex flex-col items-center gap-3 md:gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6">
           
@@ -126,12 +201,12 @@ export default function App() {
             <div className="shrink-0 flex gap-2 md:gap-3 w-full group">
               <input 
                 type="text" 
-                placeholder="Paste Raw Target ID" 
+                placeholder="Paste Target PIN" 
                 value={remoteId} 
                 onChange={(e) => setRemoteId(e.target.value)}
                 className={
                   "flex-1 min-w-0 bg-black/60 border border-white/10 rounded-xl px-3 md:px-4 py-2 md:py-3 " +
-                  "text-xs md:text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/50 transition-all shadow-inner"
+                  "text-xs md:text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/50 transition-all shadow-inner font-mono tracking-widest"
                 }
               />
               <button 
@@ -149,7 +224,9 @@ export default function App() {
           <div className={
             "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
             (!isConnected ? 'hidden' : 'block')
-          }>
+          }
+          style={{ transform: `rotate(${uiRotation}deg)`, transition: 'transform 0.3s ease-in-out' }}
+          >
             <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
             <div className={
               "absolute top-4 right-4 bg-black/50 backdrop-blur-xl border border-white/10 text-emerald-400 text-[10px] md:text-[11px] font-bold " +
@@ -162,7 +239,6 @@ export default function App() {
         </div>
       )}
 
-      {/* RECEIVER SCREEN */}
       {mode === 'receiver' && (
         <div className={
           "w-full flex flex-col items-center gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6 " +
@@ -190,8 +266,9 @@ export default function App() {
                   )}
                 </div>
 
-                <div className="shrink-0 w-full bg-black/60 rounded-xl md:rounded-2xl p-3 border border-white/10 overflow-hidden shadow-inner">
-                  <code className="text-[9px] md:text-xs text-purple-300 break-all block font-mono drop-shadow-[0_0_5px_rgba(216,180,254,0.4)]">{peerId || 'Awaiting secure token...'}</code>
+                <div className="shrink-0 w-full bg-black/60 rounded-xl md:rounded-2xl p-3 border border-white/10 overflow-hidden shadow-inner flex flex-col items-center gap-1">
+                  <span className="text-[8px] text-white/30 uppercase tracking-widest font-bold">Secure PIN</span>
+                  <code className="text-sm md:text-base text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
                 </div>
               </div>
             )}
