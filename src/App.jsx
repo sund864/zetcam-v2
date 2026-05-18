@@ -60,7 +60,6 @@ export default function App() {
         "border-b border-white/5 pb-3 z-20 relative"
       }>
         
-        {/* UPDATED LOGO SECTION */}
         <div className="flex flex-col">
           <div className="flex items-center gap-2 mb-0.5">
             <span className="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,1)] animate-pulse" />
@@ -68,7 +67,6 @@ export default function App() {
               ZETCAM PRO <span className="text-[10px] font-normal text-white/30 ml-1 drop-shadow-none">v2.1.1</span>
             </h1>
           </div>
-          {/* Moved below logo, changed to metallic white, aligned slightly right to clear the pink orb */}
           <div className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase ml-[18px] text-transparent bg-clip-text bg-gradient-to-r from-gray-100 via-white to-gray-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
             ZetNet Architecture
           </div>
@@ -170,7 +168,6 @@ export default function App() {
         )}
       </header>
 
-      {/* HOME SCREEN */}
       {mode === 'home' && (
         <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-8 md:gap-10 justify-center items-center flex-1 min-h-0 z-10 relative pb-2 md:pb-6">
           <button 
@@ -209,7 +206,6 @@ export default function App() {
         </div>
       )}
 
-      {/* CAMERA SCREEN */}
       {mode === 'camera' && (
         <div className="w-full max-w-md flex flex-col items-center gap-3 md:gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6">
           
@@ -277,7 +273,6 @@ export default function App() {
         </div>
       )}
 
-      {/* RECEIVER SCREEN */}
       {mode === 'receiver' && (
         <div className={
           "w-full flex flex-col items-center gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6 " +
@@ -314,14 +309,14 @@ export default function App() {
 
             <div className={
               "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] "
-            }
-            style={{ transform: `rotate(${uiRotation}deg)`, transition: 'transform 0.3s ease-in-out' }}
-            >
+            }>
+              {/* CSS Rotation is now exclusively applied to the Video Tag! */}
               <video 
                 ref={remoteVideoRef} 
                 autoPlay 
                 playsInline 
                 className="w-full h-full object-contain" 
+                style={{ transform: `rotate(${uiRotation}deg)`, transition: 'transform 0.3s ease-in-out' }}
               />
               
               {!isConnected && (
