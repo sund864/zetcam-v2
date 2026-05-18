@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import Peer from 'peerjs';
 import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw } from 'lucide-react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
+import QRCode from 'react-qr-code'; 
 
 export default function App() {
   const [mode, setMode] = useState('home'); 
   const [peerId, setPeerId] = useState('');
-  const [status, setStatus] = useState('Initializing ZetNet...');
+  const [status, setStatus] = useState('Initializing Zetcam...');
   const [isConnected, setIsConnected] = useState(false);
+  const [remoteId, setRemoteId] = useState('');
 
   const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -39,8 +41,14 @@ export default function App() {
     });
 
     peer.on('open', (id) => {
+      console.log("Zetcam Secure Token Generated:", id);
       setPeerId(id);
-      setStatus('ZetNet Engine Active');
+      setStatus('Zetcam Engine Active');
+    });
+
+    peer.on('error', (err) => {
+      console.error("PeerJS Core Error:", err);
+      setStatus("Engine Error: " + err.type);
     });
 
     peer.on('call', (call) => {
@@ -114,7 +122,6 @@ export default function App() {
   return (
     <div className="min-h-screen w-full bg-[#120d1a] text-white font-sans antialiased p-4 md:p-6 flex flex-col items-center justify-start overflow-x-hidden selection:bg-pink-500/30">
       
-      {/* FORCE KILL WHITE BORDERS (Direct Style Injection) */}
       <style>{`
         html, body, #root {
           background-color: #120d1a !important;
@@ -130,7 +137,6 @@ export default function App() {
         }
       `}</style>
       
-      {/* Responsive Header */}
       <header className="w-full max-w-4xl flex justify-between items-center mb-6 border-b border-white/5 pb-4">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse" />
@@ -148,13 +154,8 @@ export default function App() {
         )}
       </header>
 
-      {/* ========================================================= */}
-      {/* 1. HOME SCREEN - PREMIUM SPLIT CARDS                      */}
-      {/* ========================================================= */}
       {mode === 'home' && (
         <div className="w-full max-w-2xl flex flex-col sm:flex-row gap-4 justify-center items-stretch my-auto py-6">
-          
-          {/* Phone Card */}
           <button 
             onClick={() => setMode('camera')}
             className="flex-1 bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-left transition-all hover:border-pink-500/40 hover:bg-pink-500/[0.01] group relative overflow-hidden"
@@ -169,7 +170,6 @@ export default function App() {
             </div>
           </button>
 
-          {/* PC Card */}
           <button 
             onClick={() => setMode('receiver')}
             className="flex-1 bg-white/[0.02] border border-white/10 rounded-2xl p-6 text-left transition-all hover:border-purple-500/40 hover:bg-purple-500/[0.01] group relative overflow-hidden"
@@ -183,13 +183,9 @@ export default function App() {
               <CheckCircle size={70} />
             </div>
           </button>
-
         </div>
       )}
 
-      {/* ========================================================= */}
-      {/* 2. SENDER / CAMERA VIEW                                    */}
-      {/* ========================================================= */}
       {mode === 'camera' && (
         <div className="w-full max-w-sm flex flex-col items-center gap-4">
           <div className="w-full bg-white/[0.02] border border-white/5 rounded-xl p-3 text-center">
@@ -199,9 +195,27 @@ export default function App() {
           </div>
 
           {!isConnected ? (
-            <div className="w-full bg-white/[0.02] border border-white/10 rounded-2xl p-4 text-center">
-              <h4 className="text-md font-bold mb-3">Align Scanner to PC Screen</h4>
+            <div className="w-full bg-white/[0.02] border border-white/10 rounded-2xl p-4 text-center flex flex-col gap-3">
+              <h4 className="text-md font-bold">Align Scanner to PC Screen</h4>
               <div id="reader" className="overflow-hidden rounded-xl bg-black border border-white/5 text-black max-w-full"></div>
+              
+              <div className="text-xs text-white/30 my-1">— OR USE MANUAL BACKUP —</div>
+              
+              <div className="flex gap-2 w-full">
+                <input 
+                  type="text" 
+                  placeholder="Paste PC Raw ID String" 
+                  value={remoteId} 
+                  onChange={(e) => setRemoteId(e.target.value)}
+                  className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-pink-500"
+                />
+                <button 
+                  onClick={() => handleConnectToPC(remoteId)}
+                  className="bg-pink-500 text-black font-bold text-xs px-4 py-2 rounded-lg hover:bg-pink-400 active:scale-95 transition-all"
+                >
+                  Connect
+                </button>
+              </div>
             </div>
           ) : (
             <div className="w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative aspect-[3/4]">
@@ -214,9 +228,6 @@ export default function App() {
         </div>
       )}
 
-      {/* ========================================================= */}
-      {/* 3. RECEIVER / PC MONITOR VIEW                              */}
-      {/* ========================================================= */}
       {mode === 'receiver' && (
         <div className="w-full max-w-4xl flex flex-col items-center gap-4">
           <div className={`w-full flex flex-col ${isConnected ? 'lg:flex-row' : 'items-center'} gap-4`}>
@@ -226,13 +237,9 @@ export default function App() {
                 <h3 className="text-md font-bold mb-1">Scan to Pair Device</h3>
                 <p className="text-[11px] text-white/40 mb-4">Point your mobile scanner at this code</p>
                 
-                <div className="bg-white p-3 rounded-xl mb-4">
+                <div className="bg-white p-3 rounded-xl mb-4 flex justify-center items-center min-h-[160px] min-w-[160px]">
                   {peerId ? (
-                    <img 
-                      src={`https://chart.googleapis.com/chart?cht=qr&chs=180x180&chl=${peerId}`} 
-                      alt="Pairing QR Code"
-                      className="w-40 h-40 block"
-                    />
+                    <QRCode value={peerId} size={150} />
                   ) : (
                     <div className="w-40 h-40 flex flex-col items-center justify-center text-black/40 gap-1">
                       <RefreshCw className="animate-spin text-purple-600" size={20} />
