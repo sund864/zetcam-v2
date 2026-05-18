@@ -9,13 +9,15 @@ export function useZetcam() {
   const [isConnected, setIsConnected] = useState(false);
   const [remoteId, setRemoteId] = useState('');
 
-  // NEW: Hardware State
+  // Hardware States
   const [isTorchOn, setIsTorchOn] = useState(false);
+  const [facingMode, setFacingMode] = useState('environment'); // NEW: Track active lens
 
   const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerInstance = useRef(null);
   const scannerInstanceRef = useRef(null);
+  const currentCallRef = useRef(null); // NEW: Keeps track of the active connection for hot-swapping
 
   const handleGoHome = async () => {
     setStatus('Safely powering down camera...');
@@ -43,10 +45,12 @@ export function useZetcam() {
       peerInstance.current = null;
     }
 
+    currentCallRef.current = null;
     setIsConnected(false);
     setPeerId('');
     setRemoteId('');
-    setIsTorchOn(false); // Reset torch on exit
+    setIsTorchOn(false); 
+    setFacingMode('environment'); // Reset to back camera on exit
     setMode('home');
   };
 
@@ -78,6 +82,7 @@ export function useZetcam() {
 
     peer.on('call', (call) => {
       setStatus('Incoming feed detected...');
+      currentCallRef.current = call; // Store the call reference
       call.answer();
       call.on('stream', (remoteStream) => {
         if (!isActive) return;
@@ -161,11 +166,13 @@ export function useZetcam() {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      // Use the current facingMode state when initializing connection
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: false });
       if (myVideoRef.current) {
         myVideoRef.current.srcObject = stream;
       }
-      peerInstance.current.call(targetPcId, stream);
+      const call = peerInstance.current.call(targetPcId, stream);
+      currentCallRef.current = call; // Store the call reference
       setIsConnected(true);
       setStatus('Streaming Live to PC!');
     } catch (err) {
@@ -189,44 +196,64 @@ export function useZetcam() {
     handleConnectToPC(remoteId.trim());
   };
 
-  // NEW: Safely Toggle Hardware Flashlight
   const toggleTorch = async () => {
     if (!myVideoRef.current || !myVideoRef.current.srcObject) {
       setStatus("Error: Camera not active.");
       return;
     }
-    
     const track = myVideoRef.current.srcObject.getVideoTracks()[0];
-    
     try {
       const capabilities = track.getCapabilities ? track.getCapabilities() : {};
-      
       if (!capabilities.torch) {
         setStatus("Hardware Error: Torch not supported on this device/browser.");
         return;
       }
-
-      await track.applyConstraints({
-        advanced: [{ torch: !isTorchOn }]
-      });
-      
+      await track.applyConstraints({ advanced: [{ torch: !isTorchOn }] });
       setIsTorchOn(!isTorchOn);
     } catch (err) {
       setStatus("Hardware Error: Could not toggle torch.");
     }
   };
 
+  // NEW: Safely Hot-Swap Camera Lenses
+  const toggleLens = async () => {
+    if (!myVideoRef.current || !myVideoRef.current.srcObject) return;
+
+    setStatus('Switching lenses...');
+    const newMode = facingMode === 'environment' ? 'user' : 'environment';
+
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: newMode }, audio: false });
+
+      // Stop old hardware tracks to free up the physical camera
+      myVideoRef.current.srcObject.getTracks().forEach(track => track.stop());
+
+      // Attach new stream to local preview
+      myVideoRef.current.srcObject = newStream;
+      setFacingMode(newMode);
+      setIsTorchOn(false); // Hardware safely turns off torch when switching lenses
+
+      // The WebRTC Magic: Hot-swap the video track to the PC without dropping the call
+      if (currentCallRef.current && currentCallRef.current.peerConnection) {
+        const newVideoTrack = newStream.getVideoTracks()[0];
+        const sender = currentCallRef.current.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender) {
+          sender.replaceTrack(newVideoTrack);
+        }
+      }
+      setStatus('Streaming Live to PC!');
+    } catch (err) {
+      setStatus('Hardware Error: Could not switch lens.');
+    }
+  };
+
   return {
     mode, setMode,
-    peerId,
-    status,
-    isConnected,
+    peerId, status, isConnected,
     remoteId, setRemoteId,
-    myVideoRef,
-    remoteVideoRef,
-    handleGoHome,
-    executeManualConnect,
-    isTorchOn,    // Expose to UI
-    toggleTorch   // Expose to UI
+    myVideoRef, remoteVideoRef,
+    handleGoHome, executeManualConnect,
+    isTorchOn, toggleTorch,
+    facingMode, toggleLens // NEW: Expose to UI
   };
 }

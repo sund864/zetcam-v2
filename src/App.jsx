@@ -10,7 +10,8 @@ export default function App() {
     remoteId, setRemoteId,
     myVideoRef, remoteVideoRef,
     handleGoHome, executeManualConnect,
-    isTorchOn, toggleTorch // NEW: Extracted from engine
+    isTorchOn, toggleTorch,
+    facingMode, toggleLens // NEW: Extracted from engine
   } = useZetcam();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -81,7 +82,6 @@ export default function App() {
               <div className="absolute top-12 right-0 w-56 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50">
                 <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">Hardware Controls</div>
                 
-                {/* NEW: Connected Torch UI logic */}
                 <button 
                   onClick={toggleTorch}
                   className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
@@ -94,11 +94,17 @@ export default function App() {
                   </div>
                 </button>
 
-                <button className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
+                {/* NEW: Connected Lens Switcher UI */}
+                <button 
+                  onClick={toggleLens}
+                  className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group active:scale-95"
+                >
                   <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                    <Repeat size={14} className="text-blue-400" /> Switch Lens
+                    <Repeat size={14} className="text-blue-400 group-hover:rotate-180 transition-transform duration-500" /> Switch Lens
                   </div>
-                  <span className="text-[10px] text-white/40 group-hover:text-white/70">Back</span>
+                  <span className="text-[10px] text-white/40 group-hover:text-white/70 uppercase font-bold tracking-wider">
+                    {facingMode === 'environment' ? 'Back' : 'Front'}
+                  </span>
                 </button>
 
                 <button 
@@ -132,6 +138,7 @@ export default function App() {
         )}
       </header>
 
+      {/* HOME SCREEN */}
       {mode === 'home' && (
         <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-8 md:gap-10 justify-center items-center flex-1 min-h-0 z-10 relative pb-2 md:pb-6">
           <button 
@@ -170,6 +177,7 @@ export default function App() {
         </div>
       )}
 
+      {/* CAMERA SCREEN */}
       {mode === 'camera' && (
         <div className="w-full max-w-md flex flex-col items-center gap-3 md:gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6">
           
@@ -239,6 +247,7 @@ export default function App() {
         </div>
       )}
 
+      {/* RECEIVER SCREEN */}
       {mode === 'receiver' && (
         <div className={
           "w-full flex flex-col items-center gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6 " +
