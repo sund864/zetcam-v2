@@ -253,15 +253,16 @@ export default function App() {
   );
 
   return (
+    // FIX: Replaced "h-[100dvh] w-full relative" with "absolute inset-0" to lock corners and bypass Safari's math delay
     <div className={
-      "h-[100dvh] w-full bg-[#0a0510] text-white font-sans antialiased " +
-      "p-3 md:p-6 flex flex-col items-center justify-start overflow-hidden selection:bg-pink-500/30 relative " +
+      "absolute inset-0 bg-[#0a0510] text-white font-sans antialiased " +
+      "p-3 md:p-6 flex flex-col items-center justify-start overflow-hidden selection:bg-pink-500/30 " +
       (isMobileView ? "landscape:p-2 landscape:md:p-4" : "")
     }>
       
-      {/* BUG FIX: Restored strict object-fit rules and isolated the canvas to stop Safari layout panics */}
+      {/* FIX: Added position: fixed to html, body, and root to prevent Safari from bouncing during orientation changes */}
       <style>{`
-        html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+        html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; position: fixed; inset: 0; }
         #reader { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
         #reader video { object-fit: cover !important; border-radius: 1rem !important; width: 100% !important; height: 100% !important; max-width: 100%; max-height: 100%; position: absolute; inset: 0; }
         #reader canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 1rem !important; pointer-events: none; }
