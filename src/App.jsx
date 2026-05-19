@@ -266,10 +266,13 @@ export default function App() {
       
       {!isFullscreen && (
         <header className={
-          "shrink-0 w-full max-w-5xl flex justify-between items-center mb-3 md:mb-6 landscape:mb-2 " +
-          "border-b border-white/5 pb-3 landscape:pb-2 z-20 relative"
+          "shrink-0 w-full max-w-5xl flex justify-between items-center mb-3 md:mb-6 " +
+          // REIMAGINED: If we are not on the home screen, we remove the bottom margin and padding in landscape to save height
+          (mode === 'home' ? "landscape:mb-2 border-b border-white/5 pb-3 landscape:pb-2" : "landscape:mb-1 landscape:pb-1 border-b border-white/5 pb-3 landscape:border-none") + 
+          " z-20 relative"
         }>
-          <div className="flex flex-col">
+          {/* REIMAGINED: Completely hide the Zetcam Logo in landscape mode if we are scanning or streaming */}
+          <div className={`flex flex-col ${mode !== 'home' ? 'landscape:hidden' : ''}`}>
             <div className="flex items-center gap-2 mb-0.5">
               <span className="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,1)] animate-pulse" />
               <h1 className="text-lg md:text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg">
@@ -282,7 +285,7 @@ export default function App() {
           </div>
 
           {mode !== 'home' && (
-            <div className="relative">
+            <div className="relative ml-auto">
               {!isStreamActive ? (
                 <button 
                   onClick={executeExit}
@@ -358,17 +361,17 @@ export default function App() {
             </span>
           </div>
 
-          {/* DYNAMIC FLEX SPLITTER FOR LANDSCAPE */}
           <div className="w-full flex flex-col landscape:flex-row gap-3 md:gap-4 flex-1 min-h-0">
             
             <div className={
               "landscape:w-[40%] flex-1 min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-3 md:p-6 landscape:p-3 flex flex-col gap-2 md:gap-4 landscape:gap-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
               (isConnected ? 'hidden' : 'flex')
             }>
-              <h4 className="shrink-0 text-sm md:text-lg font-bold tracking-tight text-center text-white drop-shadow-md">Align Scanner to PC Screen</h4>
+              <h4 className="shrink-0 text-sm md:text-lg font-bold tracking-tight text-center text-white drop-shadow-md landscape:hidden">Align Scanner to PC</h4>
               
+              {/* REIMAGINED: Strict minimum height so the video canvas never disappears */}
               <div id="reader" className={
-                "flex-1 min-h-0 overflow-hidden rounded-xl md:rounded-3xl bg-black/80 border border-white/10 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] " +
+                "flex-1 min-h-[120px] overflow-hidden rounded-xl md:rounded-3xl bg-black/80 border border-white/10 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] " +
                 "text-white flex items-center justify-center relative"
               }>
                  <span className="text-xs md:text-sm text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4">Activating Lens...</span>
@@ -380,7 +383,8 @@ export default function App() {
                 <div className="h-px bg-white/20 flex-1"></div>
               </div>
               
-              <div className="shrink-0 flex gap-2 w-full group landscape:flex-col lg:landscape:flex-row">
+              {/* REIMAGINED: Forces the input and button to stay side-by-side horizontally even in landscape to save height */}
+              <div className="shrink-0 flex gap-2 w-full group landscape:flex-row">
                 <input 
                   type="text" 
                   placeholder="Paste PIN" 
@@ -405,7 +409,6 @@ export default function App() {
 
             <div className={
               "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
-              // If not connected, hide in portrait but show alongside scanner in landscape
               (!isConnected ? 'hidden landscape:block' : 'block')
             }>
               <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
@@ -434,8 +437,8 @@ export default function App() {
                 "flex-1 md:flex-none landscape:w-[40%] md:w-1/3 flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] " +
                 "p-4 md:p-8 landscape:p-4 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all"
               }>
-                <h3 className="shrink-0 text-lg md:text-2xl font-bold mb-1 tracking-tight drop-shadow-md">Pair Device</h3>
-                <p className="shrink-0 text-[11px] md:text-sm text-white/50 mb-4 md:mb-8 landscape:mb-2 font-light">Point mobile lens at this matrix</p>
+                <h3 className="shrink-0 text-lg md:text-2xl font-bold mb-1 tracking-tight drop-shadow-md landscape:hidden">Pair Device</h3>
+                <p className="shrink-0 text-[11px] md:text-sm text-white/50 mb-4 md:mb-8 landscape:mb-2 font-light landscape:hidden">Point mobile lens at this matrix</p>
                 
                 <div className="flex-1 min-h-0 w-full max-h-[240px] bg-white p-3 md:p-5 rounded-[20px] md:rounded-[24px] mb-4 md:mb-8 landscape:mb-4 flex justify-center items-center shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
