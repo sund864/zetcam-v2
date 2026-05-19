@@ -18,7 +18,7 @@ export default function App() {
     videoQuality, changeQuality,
     stayAwake, toggleStayAwake,
     batterySaver, toggleBatterySaver,
-    isNativeApp, runInBackground, toggleBackgroundMode // NEW
+    isNativeApp, runInBackground, toggleBackgroundMode
   } = useZetcam();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -141,7 +141,6 @@ export default function App() {
             <span className="text-[10px] text-white/40 group-hover:text-white/70">OLED Blackout</span>
           </button>
 
-          {/* DYNAMIC PLATFORM RENDER: Locks out web users from native features */}
           {isNativeApp ? (
             <button 
               onClick={() => { setIsSettingsOpen(false); toggleBackgroundMode(); }}
@@ -234,13 +233,15 @@ export default function App() {
   );
 
   return (
+    // FIX 3: Changed h-[100dvh] to min-h-[100dvh] and replaced overflow-hidden with overflow-y-auto overflow-x-hidden
     <div className={
-      "h-[100dvh] w-full bg-[#0a0510] text-white font-sans antialiased " +
-      "p-3 md:p-6 flex flex-col items-center justify-start overflow-hidden selection:bg-pink-500/30 relative"
+      "min-h-[100dvh] w-full bg-[#0a0510] text-white font-sans antialiased " +
+      "p-3 md:p-6 flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden selection:bg-pink-500/30 relative custom-scrollbar"
     }>
       
+      {/* FIX 3: Removed strict overflow:hidden from HTML and BODY tags so landscape mode can scroll natively */}
       <style>{`
-        html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+        html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow-x: hidden; }
         #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
         #reader video { object-fit: cover !important; border-radius: 1rem !important; width: 100% !important; height: 100% !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
@@ -316,12 +317,14 @@ export default function App() {
         <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-8 md:gap-10 justify-center items-center flex-1 min-h-0 z-10 relative pb-2 md:pb-6">
           <button 
             onClick={() => setMode('camera')}
+            // FIX 1: Added items-center and text-center to the main card
             className={
-              "w-full sm:flex-1 h-fit flex flex-col justify-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-left " +
+              "w-full sm:flex-1 h-fit flex flex-col justify-center items-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-center " +
               "transition-all duration-300 hover:border-pink-500/40 hover:bg-pink-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(236,72,153,0.25)] group relative overflow-hidden"
             }
           >
-            <div className="w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br from-pink-500/20 to-pink-500/5 flex items-center justify-center text-pink-400 mb-4 md:mb-6 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-300 border border-pink-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+            {/* FIX 1: Added mx-auto to center the icon div */}
+            <div className="mx-auto w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br from-pink-500/20 to-pink-500/5 flex items-center justify-center text-pink-400 mb-4 md:mb-6 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-300 border border-pink-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
               <Camera className="w-6 h-6 md:w-8 md:h-8" />
             </div>
             <h3 className="text-xl md:text-2xl font-bold mb-2 tracking-tight group-hover:text-pink-100 transition-colors">I am the Camera</h3>
@@ -333,12 +336,14 @@ export default function App() {
 
           <button 
             onClick={() => setMode('receiver')}
+            // FIX 1: Added items-center and text-center to the main card
             className={
-              "w-full sm:flex-1 h-fit flex flex-col justify-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-left " +
+              "w-full sm:flex-1 h-fit flex flex-col justify-center items-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-center " +
               "transition-all duration-300 hover:border-purple-500/40 hover:bg-purple-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.25)] group relative overflow-hidden"
             }
           >
-            <div className="w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center text-purple-400 mb-4 md:mb-6 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-300 border border-purple-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+            {/* FIX 1: Added mx-auto to center the icon div */}
+            <div className="mx-auto w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center text-purple-400 mb-4 md:mb-6 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-300 border border-purple-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
               <Monitor className="w-6 h-6 md:w-8 md:h-8" />
             </div>
             <h3 className="text-xl md:text-2xl font-bold mb-2 tracking-tight group-hover:text-purple-100 transition-colors">I am the PC Monitor</h3>
@@ -351,7 +356,7 @@ export default function App() {
       )}
 
       {mode === 'camera' && (
-        <div className="w-full max-w-md flex flex-col items-center gap-3 md:gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6">
+        <div className="w-full max-w-md flex flex-col items-center gap-3 md:gap-4 z-10 relative flex-1 min-h-[500px] pb-2 md:pb-6">
           
           <div className="shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
             <span className="text-xs md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">
@@ -366,7 +371,7 @@ export default function App() {
             <h4 className="shrink-0 text-base md:text-lg font-bold tracking-tight text-center text-white drop-shadow-md">Align Scanner to PC Screen</h4>
             
             <div id="reader" className={
-              "flex-1 min-h-0 overflow-hidden rounded-xl md:rounded-3xl bg-black/80 border border-white/10 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] " +
+              "flex-1 min-h-[250px] overflow-hidden rounded-xl md:rounded-3xl bg-black/80 border border-white/10 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] " +
               "text-white flex items-center justify-center relative"
             }>
                <span className="text-xs md:text-sm text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4">Activating Lens...</span>
@@ -402,7 +407,7 @@ export default function App() {
           </div>
 
           <div className={
-            "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
+            "w-full flex-1 min-h-[250px] bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
             (!isConnected ? 'hidden' : 'block')
           }>
             <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
@@ -419,14 +424,14 @@ export default function App() {
 
       {mode === 'receiver' && (
         <div className={
-          "w-full flex flex-col items-center gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6 " +
+          "w-full flex flex-col items-center gap-4 z-10 relative flex-1 min-h-[500px] pb-2 md:pb-6 " +
           (isConnected ? 'max-w-full px-0 md:px-4' : 'max-w-5xl')
         }>
           <div className="w-full h-full flex flex-col md:flex-row items-stretch justify-center gap-4 flex-1 min-h-0">
             
             {!isConnected && (
               <div className={
-                "flex-1 md:flex-none md:w-1/3 flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] " +
+                "flex-1 md:flex-none md:w-1/3 flex flex-col items-center justify-center min-h-[300px] bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] " +
                 "p-5 md:p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all"
               }>
                 <h3 className="shrink-0 text-lg md:text-2xl font-bold mb-1 tracking-tight drop-shadow-md">Pair Device</h3>
@@ -455,7 +460,7 @@ export default function App() {
               className={
                 isFullscreen 
                   ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default" 
-                  : "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] "
+                  : "flex-1 min-h-[300px] bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] "
               }
               onMouseMove={handleFsInteraction}
               onClick={handleFsInteraction}

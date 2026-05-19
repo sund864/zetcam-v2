@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Peer from 'peerjs';
 import { Html5Qrcode } from 'html5-qrcode'; 
-import { Capacitor } from '@capacitor/core'; // NEW: Platform Detector
+import { Capacitor } from '@capacitor/core'; 
 
 const VIDEO_RESOLUTIONS = {
   '720p': { width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -33,9 +33,8 @@ export function useZetcam() {
 
   const [stayAwake, setStayAwake] = useState(false);
   const [batterySaver, setBatterySaver] = useState(false);
-  const [runInBackground, setRunInBackground] = useState(false); // NEW: Native Stealth State
+  const [runInBackground, setRunInBackground] = useState(false); 
 
-  // Detect if we are running as an installed native app
   const isNativeApp = Capacitor.isNativePlatform();
 
   const myVideoRef = useRef(null);
@@ -90,7 +89,11 @@ export function useZetcam() {
       wakeLockRef.current = null;
     }
     
-    // Shut down native background service if active
+    // Restore default system brightness if battery saver was on
+    if (batterySaver && window.cordova?.plugins?.brightness) {
+      window.cordova.plugins.brightness.setBrightness(-1, null, null);
+    }
+
     if (runInBackground && window.cordova?.plugins?.backgroundMode) {
       window.cordova.plugins.backgroundMode.disable();
     }
@@ -240,18 +243,30 @@ export function useZetcam() {
     }
   };
 
+  // REWIRED: Controls OLED blackout AND drops native hardware brightness to 1%
   const toggleBatterySaver = async () => {
     const newState = !batterySaver;
     setBatterySaver(newState);
-    if (newState && !stayAwake && 'wakeLock' in navigator) {
-      try {
-        wakeLockRef.current = await navigator.wakeLock.request('screen');
-        setStayAwake(true);
-      } catch (e) {}
+    
+    if (newState) {
+      if (!stayAwake && 'wakeLock' in navigator) {
+        try {
+          wakeLockRef.current = await navigator.wakeLock.request('screen');
+          setStayAwake(true);
+        } catch (e) {}
+      }
+      // Force hardware brightness to 1%
+      if (window.cordova?.plugins?.brightness) {
+        window.cordova.plugins.brightness.setBrightness(0.01, null, null);
+      }
+    } else {
+      // Restore system default brightness (-1)
+      if (window.cordova?.plugins?.brightness) {
+        window.cordova.plugins.brightness.setBrightness(-1, null, null);
+      }
     }
   };
 
-  // NEW: Native Android Background Execution
   const toggleBackgroundMode = () => {
     if (!isNativeApp) {
       setStatus('System Error: App installation required for background streams.');
@@ -263,13 +278,12 @@ export function useZetcam() {
       const newState = !runInBackground;
       
       if (newState) {
-        // Configure the native Android push notification
         bgMode.setDefaults({
-            title: 'ZetNet Engine Active',
+            title: 'Zetcam Engine Active', 
             text: 'Camera is securely streaming in the background',
             resume: true,
             hidden: false,
-            color: 'EC4899' // Pink branding
+            color: 'EC4899'
         });
         bgMode.enable();
         setRunInBackground(true);
@@ -490,6 +504,6 @@ export function useZetcam() {
     videoQuality, changeQuality,
     stayAwake, toggleStayAwake,
     batterySaver, toggleBatterySaver,
-    isNativeApp, runInBackground, toggleBackgroundMode // NEW
+    isNativeApp, runInBackground, toggleBackgroundMode
   };
 }
