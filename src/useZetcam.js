@@ -89,7 +89,6 @@ export function useZetcam() {
       wakeLockRef.current = null;
     }
     
-    // Restore default system brightness if battery saver was on
     if (batterySaver && window.cordova?.plugins?.brightness) {
       window.cordova.plugins.brightness.setBrightness(-1, null, null);
     }
@@ -243,7 +242,6 @@ export function useZetcam() {
     }
   };
 
-  // REWIRED: Controls OLED blackout AND drops native hardware brightness to 1%
   const toggleBatterySaver = async () => {
     const newState = !batterySaver;
     setBatterySaver(newState);
@@ -255,12 +253,10 @@ export function useZetcam() {
           setStayAwake(true);
         } catch (e) {}
       }
-      // Force hardware brightness to 1%
       if (window.cordova?.plugins?.brightness) {
         window.cordova.plugins.brightness.setBrightness(0.01, null, null);
       }
     } else {
-      // Restore system default brightness (-1)
       if (window.cordova?.plugins?.brightness) {
         window.cordova.plugins.brightness.setBrightness(-1, null, null);
       }
@@ -343,9 +339,7 @@ export function useZetcam() {
         if (!isActive) return;
         setIsConnected(true);
         setStatus('Streaming Live to PC!');
-        if (remoteVideoRef.current) {
-          remoteVideoRef.current.srcObject = remoteStream;
-        }
+        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remoteStream;
       });
 
       call.on('close', () => {

@@ -27,12 +27,9 @@ export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fsControlsVisible, setFsControlsVisible] = useState(true);
 
-  // ADVANCED HARDWARE DETECTOR: Segregates Phones from Tablets/Macs/PCs
   const checkIsMobile = () => {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    // Flags True ONLY for Phones (Portrait < 640px wide, or Landscape < 1024px wide but strictly < 640px height)
-    // iPads (768x1024) and Macs will evaluate to False and confidently receive the Desktop UI
     return w < 640 || (w < 1024 && h < 640);
   };
   
@@ -265,7 +262,7 @@ export default function App() {
       <style>{`
         html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
         #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        #reader video { object-fit: cover !important; border-radius: 1rem !important; width: 100% !important; height: 100% !important; }
+        #reader video { border-radius: 1rem !important; width: 100% !important; height: 100% !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
       `}</style>
@@ -325,7 +322,7 @@ export default function App() {
                   onClick={() => setIsSettingsOpen(!isSettingsOpen)}
                   className={
                     "flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs font-bold text-white " +
-                    "bg-pink-500/20 backdrop-blur-xl px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-pink-500/30 hover:border-pink-400 hover:bg-pink-500/30 transition-all shadow-[0_0_15px_rgba(236,72,153,0.3)]"
+                    "bg-pink-500/20 backdrop-blur-xl px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-pink-500/30 hover:border-pink-400 hover:bg-pink-500/30 transition-all shadow-[0_4px_15px_rgba(236,72,153,0.3)]"
                   }
                 >
                   <Settings size={14} className={isSettingsOpen ? "animate-spin-slow" : ""} /> Settings
@@ -468,40 +465,41 @@ export default function App() {
               </div>
             )}
 
-            {/* Desktop Video Card with Pink "Awaiting Stream" Placeholder */}
+            {/* NEW: SHRINK-WRAPPED CANVAS */}
             <div className={
-              "min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
-              (!isConnected && isMobileView ? 'hidden ' : 'flex-1 flex flex-col ') +
+              "flex-1 min-h-0 flex items-center justify-center " +
+              (!isConnected && isMobileView ? 'hidden ' : 'flex ') +
               (isMobileView ? 'landscape:flex-none landscape:w-[73%] ' : ' ')
             }>
               
-              <video ref={myVideoRef} autoPlay playsInline muted className={`w-full h-full object-cover ${!isConnected ? 'hidden' : 'block'}`} />
-              
-              {/* Desktop/Tablet Offline Placeholder (Pink Theme) */}
-              {!isConnected && !isMobileView && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-4 md:gap-6 text-center p-4 md:p-8 z-10">
+              {!isConnected && !isMobileView ? (
+                 <div className="w-full h-full bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative flex flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-4 md:gap-6 text-center p-4 md:p-8 z-10">
                   <div className="shrink-0 p-4 md:p-6 bg-pink-500/10 rounded-full border border-pink-500/30 text-pink-400 animate-pulse shadow-[0_0_40px_rgba(236,72,153,0.3)]">
                     <Camera className="w-6 h-6 md:w-12 md:h-12 drop-shadow-[0_0_10px_rgba(236,72,153,0.8)]" />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 max-w-md">
                     <h4 className="text-base md:text-2xl font-bold tracking-tight drop-shadow-md">Awaiting PC Connection</h4>
-                    <p className="hidden md:block text-base text-white/60 max-w-md mx-auto leading-relaxed font-light mt-2">
+                    <p className="hidden md:block text-base text-white/60 mx-auto leading-relaxed font-light mt-2">
                       Point this camera at the target matrix on the receiving device to initiate the secure video link.
                     </p>
                   </div>
                 </div>
-              )}
-
-              {/* Connected Live Badge */}
-              {isConnected && (
-                <div className={
-                  "absolute top-4 right-4 bg-black/50 backdrop-blur-xl border border-white/10 text-emerald-400 text-[10px] md:text-[11px] font-bold " +
-                  "uppercase px-3 py-1.5 md:py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)]"
-                }>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span>
-                  Live
+              ) : (
+                <div className={`relative w-fit h-fit max-w-full max-h-full flex items-center justify-center rounded-[24px] md:rounded-[32px] shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 bg-black overflow-hidden ${!isConnected ? 'hidden' : 'flex'}`}>
+                  <video 
+                    ref={myVideoRef} 
+                    autoPlay 
+                    playsInline 
+                    muted 
+                    className="max-w-full max-h-full block" 
+                  />
+                  <div className="absolute top-4 right-4 z-20 bg-black/50 backdrop-blur-xl border border-white/10 text-emerald-400 text-[10px] md:text-[11px] font-bold uppercase px-3 py-1.5 md:py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span>
+                    Live
+                  </div>
                 </div>
               )}
+
             </div>
 
             {/* Mobile Extended Right Side Settings Sidebar */}
@@ -554,22 +552,44 @@ export default function App() {
               className={
                 isFullscreen 
                   ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default" 
-                  : "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] "
+                  : "flex-1 min-h-0 flex items-center justify-center relative " + (!isConnected ? 'w-full' : '')
               }
               onMouseMove={handleFsInteraction}
               onClick={handleFsInteraction}
             >
-              <video 
-                ref={remoteVideoRef} 
-                autoPlay 
-                playsInline 
-                className="w-full h-full object-contain" 
-                style={{ transform: `rotate(${uiRotation}deg)`, transition: 'transform 0.3s ease-in-out' }}
-              />
+              
+              {!isConnected && (
+                <div className="absolute inset-0 w-full h-full bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 flex flex-row md:flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-4 md:gap-6 text-left md:text-center p-4 md:p-8 z-10">
+                  <div className="shrink-0 p-4 md:p-6 bg-purple-500/10 rounded-full border border-purple-500/30 text-purple-400 animate-pulse shadow-[0_0_40px_rgba(168,85,247,0.3)]">
+                    <Monitor className="w-6 h-6 md:w-12 md:h-12 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+                  </div>
+                  <div className="flex-1 min-w-0 max-w-md">
+                    <h4 className="text-base md:text-2xl font-bold tracking-tight drop-shadow-md">Awaiting Stream Link</h4>
+                    <p className="hidden md:block text-base text-white/60 mx-auto leading-relaxed font-light mt-2">
+                      Remote video frames will mount directly to this viewport the moment your phone confirms the authentication matrix.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* NEW: SHRINK-WRAPPED CANVAS FOR RECEIVER */}
+              {isConnected && (
+                <div 
+                  className="relative w-fit h-fit max-w-full max-h-full flex items-center justify-center rounded-[24px] md:rounded-[32px] shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 bg-black overflow-hidden"
+                  style={{ transform: `rotate(${uiRotation}deg)`, transition: 'transform 0.3s ease-in-out' }}
+                >
+                  <video 
+                    ref={remoteVideoRef} 
+                    autoPlay 
+                    playsInline 
+                    className="max-w-full max-h-full block" 
+                  />
+                </div>
+              )}
 
               {isFullscreen && (
                 <div 
-                  className={`absolute top-6 right-6 flex items-center gap-3 transition-opacity duration-500 ${fsControlsVisible || isSettingsOpen ? 'opacity-100' : 'opacity-0'}`}
+                  className={`absolute top-6 right-6 z-20 flex items-center gap-3 transition-opacity duration-500 ${fsControlsVisible || isSettingsOpen ? 'opacity-100' : 'opacity-0'}`}
                 >
                   <div className="relative">
                     <button 
@@ -587,20 +607,6 @@ export default function App() {
                   >
                     <Minimize size={16} /> Exit Theater
                   </button>
-                </div>
-              )}
-              
-              {!isConnected && (
-                <div className="absolute inset-0 flex flex-row md:flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-4 md:gap-6 text-left md:text-center p-4 md:p-8">
-                  <div className="shrink-0 p-4 md:p-6 bg-purple-500/10 rounded-full border border-purple-500/30 text-purple-400 animate-pulse shadow-[0_0_40px_rgba(168,85,247,0.3)]">
-                    <Monitor className="w-6 h-6 md:w-12 md:h-12 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-base md:text-2xl font-bold tracking-tight drop-shadow-md">Awaiting Stream Link</h4>
-                    <p className="hidden md:block text-base text-white/60 max-w-md mx-auto leading-relaxed font-light mt-2">
-                      Remote video frames will mount directly to this viewport the moment your phone confirms the authentication matrix.
-                    </p>
-                  </div>
                 </div>
               )}
             </div>
