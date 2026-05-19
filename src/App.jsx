@@ -267,11 +267,9 @@ export default function App() {
       {!isFullscreen && (
         <header className={
           "shrink-0 w-full max-w-5xl flex justify-between items-center mb-3 md:mb-6 " +
-          // REIMAGINED: If we are not on the home screen, we remove the bottom margin and padding in landscape to save height
           (mode === 'home' ? "landscape:mb-2 border-b border-white/5 pb-3 landscape:pb-2" : "landscape:mb-1 landscape:pb-1 border-b border-white/5 pb-3 landscape:border-none") + 
           " z-20 relative"
         }>
-          {/* REIMAGINED: Completely hide the Zetcam Logo in landscape mode if we are scanning or streaming */}
           <div className={`flex flex-col ${mode !== 'home' ? 'landscape:hidden' : ''}`}>
             <div className="flex items-center gap-2 mb-0.5">
               <span className="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,1)] animate-pulse" />
@@ -285,7 +283,8 @@ export default function App() {
           </div>
 
           {mode !== 'home' && (
-            <div className="relative ml-auto">
+            // FIX: We hide the top header Exit button entirely in landscape mode before connection
+            <div className={`relative ml-auto ${mode === 'camera' && !isStreamActive ? 'landscape:hidden' : ''}`}>
               {!isStreamActive ? (
                 <button 
                   onClick={executeExit}
@@ -355,21 +354,31 @@ export default function App() {
       {mode === 'camera' && (
         <div className="w-full max-w-5xl flex flex-col items-center gap-2 md:gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6 landscape:pb-0">
           
-          <div className="shrink-0 w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-2 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-            <span className="text-[10px] md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">
-              <Radio size={14} className="animate-pulse shrink-0" /> <span className="truncate">{status}</span>
-            </span>
-          </div>
+          {/* TOP BANNER: Shown in Portrait ALWAYS. Shown in Landscape ONLY if connected. */}
+          {(!isConnected) && (
+            <div className="shrink-0 w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-2 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] landscape:hidden">
+              <span className="text-[10px] md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">
+                <Radio size={14} className="animate-pulse shrink-0" /> <span className="truncate">{status}</span>
+              </span>
+            </div>
+          )}
+          {isConnected && (
+            <div className="shrink-0 w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-2 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+              <span className="text-[10px] md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">
+                <Radio size={14} className="animate-pulse shrink-0" /> <span className="truncate">{status}</span>
+              </span>
+            </div>
+          )}
 
           <div className="w-full flex flex-col landscape:flex-row gap-3 md:gap-4 flex-1 min-h-0">
             
+            {/* --- LEFT SIDE: SCANNER --- */}
             <div className={
-              "landscape:w-[40%] flex-1 min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-3 md:p-6 landscape:p-3 flex flex-col gap-2 md:gap-4 landscape:gap-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
-              (isConnected ? 'hidden' : 'flex')
+              "flex-1 min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-3 md:p-6 landscape:p-3 flex flex-col gap-2 md:gap-4 landscape:gap-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
+              (isConnected ? 'hidden' : 'flex landscape:w-[50%]')
             }>
               <h4 className="shrink-0 text-sm md:text-lg font-bold tracking-tight text-center text-white drop-shadow-md landscape:hidden">Align Scanner to PC</h4>
               
-              {/* REIMAGINED: Strict minimum height so the video canvas never disappears */}
               <div id="reader" className={
                 "flex-1 min-h-[120px] overflow-hidden rounded-xl md:rounded-3xl bg-black/80 border border-white/10 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] " +
                 "text-white flex items-center justify-center relative"
@@ -377,14 +386,13 @@ export default function App() {
                  <span className="text-xs md:text-sm text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4">Activating Lens...</span>
               </div>
               
+              {/* These manual link tools hide in landscape because we move them to the right panel */}
               <div className="shrink-0 flex items-center gap-2 w-full my-0.5 opacity-50 landscape:hidden">
                 <div className="h-px bg-white/20 flex-1"></div>
                 <span className="text-[8px] md:text-[10px] text-white/50 uppercase tracking-widest font-bold">Override</span>
                 <div className="h-px bg-white/20 flex-1"></div>
               </div>
-              
-              {/* REIMAGINED: Forces the input and button to stay side-by-side horizontally even in landscape to save height */}
-              <div className="shrink-0 flex gap-2 w-full group landscape:flex-row">
+              <div className="shrink-0 flex gap-2 w-full group landscape:hidden">
                 <input 
                   type="text" 
                   placeholder="Paste PIN" 
@@ -407,9 +415,56 @@ export default function App() {
               </div>
             </div>
 
+            {/* --- RIGHT SIDE: CONTROLS (Only visible in landscape before connection) --- */}
+            {!isConnected && (
+              <div className="hidden landscape:flex landscape:w-[50%] flex-col justify-center gap-3 md:gap-4">
+                
+                {/* 1. Status Banner */}
+                <div className="w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] shrink-0">
+                  <span className="text-xs md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">
+                    <Radio size={16} className="animate-pulse shrink-0" /> <span className="truncate">{status}</span>
+                  </span>
+                </div>
+
+                {/* 2. Manual Override Block */}
+                <div className="w-full bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl p-3 flex flex-col gap-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] shrink-0">
+                  <div className="flex items-center gap-2 w-full opacity-50">
+                    <div className="h-px bg-white/20 flex-1"></div>
+                    <span className="text-[10px] text-white/50 uppercase tracking-widest font-bold">Manual Link</span>
+                    <div className="h-px bg-white/20 flex-1"></div>
+                  </div>
+                  <div className="flex gap-2 w-full">
+                    <input 
+                      type="text" 
+                      placeholder="Paste PIN" 
+                      value={remoteId} 
+                      onChange={(e) => setRemoteId(e.target.value)}
+                      className="flex-1 min-w-0 bg-black/60 border border-white/10 rounded-xl px-3 py-2 text-xs md:text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-pink-500/50 transition-all shadow-inner font-mono tracking-widest"
+                    />
+                    <button 
+                      onClick={executeManualConnect}
+                      className="shrink-0 bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold text-xs md:text-sm px-4 py-2 rounded-xl hover:shadow-[0_0_25px_rgba(236,72,153,0.6)] active:scale-95 transition-all"
+                    >
+                      Link
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3. Exit Button */}
+                <button 
+                  onClick={executeExit}
+                  className="flex items-center justify-center gap-2 w-full bg-red-500/10 backdrop-blur-xl px-4 py-3 rounded-2xl border border-red-500/20 hover:bg-red-500/20 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)] text-red-400 font-bold text-sm shrink-0"
+                >
+                  <LogOut size={16} /> Exit Camera Mode
+                </button>
+              </div>
+            )}
+
+            {/* --- LIVE VIDEO CANVAS (Visible only when CONNECTED) --- */}
+            {/* FIX 1: Changed from 'hidden landscape:block' to just 'hidden' so it vanishes completely before connection */}
             <div className={
               "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
-              (!isConnected ? 'hidden landscape:block' : 'block')
+              (!isConnected ? 'hidden' : 'block')
             }>
               <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
               <div className={
