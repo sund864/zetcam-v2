@@ -64,8 +64,9 @@ export default function App() {
     handleGoHome();
   };
 
-  const renderSettingsDropdown = () => (
-    <div className="absolute top-12 right-0 w-64 bg-black/90 backdrop-blur-3xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50 max-h-[80dvh] overflow-y-auto custom-scrollbar">
+  // REIMAGINED: We extract the settings content so it can be used in BOTH the dropdown and the new landscape sidebar
+  const renderSettingsContent = () => (
+    <>
       <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">
         {mode === 'camera' ? 'Local Controls' : 'Remote Controls'}
       </div>
@@ -73,17 +74,17 @@ export default function App() {
       {mode === 'camera' && (
         <div className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
           <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-            <Video size={14} className="text-indigo-400" /> Resolution
+            <Video size={14} className="text-indigo-400" /> <span className="landscape:hidden md:landscape:inline">Resolution</span>
           </div>
           <select 
             value={videoQuality}
             onChange={(e) => changeQuality(e.target.value)}
-            className="bg-black/60 border border-white/10 rounded-lg text-[10px] text-white/80 font-bold px-2 py-1 outline-none focus:border-indigo-500/50 cursor-pointer"
+            className="bg-black/60 border border-white/10 rounded-lg text-[10px] text-white/80 font-bold px-2 py-1 outline-none focus:border-indigo-500/50 cursor-pointer max-w-[80px] md:max-w-none"
           >
             <option value="720p">720p</option>
-            <option value="1080p">1080p (HD)</option>
-            <option value="1440p">1440p (2K)</option>
-            <option value="4K">4K (Ultra)</option>
+            <option value="1080p">1080p</option>
+            <option value="1440p">1440p</option>
+            <option value="4K">4K</option>
           </select>
         </div>
       )}
@@ -93,7 +94,7 @@ export default function App() {
         className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
       >
         <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-          <Zap size={14} className={displayTorch ? "text-yellow-400" : "text-white/40 group-hover:text-yellow-400/50"} /> Flashlight
+          <Zap size={14} className={displayTorch ? "text-yellow-400" : "text-white/40 group-hover:text-yellow-400/50"} /> <span className="landscape:hidden md:landscape:inline">Flashlight</span>
         </div>
         <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${displayTorch ? 'bg-pink-500' : 'bg-white/10'}`}>
           <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${displayTorch ? 'left-4' : 'left-0 bg-white/40'}`}></div>
@@ -106,7 +107,7 @@ export default function App() {
           className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group active:scale-95"
         >
           <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-            <Repeat size={14} className="text-blue-400 group-hover:rotate-180 transition-transform duration-500" /> Switch Lens
+            <Repeat size={14} className="text-blue-400 group-hover:rotate-180 transition-transform duration-500" /> <span className="landscape:hidden md:landscape:inline">Switch Lens</span>
           </div>
           <span className="text-[10px] text-white/40 group-hover:text-white/70 uppercase font-bold tracking-wider">
             {facingMode === 'environment' ? 'Back' : 'Front'}
@@ -124,7 +125,7 @@ export default function App() {
             className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
           >
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-              <Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40 group-hover:text-emerald-400/50"} /> Stay Awake
+              <Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40 group-hover:text-emerald-400/50"} /> <span className="landscape:hidden md:landscape:inline">Stay Awake</span>
             </div>
             <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${stayAwake ? 'bg-emerald-500' : 'bg-white/10'}`}>
               <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${stayAwake ? 'left-4' : 'left-0 bg-white/40'}`}></div>
@@ -136,9 +137,9 @@ export default function App() {
             className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
           >
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-              <Battery size={14} className="text-gray-400 group-hover:text-white" /> Battery Saver
+              <Battery size={14} className="text-gray-400 group-hover:text-white" /> <span className="landscape:hidden md:landscape:inline">Battery Saver</span>
             </div>
-            <span className="text-[10px] text-white/40 group-hover:text-white/70">OLED Blackout</span>
+            <span className="text-[10px] text-white/40 group-hover:text-white/70">OLED</span>
           </button>
 
           {isNativeApp ? (
@@ -147,7 +148,7 @@ export default function App() {
               className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
             >
               <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                <EyeOff size={14} className={runInBackground ? "text-purple-500" : "text-gray-400 group-hover:text-white"} /> Stealth Mode
+                <EyeOff size={14} className={runInBackground ? "text-purple-500" : "text-gray-400 group-hover:text-white"} /> <span className="landscape:hidden md:landscape:inline">Stealth</span>
               </div>
               <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${runInBackground ? 'bg-purple-500' : 'bg-white/10'}`}>
                 <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${runInBackground ? 'left-4' : 'left-0 bg-white/40'}`}></div>
@@ -159,10 +160,10 @@ export default function App() {
               title="Install app to unlock"
             >
               <div className="flex items-center gap-3 text-xs font-medium text-white/50">
-                <EyeOff size={14} /> Stealth Mode
+                <EyeOff size={14} /> <span className="landscape:hidden md:landscape:inline">Stealth</span>
               </div>
               <span className="flex items-center gap-1 text-[9px] text-pink-400 font-bold uppercase tracking-widest">
-                <Lock size={10} /> App Only
+                <Lock size={10} /> App
               </span>
             </button>
           )}
@@ -176,7 +177,7 @@ export default function App() {
             className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
           >
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-              <Monitor size={14} className="text-emerald-400" /> UI Rotation
+              <Monitor size={14} className="text-emerald-400" /> <span className="landscape:hidden md:landscape:inline">UI Rotation</span>
             </div>
             <span className="text-[10px] text-white/40 group-hover:text-white/70">{uiRotation}°</span>
           </button>
@@ -186,7 +187,7 @@ export default function App() {
             className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
           >
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-              <PictureInPicture size={14} className="text-blue-400" /> Pop-out Player
+              <PictureInPicture size={14} className="text-blue-400" /> <span className="landscape:hidden md:landscape:inline">Pop-out Player</span>
             </div>
             <span className="text-[10px] text-white/40 group-hover:text-white/70">PiP Mode</span>
           </button>
@@ -197,7 +198,7 @@ export default function App() {
               className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
             >
               <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-                <Maximize size={14} className="text-pink-400" /> Theater Mode
+                <Maximize size={14} className="text-pink-400" /> <span className="landscape:hidden md:landscape:inline">Theater Mode</span>
               </div>
               <span className="text-[10px] text-white/40 group-hover:text-white/70">Full Screen</span>
             </button>
@@ -209,7 +210,7 @@ export default function App() {
 
       <div className="flex flex-col gap-2 w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group">
         <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-          <Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Exposure
+          <Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> <span className="landscape:hidden md:landscape:inline">Exposure</span>
         </div>
         <input 
           type="range" 
@@ -227,8 +228,14 @@ export default function App() {
         onClick={executeExit}
         className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-red-500/10 text-red-400 transition-colors group"
       >
-        <LogOut size={14} /> <span className="text-xs font-bold">Terminate Connection</span>
+        <LogOut size={14} /> <span className="text-xs font-bold landscape:hidden md:landscape:inline">Terminate Connection</span>
       </button>
+    </>
+  );
+
+  const renderSettingsDropdown = () => (
+    <div className="absolute top-12 right-0 w-64 bg-black/90 backdrop-blur-3xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50 max-h-[80dvh] overflow-y-auto custom-scrollbar">
+      {renderSettingsContent()}
     </div>
   );
 
@@ -283,8 +290,8 @@ export default function App() {
           </div>
 
           {mode !== 'home' && (
-            // FIX: We hide the top header Exit button entirely in landscape mode before connection
-            <div className={`relative ml-auto ${mode === 'camera' && !isStreamActive ? 'landscape:hidden' : ''}`}>
+            // FIX: If we are in camera mode, we COMPLETELY hide the header dropdown controls in landscape
+            <div className={`relative ml-auto ${mode === 'camera' ? 'landscape:hidden' : ''}`}>
               {!isStreamActive ? (
                 <button 
                   onClick={executeExit}
@@ -354,7 +361,7 @@ export default function App() {
       {mode === 'camera' && (
         <div className="w-full max-w-5xl flex flex-col items-center gap-2 md:gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6 landscape:pb-0">
           
-          {/* TOP BANNER: Shown in Portrait ALWAYS. Shown in Landscape ONLY if connected. */}
+          {/* FIX 1: We completely destroy the top status banner when connected to save space */}
           {(!isConnected) && (
             <div className="shrink-0 w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-2 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] landscape:hidden">
               <span className="text-[10px] md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">
@@ -362,17 +369,10 @@ export default function App() {
               </span>
             </div>
           )}
-          {isConnected && (
-            <div className="shrink-0 w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-2 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-              <span className="text-[10px] md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">
-                <Radio size={14} className="animate-pulse shrink-0" /> <span className="truncate">{status}</span>
-              </span>
-            </div>
-          )}
 
-          <div className="w-full flex flex-col landscape:flex-row gap-3 md:gap-4 flex-1 min-h-0">
+          {/* FIX 4: If connected in landscape, we trigger justify-between to create the automatic 4% gap */}
+          <div className={`w-full flex flex-col landscape:flex-row flex-1 min-h-0 ${isConnected ? 'landscape:justify-between' : 'gap-3 md:gap-4'}`}>
             
-            {/* --- LEFT SIDE: SCANNER --- */}
             <div className={
               "flex-1 min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-3 md:p-6 landscape:p-3 flex flex-col gap-2 md:gap-4 landscape:gap-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
               (isConnected ? 'hidden' : 'flex landscape:w-[50%]')
@@ -386,7 +386,6 @@ export default function App() {
                  <span className="text-xs md:text-sm text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4">Activating Lens...</span>
               </div>
               
-              {/* These manual link tools hide in landscape because we move them to the right panel */}
               <div className="shrink-0 flex items-center gap-2 w-full my-0.5 opacity-50 landscape:hidden">
                 <div className="h-px bg-white/20 flex-1"></div>
                 <span className="text-[8px] md:text-[10px] text-white/50 uppercase tracking-widest font-bold">Override</span>
@@ -415,18 +414,15 @@ export default function App() {
               </div>
             </div>
 
-            {/* --- RIGHT SIDE: CONTROLS (Only visible in landscape before connection) --- */}
             {!isConnected && (
               <div className="hidden landscape:flex landscape:w-[50%] flex-col justify-center gap-3 md:gap-4">
                 
-                {/* 1. Status Banner */}
                 <div className="w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] shrink-0">
                   <span className="text-xs md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">
                     <Radio size={16} className="animate-pulse shrink-0" /> <span className="truncate">{status}</span>
                   </span>
                 </div>
 
-                {/* 2. Manual Override Block */}
                 <div className="w-full bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-2xl p-3 flex flex-col gap-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] shrink-0">
                   <div className="flex items-center gap-2 w-full opacity-50">
                     <div className="h-px bg-white/20 flex-1"></div>
@@ -450,7 +446,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* 3. Exit Button */}
                 <button 
                   onClick={executeExit}
                   className="flex items-center justify-center gap-2 w-full bg-red-500/10 backdrop-blur-xl px-4 py-3 rounded-2xl border border-red-500/20 hover:bg-red-500/20 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)] text-red-400 font-bold text-sm shrink-0"
@@ -460,11 +455,10 @@ export default function App() {
               </div>
             )}
 
-            {/* --- LIVE VIDEO CANVAS (Visible only when CONNECTED) --- */}
-            {/* FIX 1: Changed from 'hidden landscape:block' to just 'hidden' so it vanishes completely before connection */}
+            {/* FIX 2: Added landscape:flex-none landscape:w-[73%] */}
             <div className={
-              "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
-              (!isConnected ? 'hidden' : 'block')
+              "min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
+              (!isConnected ? 'hidden ' : 'flex-1 landscape:flex-none landscape:w-[73%] block ')
             }>
               <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
               <div className={
@@ -475,6 +469,13 @@ export default function App() {
                 Live
               </div>
             </div>
+
+            {/* FIX 3: Extended Sidebar for Settings Mode (23%) */}
+            {isConnected && (
+              <div className="hidden landscape:flex landscape:flex-col landscape:w-[23%] bg-[#0a0510]/80 backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-2 overflow-y-auto custom-scrollbar shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative z-30 gap-1">
+                {renderSettingsContent()}
+              </div>
+            )}
 
           </div>
         </div>
