@@ -234,12 +234,13 @@ export default function App() {
 
   return (
     <div className={
-      "h-[100dvh] w-full bg-[#0a0510] text-white font-sans antialiased " +
-      "p-3 md:p-6 flex flex-col items-center justify-start overflow-hidden selection:bg-pink-500/30 relative"
+      "fixed inset-0 w-full h-full bg-[#0a0510] text-white font-sans antialiased " +
+      "p-3 md:p-6 flex flex-col items-center justify-start overflow-hidden selection:bg-pink-500/30 z-0"
     }>
       
+      {/* SAFARI MEMORY FIX: Strict hardware locks on the root canvas to prevent white flashing and scroll bouncing */}
       <style>{`
-        html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+        html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; position: fixed; inset: 0; overflow: hidden; }
         #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
         #reader video { object-fit: cover !important; border-radius: 1rem !important; width: 100% !important; height: 100% !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
@@ -257,10 +258,11 @@ export default function App() {
         </div>
       )}
 
+      {/* GPU PANIC FIX: Added translate3d to force Safari to calculate blurs on the hardware GPU, preventing UI crashes */}
       {!isFullscreen && (
         <>
-          <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-pink-600/15 blur-[120px] pointer-events-none z-0 transition-opacity duration-1000"></div>
-          <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-600/15 blur-[120px] pointer-events-none z-0 transition-opacity duration-1000"></div>
+          <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-pink-600/15 blur-[80px] md:blur-[120px] pointer-events-none z-[-1] transition-opacity duration-1000" style={{ transform: 'translate3d(0,0,0)', WebkitTransform: 'translate3d(0,0,0)' }}></div>
+          <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-600/15 blur-[80px] md:blur-[120px] pointer-events-none z-[-1] transition-opacity duration-1000" style={{ transform: 'translate3d(0,0,0)', WebkitTransform: 'translate3d(0,0,0)' }}></div>
         </>
       )}
       
@@ -358,16 +360,15 @@ export default function App() {
             </span>
           </div>
 
-          {/* SAFARI BUG FIX: Replaced flex-1 min-h-0 with strict height guarantees so Safari WebKit doesn't crash on 0px canvas creation */}
           <div className={
-            "w-full flex-1 min-h-[350px] bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-4 md:p-6 flex flex-col gap-3 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
+            "w-full flex-1 min-h-[300px] bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-4 md:p-6 flex flex-col gap-3 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
             (isConnected ? 'hidden' : 'flex')
           }>
             <h4 className="shrink-0 text-base md:text-lg font-bold tracking-tight text-center text-white drop-shadow-md">Align Scanner to PC Screen</h4>
             
-            {/* SAFARI BUG FIX: Enforced strict h-[250px] shrink-0 so the box can never evaluate to 0 height */}
+            {/* CANVAS CRASH FIX: Enforced strict h-[200px]/h-[250px] shrink-0 so the box NEVER evaluates to 0 height during DOM paint */}
             <div id="reader" className={
-              "w-full h-[250px] md:h-[300px] shrink-0 overflow-hidden rounded-xl md:rounded-3xl bg-black/80 border border-white/10 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] " +
+              "w-full h-[200px] md:h-[250px] shrink-0 overflow-hidden rounded-xl md:rounded-3xl bg-black/80 border border-white/10 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] " +
               "text-white flex items-center justify-center relative"
             }>
                <span className="text-xs md:text-sm text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4">Activating Lens...</span>
@@ -403,7 +404,7 @@ export default function App() {
           </div>
 
           <div className={
-            "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
+            "w-full flex-1 min-h-[300px] bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
             (!isConnected ? 'hidden' : 'block')
           }>
             <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
@@ -456,7 +457,7 @@ export default function App() {
               className={
                 isFullscreen 
                   ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default" 
-                  : "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] "
+                  : "flex-1 min-h-[300px] bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] "
               }
               onMouseMove={handleFsInteraction}
               onClick={handleFsInteraction}
