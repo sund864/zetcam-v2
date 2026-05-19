@@ -27,7 +27,6 @@ export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fsControlsVisible, setFsControlsVisible] = useState(true);
 
-  // NEW: Hardware Detector to protect the PC layout from mobile-landscape hacks
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 1024);
   
   useEffect(() => {
@@ -330,21 +329,21 @@ export default function App() {
         </header>
       )}
 
+      {/* TWEAK 2: Home Screen Cards stack on ANY device if it is in Portrait mode */}
       {mode === 'home' && (
-        <div className={`w-full max-w-4xl flex flex-col sm:flex-row gap-4 md:gap-10 justify-center items-center flex-1 min-h-0 z-10 relative pb-2 md:pb-6 ${isMobileView ? 'landscape:flex-row' : ''}`}>
+        <div className="w-full max-w-4xl flex flex-col landscape:flex-row gap-4 md:gap-6 lg:gap-10 justify-center items-center flex-1 min-h-0 z-10 relative pb-2 md:pb-6">
           <button 
             onClick={() => setMode('camera')}
             className={
-              "w-full sm:flex-1 h-fit flex flex-col justify-center items-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-center " +
-              "transition-all duration-300 hover:border-pink-500/40 hover:bg-pink-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(236,72,153,0.25)] group relative overflow-hidden " +
-              (isMobileView ? "landscape:p-4" : "")
+              "w-full max-w-md landscape:max-w-none landscape:flex-1 h-fit flex flex-col justify-center items-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 landscape:p-6 text-center " +
+              "transition-all duration-300 hover:border-pink-500/40 hover:bg-pink-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(236,72,153,0.25)] group relative overflow-hidden"
             }
           >
             <div className={`mx-auto w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br from-pink-500/20 to-pink-500/5 flex items-center justify-center text-pink-400 mb-4 md:mb-6 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-300 border border-pink-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] ${isMobileView ? 'landscape:mb-2' : ''}`}>
               <Camera className="w-6 h-6 md:w-8 md:h-8" />
             </div>
             <h3 className="text-xl md:text-2xl font-bold mb-2 tracking-tight group-hover:text-pink-100 transition-colors">I am the Camera</h3>
-            <p className="text-xs md:text-sm text-white/50 leading-relaxed font-light hidden sm:block">Turn this phone into a high-fidelity streaming lens. Auto-launches the secure QR scanner.</p>
+            <p className="text-xs md:text-sm text-white/50 leading-relaxed font-light hidden sm:block">Turn this device into a high-fidelity streaming lens. Auto-launches the secure QR scanner.</p>
             <div className="absolute -bottom-6 -right-6 text-white/[0.02] group-hover:text-pink-500/[0.05] transition-colors duration-500">
               <Scan size={140} />
             </div>
@@ -353,9 +352,8 @@ export default function App() {
           <button 
             onClick={() => setMode('receiver')}
             className={
-              "w-full sm:flex-1 h-fit flex flex-col justify-center items-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 text-center " +
-              "transition-all duration-300 hover:border-purple-500/40 hover:bg-purple-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.25)] group relative overflow-hidden " +
-              (isMobileView ? "landscape:p-4" : "")
+              "w-full max-w-md landscape:max-w-none landscape:flex-1 h-fit flex flex-col justify-center items-center min-h-0 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-8 landscape:p-6 text-center " +
+              "transition-all duration-300 hover:border-purple-500/40 hover:bg-purple-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.25)] group relative overflow-hidden"
             }
           >
             <div className={`mx-auto w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center text-purple-400 mb-4 md:mb-6 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-300 border border-purple-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] ${isMobileView ? 'landscape:mb-2' : ''}`}>
@@ -370,25 +368,26 @@ export default function App() {
         </div>
       )}
 
-      {/* --- CAMERA MODE (Includes Mobile Pro Dashboard Hacks) --- */}
+      {/* --- CAMERA MODE --- */}
       {mode === 'camera' && (
         <div className={`w-full max-w-5xl flex flex-col items-center gap-2 md:gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6 ${isMobileView ? 'landscape:pb-0' : ''}`}>
           
-          {(!isConnected) && (
-            <div className={`shrink-0 w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-2 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] ${isMobileView ? 'landscape:hidden' : ''}`}>
+          {/* TWEAK 1: Hide this top banner on desktop entirely so the Pink Placeholder can do the talking */}
+          {(!isConnected && isMobileView) && (
+            <div className="shrink-0 w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-2 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] landscape:hidden">
               <span className="text-[10px] md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">
                 <Radio size={14} className="animate-pulse shrink-0" /> <span className="truncate">{status}</span>
               </span>
             </div>
           )}
 
-          <div className={`w-full flex flex-col flex-1 min-h-0 ${isMobileView ? (isConnected ? 'landscape:flex-row landscape:justify-between' : 'landscape:flex-row gap-3 md:gap-4') : 'gap-3 md:gap-4'}`}>
+          <div className={`w-full flex flex-col landscape:flex-row flex-1 min-h-0 ${isConnected && isMobileView ? 'landscape:justify-between' : 'gap-3 md:gap-4'}`}>
             
             {/* Camera Left Side (Scanner) */}
             <div className={
               "flex-1 min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-3 md:p-6 flex flex-col gap-2 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
-              (isConnected && isMobileView ? 'hidden' : isConnected && !isMobileView ? 'hidden' : 'flex ') +
-              (isMobileView ? 'landscape:p-3 landscape:gap-2 landscape:w-[50%]' : '')
+              (isConnected ? 'hidden ' : 'flex ') +
+              (isMobileView ? 'landscape:p-3 landscape:gap-2 landscape:w-[50%]' : 'landscape:w-[40%]') // PC landscape allocates 40% for scanner
             }>
               <h4 className={`shrink-0 text-sm md:text-lg font-bold tracking-tight text-center text-white drop-shadow-md ${isMobileView ? 'landscape:hidden' : ''}`}>Align Scanner to PC</h4>
               
@@ -421,7 +420,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Camera Right Side (Pre-connection Controls - ONLY on mobile landscape) */}
+            {/* Mobile-Only Pre-connection Controls Panel */}
             {!isConnected && isMobileView && (
               <div className="hidden landscape:flex landscape:w-[50%] flex-col justify-center gap-3 md:gap-4">
                 <div className="w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] shrink-0">
@@ -460,23 +459,44 @@ export default function App() {
               </div>
             )}
 
-            {/* Camera Video Player */}
+            {/* TWEAK 1: Desktop Video Card with Pink "Awaiting Stream" Placeholder */}
             <div className={
               "min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
-              (!isConnected ? 'hidden ' : 'block ') +
+              (!isConnected && isMobileView ? 'hidden ' : 'block ') +
               (isMobileView ? 'landscape:flex-none landscape:w-[73%] ' : 'flex-1 ')
             }>
-              <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-              <div className={
-                "absolute top-4 right-4 bg-black/50 backdrop-blur-xl border border-white/10 text-emerald-400 text-[10px] md:text-[11px] font-bold " +
-                "uppercase px-3 py-1.5 md:py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)]"
-              }>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span>
-                Live
-              </div>
+              
+              {/* Only show actual video feed when connected */}
+              <video ref={myVideoRef} autoPlay playsInline muted className={`w-full h-full object-cover ${!isConnected ? 'hidden' : 'block'}`} />
+              
+              {/* Desktop/Tablet Offline Placeholder (Pink Theme) */}
+              {!isConnected && !isMobileView && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-4 md:gap-6 text-center p-4 md:p-8 z-10">
+                  <div className="shrink-0 p-4 md:p-6 bg-pink-500/10 rounded-full border border-pink-500/30 text-pink-400 animate-pulse shadow-[0_0_40px_rgba(236,72,153,0.3)]">
+                    <Camera className="w-6 h-6 md:w-12 md:h-12 drop-shadow-[0_0_10px_rgba(236,72,153,0.8)]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-base md:text-2xl font-bold tracking-tight drop-shadow-md">Awaiting PC Connection</h4>
+                    <p className="hidden md:block text-base text-white/60 max-w-md mx-auto leading-relaxed font-light mt-2">
+                      Point this camera at the target matrix on the receiving device to initiate the secure video link.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Connected Live Badge */}
+              {isConnected && (
+                <div className={
+                  "absolute top-4 right-4 bg-black/50 backdrop-blur-xl border border-white/10 text-emerald-400 text-[10px] md:text-[11px] font-bold " +
+                  "uppercase px-3 py-1.5 md:py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+                }>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span>
+                  Live
+                </div>
+              )}
             </div>
 
-            {/* Camera Right Side Settings Sidebar (ONLY on mobile landscape when connected) */}
+            {/* Mobile Extended Right Side Settings Sidebar */}
             {isConnected && isMobileView && (
               <div className="hidden landscape:flex landscape:flex-col landscape:w-[23%] bg-[#0a0510]/80 backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-2 overflow-y-auto custom-scrollbar shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative z-30 gap-1">
                 {renderSettingsContent()}
@@ -487,7 +507,7 @@ export default function App() {
         </div>
       )}
 
-      {/* --- RECEIVER MODE (Pristine Desktop Layout - NO mobile landscape hacks) --- */}
+      {/* --- RECEIVER MODE --- */}
       {mode === 'receiver' && (
         <div className={
           "w-full flex flex-col items-center gap-4 z-10 relative flex-1 min-h-0 pb-2 md:pb-6 " +
