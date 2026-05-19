@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Peer from 'peerjs';
 import { Html5Qrcode } from 'html5-qrcode'; 
+import { Capacitor } from '@capacitor/core'; // NEW: Platform Detector
 
 const VIDEO_RESOLUTIONS = {
   '720p': { width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -30,9 +31,12 @@ export function useZetcam() {
   const [remoteTorch, setRemoteTorch] = useState(false);
   const [remoteExposure, setRemoteExposure] = useState(50);
 
-  // ADVANCED OPTIONS
   const [stayAwake, setStayAwake] = useState(false);
   const [batterySaver, setBatterySaver] = useState(false);
+  const [runInBackground, setRunInBackground] = useState(false); // NEW: Native Stealth State
+
+  // Detect if we are running as an installed native app
+  const isNativeApp = Capacitor.isNativePlatform();
 
   const myVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -85,6 +89,11 @@ export function useZetcam() {
       try { await wakeLockRef.current.release(); } catch (e) {}
       wakeLockRef.current = null;
     }
+    
+    // Shut down native background service if active
+    if (runInBackground && window.cordova?.plugins?.backgroundMode) {
+      window.cordova.plugins.backgroundMode.disable();
+    }
 
     currentCallRef.current = null;
     setIsConnected(false);
@@ -99,6 +108,7 @@ export function useZetcam() {
     
     setStayAwake(false);
     setBatterySaver(false);
+    setRunInBackground(false);
     
     setMode('home');
     setTimeout(() => { isDisconnectingRef.current = false; }, 500);
@@ -230,17 +240,47 @@ export function useZetcam() {
     }
   };
 
-  // REWIRED: Battery Saver now handles the OLED blackout feature directly
   const toggleBatterySaver = async () => {
     const newState = !batterySaver;
     setBatterySaver(newState);
-    
-    // Auto-enable WakeLock when black screen is on so the OS doesn't go to sleep
     if (newState && !stayAwake && 'wakeLock' in navigator) {
       try {
         wakeLockRef.current = await navigator.wakeLock.request('screen');
         setStayAwake(true);
       } catch (e) {}
+    }
+  };
+
+  // NEW: Native Android Background Execution
+  const toggleBackgroundMode = () => {
+    if (!isNativeApp) {
+      setStatus('System Error: App installation required for background streams.');
+      return;
+    }
+    
+    if (window.cordova && window.cordova.plugins && window.cordova.plugins.backgroundMode) {
+      const bgMode = window.cordova.plugins.backgroundMode;
+      const newState = !runInBackground;
+      
+      if (newState) {
+        // Configure the native Android push notification
+        bgMode.setDefaults({
+            title: 'ZetNet Engine Active',
+            text: 'Camera is securely streaming in the background',
+            resume: true,
+            hidden: false,
+            color: 'EC4899' // Pink branding
+        });
+        bgMode.enable();
+        setRunInBackground(true);
+        setStatus('Background Mode Authorized');
+      } else {
+        bgMode.disable();
+        setRunInBackground(false);
+        setStatus('Background Mode Disabled');
+      }
+    } else {
+      setStatus('System Error: Native APIs failed to mount.');
     }
   };
 
@@ -449,6 +489,7 @@ export function useZetcam() {
     togglePiP,
     videoQuality, changeQuality,
     stayAwake, toggleStayAwake,
-    batterySaver, toggleBatterySaver
+    batterySaver, toggleBatterySaver,
+    isNativeApp, runInBackground, toggleBackgroundMode // NEW
   };
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw, Scan, Settings, Zap, Repeat, Sun, LogOut, Maximize, Minimize, PictureInPicture, Video, Smartphone, Battery } from 'lucide-react';
+import { Camera, Monitor, ArrowLeft, Radio, CheckCircle, RefreshCw, Scan, Settings, Zap, Repeat, Sun, LogOut, Maximize, Minimize, PictureInPicture, Video, Smartphone, Battery, EyeOff, Lock } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react'; 
 import { useZetcam } from './useZetcam';
 
@@ -17,7 +17,8 @@ export default function App() {
     togglePiP,
     videoQuality, changeQuality,
     stayAwake, toggleStayAwake,
-    batterySaver, toggleBatterySaver
+    batterySaver, toggleBatterySaver,
+    isNativeApp, runInBackground, toggleBackgroundMode // NEW
   } = useZetcam();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -139,6 +140,33 @@ export default function App() {
             </div>
             <span className="text-[10px] text-white/40 group-hover:text-white/70">OLED Blackout</span>
           </button>
+
+          {/* DYNAMIC PLATFORM RENDER: Locks out web users from native features */}
+          {isNativeApp ? (
+            <button 
+              onClick={() => { setIsSettingsOpen(false); toggleBackgroundMode(); }}
+              className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+            >
+              <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                <EyeOff size={14} className={runInBackground ? "text-purple-500" : "text-gray-400 group-hover:text-white"} /> Stealth Mode
+              </div>
+              <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${runInBackground ? 'bg-purple-500' : 'bg-white/10'}`}>
+                <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${runInBackground ? 'left-4' : 'left-0 bg-white/40'}`}></div>
+              </div>
+            </button>
+          ) : (
+            <button 
+              className="flex items-center justify-between w-full px-3 py-3 rounded-xl cursor-not-allowed opacity-50 bg-white/5"
+              title="Install app to unlock"
+            >
+              <div className="flex items-center gap-3 text-xs font-medium text-white/50">
+                <EyeOff size={14} /> Stealth Mode
+              </div>
+              <span className="flex items-center gap-1 text-[9px] text-pink-400 font-bold uppercase tracking-widest">
+                <Lock size={10} /> App Only
+              </span>
+            </button>
+          )}
         </>
       )}
 
@@ -219,7 +247,6 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
       `}</style>
 
-      {/* OLED BLACKOUT OVERLAY */}
       {batterySaver && (
         <div 
           className="fixed inset-0 bg-black z-[999] flex flex-col items-center justify-center text-white/10 cursor-pointer"

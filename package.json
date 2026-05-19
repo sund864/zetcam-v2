@@ -11,6 +11,10 @@
     "deploy": "vite build && gh-pages -d dist"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "cordova-plugin-background-mode": "^0.7.3",
+    "cordova-plugin-device": "^3.0.0",
     "html5-qrcode": "^2.3.8",
     "lucide-react": "^1.16.0",
     "peerjs": "^1.5.5",
@@ -20,6 +24,7 @@
     "react-qr-code": "^2.0.21"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.3.4",
     "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
