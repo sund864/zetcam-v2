@@ -358,14 +358,16 @@ export default function App() {
             </span>
           </div>
 
+          {/* SAFARI BUG FIX: Replaced flex-1 min-h-0 with strict height guarantees so Safari WebKit doesn't crash on 0px canvas creation */}
           <div className={
-            "w-full flex-1 min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-4 md:p-6 flex flex-col gap-3 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
+            "w-full flex-1 min-h-[350px] bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-4 md:p-6 flex flex-col gap-3 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
             (isConnected ? 'hidden' : 'flex')
           }>
             <h4 className="shrink-0 text-base md:text-lg font-bold tracking-tight text-center text-white drop-shadow-md">Align Scanner to PC Screen</h4>
             
+            {/* SAFARI BUG FIX: Enforced strict h-[250px] shrink-0 so the box can never evaluate to 0 height */}
             <div id="reader" className={
-              "flex-1 min-h-0 overflow-hidden rounded-xl md:rounded-3xl bg-black/80 border border-white/10 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] " +
+              "w-full h-[250px] md:h-[300px] shrink-0 overflow-hidden rounded-xl md:rounded-3xl bg-black/80 border border-white/10 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] " +
               "text-white flex items-center justify-center relative"
             }>
                <span className="text-xs md:text-sm text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4">Activating Lens...</span>
