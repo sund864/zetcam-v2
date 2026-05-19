@@ -253,19 +253,16 @@ export default function App() {
   );
 
   return (
-    // FIX: Replaced "h-[100dvh] w-full relative" with "absolute inset-0" to lock corners and bypass Safari's math delay
+    // FIX: Reverted to standard min-h-screen width-full layout to prevent Safari from tearing the document background
     <div className={
-      "absolute inset-0 bg-[#0a0510] text-white font-sans antialiased " +
-      "p-3 md:p-6 flex flex-col items-center justify-start overflow-hidden selection:bg-pink-500/30 " +
+      "min-h-[100dvh] w-full bg-[#0a0510] text-white font-sans antialiased " +
+      "p-3 md:p-6 flex flex-col items-center justify-start overflow-hidden selection:bg-pink-500/30 relative " +
       (isMobileView ? "landscape:p-2 landscape:md:p-4" : "")
     }>
       
-      {/* FIX: Added position: fixed to html, body, and root to prevent Safari from bouncing during orientation changes */}
+      {/* FIX: Cleaned up the toxic CSS that destroyed the QR Scanner Library */}
       <style>{`
-        html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; position: fixed; inset: 0; }
-        #reader { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
-        #reader video { object-fit: cover !important; border-radius: 1rem !important; width: 100% !important; height: 100% !important; max-width: 100%; max-height: 100%; position: absolute; inset: 0; }
-        #reader canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 1rem !important; pointer-events: none; }
+        html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; overflow-x: hidden; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
       `}</style>
@@ -400,9 +397,9 @@ export default function App() {
             }>
               <h4 className={`shrink-0 text-sm md:text-lg font-bold tracking-tight text-center text-white drop-shadow-md ${isMobileView ? 'landscape:hidden' : ''}`}>Align Scanner to PC</h4>
               
-              <div className="flex-1 min-h-[120px] relative w-full h-full bg-black/80 border border-white/10 rounded-xl md:rounded-3xl shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] overflow-hidden">
+              <div className="flex-1 min-h-[120px] relative w-full h-full bg-black/80 border border-white/10 rounded-xl md:rounded-3xl shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] overflow-hidden flex items-center justify-center">
                 <span className="text-xs md:text-sm text-white/40 absolute inset-0 flex items-center justify-center z-0 font-medium tracking-widest uppercase text-center px-4">Activating Lens...</span>
-                <div id="reader" className="absolute inset-0 w-full h-full z-10"></div>
+                <div id="reader" className="w-full h-full z-10 flex items-center justify-center"></div>
               </div>
               
               <div className={`shrink-0 flex items-center gap-2 w-full my-0.5 opacity-50 ${isMobileView ? 'landscape:hidden' : ''}`}>

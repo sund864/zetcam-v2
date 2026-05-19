@@ -47,6 +47,21 @@ export function useZetcam() {
   
   const isDisconnectingRef = useRef(false); 
 
+  // BUG FIX: Strict hardware release function
+  const stopScanner = async () => {
+    if (scannerInstanceRef.current) {
+      try {
+        if (scannerInstanceRef.current.isScanning) {
+          await scannerInstanceRef.current.stop();
+        }
+        scannerInstanceRef.current.clear();
+      } catch (e) {
+        console.error("Scanner cleanup error:", e);
+      }
+      scannerInstanceRef.current = null;
+    }
+  };
+
   const handleGoHome = async () => {
     if (isDisconnectingRef.current) return;
     isDisconnectingRef.current = true;
@@ -64,15 +79,7 @@ export function useZetcam() {
       remoteVideoRef.current.srcObject = null;
     }
 
-    if (scannerInstanceRef.current) {
-      try {
-        if (scannerInstanceRef.current.isScanning) {
-          await scannerInstanceRef.current.stop();
-        }
-        scannerInstanceRef.current.clear();
-      } catch (e) {}
-      scannerInstanceRef.current = null;
-    }
+    await stopScanner();
 
     if (dataConnRef.current) {
       dataConnRef.current.close();
@@ -392,19 +399,15 @@ export function useZetcam() {
               selectedCameraId,
               { fps: 10, qrbox: { width: 220, height: 220 } },
               (decodedText) => {
-                html5QrCode.stop().then(() => {
-                  scannerInstanceRef.current.clear();
-                  scannerInstanceRef.current = null;
-                  handleConnectToPC(decodedText);
-                }).catch(() => {
-                  scannerInstanceRef.current = null;
+                // BUG FIX: Graceful handoff via strictly awaited async release
+                stopScanner().then(() => {
                   handleConnectToPC(decodedText);
                 });
               },
               () => {} 
             ).then(() => {
               if (!isActive) {
-                html5QrCode.stop().catch(()=>{});
+                stopScanner();
                 return;
               }
               setStatus("Scanner Active. Point at PC.");
@@ -428,7 +431,13 @@ export function useZetcam() {
   }, [mode]);
 
   const handleConnectToPC = async (targetPcId) => {
-    setStatus('Accessing camera hardware...');
+    setStatus('Releasing scanner hardware...');
+    
+    // BUG FIX: Ensure the scanner is 100% dead before asking for the camera again
+    await stopScanner();
+    await new Promise(res => setTimeout(res, 500)); // Give OS 500ms to free the camera driver
+    
+    setStatus('Accessing live stream hardware...');
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setStatus('System Error: Browser blocked camera access. HTTPS required.');
       return;
@@ -473,13 +482,6 @@ export function useZetcam() {
     if (!remoteId.trim()) {
       setStatus("Please enter a valid PC ID.");
       return;
-    }
-    if (scannerInstanceRef.current && scannerInstanceRef.current.isScanning) {
-      try {
-        await scannerInstanceRef.current.stop();
-        scannerInstanceRef.current.clear();
-      } catch (e) {}
-      scannerInstanceRef.current = null;
     }
     handleConnectToPC(remoteId.trim());
   };
