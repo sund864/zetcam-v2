@@ -47,21 +47,6 @@ export function useZetcam() {
   
   const isDisconnectingRef = useRef(false); 
 
-  // BUG FIX: Strict hardware release function
-  const stopScanner = async () => {
-    if (scannerInstanceRef.current) {
-      try {
-        if (scannerInstanceRef.current.isScanning) {
-          await scannerInstanceRef.current.stop();
-        }
-        scannerInstanceRef.current.clear();
-      } catch (e) {
-        console.error("Scanner cleanup error:", e);
-      }
-      scannerInstanceRef.current = null;
-    }
-  };
-
   const handleGoHome = async () => {
     if (isDisconnectingRef.current) return;
     isDisconnectingRef.current = true;
@@ -79,7 +64,15 @@ export function useZetcam() {
       remoteVideoRef.current.srcObject = null;
     }
 
-    await stopScanner();
+    if (scannerInstanceRef.current) {
+      try {
+        if (scannerInstanceRef.current.isScanning) {
+          await scannerInstanceRef.current.stop();
+        }
+        scannerInstanceRef.current.clear();
+      } catch (e) {}
+      scannerInstanceRef.current = null;
+    }
 
     if (dataConnRef.current) {
       dataConnRef.current.close();
@@ -96,10 +89,6 @@ export function useZetcam() {
       wakeLockRef.current = null;
     }
     
-    if (batterySaver && window.cordova?.plugins?.brightness) {
-      window.cordova.plugins.brightness.setBrightness(-1, null, null);
-    }
-
     if (runInBackground && window.cordova?.plugins?.backgroundMode) {
       window.cordova.plugins.backgroundMode.disable();
     }
@@ -252,21 +241,11 @@ export function useZetcam() {
   const toggleBatterySaver = async () => {
     const newState = !batterySaver;
     setBatterySaver(newState);
-    
-    if (newState) {
-      if (!stayAwake && 'wakeLock' in navigator) {
-        try {
-          wakeLockRef.current = await navigator.wakeLock.request('screen');
-          setStayAwake(true);
-        } catch (e) {}
-      }
-      if (window.cordova?.plugins?.brightness) {
-        window.cordova.plugins.brightness.setBrightness(0.01, null, null);
-      }
-    } else {
-      if (window.cordova?.plugins?.brightness) {
-        window.cordova.plugins.brightness.setBrightness(-1, null, null);
-      }
+    if (newState && !stayAwake && 'wakeLock' in navigator) {
+      try {
+        wakeLockRef.current = await navigator.wakeLock.request('screen');
+        setStayAwake(true);
+      } catch (e) {}
     }
   };
 
@@ -346,7 +325,9 @@ export function useZetcam() {
         if (!isActive) return;
         setIsConnected(true);
         setStatus('Streaming Live to PC!');
-        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remoteStream;
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = remoteStream;
+        }
       });
 
       call.on('close', () => {
@@ -399,15 +380,19 @@ export function useZetcam() {
               selectedCameraId,
               { fps: 10, qrbox: { width: 220, height: 220 } },
               (decodedText) => {
-                // BUG FIX: Graceful handoff via strictly awaited async release
-                stopScanner().then(() => {
+                html5QrCode.stop().then(() => {
+                  scannerInstanceRef.current.clear();
+                  scannerInstanceRef.current = null;
+                  handleConnectToPC(decodedText);
+                }).catch(() => {
+                  scannerInstanceRef.current = null;
                   handleConnectToPC(decodedText);
                 });
               },
               () => {} 
             ).then(() => {
               if (!isActive) {
-                stopScanner();
+                html5QrCode.stop().catch(()=>{});
                 return;
               }
               setStatus("Scanner Active. Point at PC.");
@@ -431,13 +416,7 @@ export function useZetcam() {
   }, [mode]);
 
   const handleConnectToPC = async (targetPcId) => {
-    setStatus('Releasing scanner hardware...');
-    
-    // BUG FIX: Ensure the scanner is 100% dead before asking for the camera again
-    await stopScanner();
-    await new Promise(res => setTimeout(res, 500)); // Give OS 500ms to free the camera driver
-    
-    setStatus('Accessing live stream hardware...');
+    setStatus('Accessing camera hardware...');
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setStatus('System Error: Browser blocked camera access. HTTPS required.');
       return;
@@ -483,6 +462,13 @@ export function useZetcam() {
       setStatus("Please enter a valid PC ID.");
       return;
     }
+    if (scannerInstanceRef.current && scannerInstanceRef.current.isScanning) {
+      try {
+        await scannerInstanceRef.current.stop();
+        scannerInstanceRef.current.clear();
+      } catch (e) {}
+      scannerInstanceRef.current = null;
+    }
     handleConnectToPC(remoteId.trim());
   };
 
@@ -500,6 +486,6 @@ export function useZetcam() {
     videoQuality, changeQuality,
     stayAwake, toggleStayAwake,
     batterySaver, toggleBatterySaver,
-    isNativeApp, runInBackground, toggleBackgroundMode
+    isNativeApp, runInBackground, toggleBackgroundMode 
   };
 }
