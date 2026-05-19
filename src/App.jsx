@@ -259,10 +259,12 @@ export default function App() {
       (isMobileView ? "landscape:p-2 landscape:md:p-4" : "")
     }>
       
+      {/* BUG FIX: Restored strict object-fit rules and isolated the canvas to stop Safari layout panics */}
       <style>{`
         html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-        #reader { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        #reader video { border-radius: 1rem !important; width: 100% !important; height: 100% !important; }
+        #reader { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+        #reader video { object-fit: cover !important; border-radius: 1rem !important; width: 100% !important; height: 100% !important; max-width: 100%; max-height: 100%; position: absolute; inset: 0; }
+        #reader canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 1rem !important; pointer-events: none; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
       `}</style>
@@ -391,17 +393,15 @@ export default function App() {
             
             {/* Camera Left Side (Scanner) */}
             <div className={
-              "flex-1 min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-3 md:p-6 flex flex-col gap-2 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
+              "flex-1 min-h-[120px] bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-3 md:p-6 flex flex-col gap-2 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
               (isConnected && isMobileView ? 'hidden' : isConnected && !isMobileView ? 'hidden' : 'flex ') +
               (isMobileView ? 'landscape:p-3 landscape:gap-2 landscape:w-[50%]' : 'landscape:w-[40%]') 
             }>
               <h4 className={`shrink-0 text-sm md:text-lg font-bold tracking-tight text-center text-white drop-shadow-md ${isMobileView ? 'landscape:hidden' : ''}`}>Align Scanner to PC</h4>
               
-              <div id="reader" className={
-                "flex-1 min-h-[120px] overflow-hidden rounded-xl md:rounded-3xl bg-black/80 border border-white/10 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] " +
-                "text-white flex items-center justify-center relative"
-              }>
-                 <span className="text-xs md:text-sm text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4">Activating Lens...</span>
+              <div className="flex-1 min-h-[120px] relative w-full h-full bg-black/80 border border-white/10 rounded-xl md:rounded-3xl shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] overflow-hidden">
+                <span className="text-xs md:text-sm text-white/40 absolute inset-0 flex items-center justify-center z-0 font-medium tracking-widest uppercase text-center px-4">Activating Lens...</span>
+                <div id="reader" className="absolute inset-0 w-full h-full z-10"></div>
               </div>
               
               <div className={`shrink-0 flex items-center gap-2 w-full my-0.5 opacity-50 ${isMobileView ? 'landscape:hidden' : ''}`}>
@@ -465,7 +465,7 @@ export default function App() {
               </div>
             )}
 
-            {/* NEW: SHRINK-WRAPPED CANVAS */}
+            {/* Desktop Video Card with Pink "Awaiting Stream" Placeholder OR Shrink-Wrapped Video */}
             <div className={
               "flex-1 min-h-0 flex items-center justify-center " +
               (!isConnected && isMobileView ? 'hidden ' : 'flex ') +
@@ -572,7 +572,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* NEW: SHRINK-WRAPPED CANVAS FOR RECEIVER */}
+              {/* SHRINK-WRAPPED CANVAS FOR RECEIVER */}
               {isConnected && (
                 <div 
                   className="relative w-fit h-fit max-w-full max-h-full flex items-center justify-center rounded-[24px] md:rounded-[32px] shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 bg-black overflow-hidden"
