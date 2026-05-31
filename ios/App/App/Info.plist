@@ -47,5 +47,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>ZetNet requires camera access to stream live video to your PC.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>ZetNet requires microphone access for WebRTC connections.</string>
 </dict>
 </plist>
