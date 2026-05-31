@@ -13,7 +13,6 @@
     "@capacitor/core": "^8.3.4",
     "@capacitor/ios": "^8.3.4",
     "@capacitor/splash-screen": "^8.0.1",
-    "cordova-plugin-background-mode": "^0.7.3",
     "cordova-plugin-brightness": "^0.2.0",
     "cordova-plugin-device": "^3.0.0",
     "html5-qrcode": "^2.3.8",
