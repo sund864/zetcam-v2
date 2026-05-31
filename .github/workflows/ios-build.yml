@@ -30,8 +30,8 @@ jobs:
       - name: Build Unsigned iOS App
         run: |
           cd ios/App
-          # Compile the app without requiring an Apple Developer Certificate
-          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGNING_IDENTITY=""
+          # Tell Xcode to use the modern .xcodeproj file instead of the old workspace
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release -sdk iphoneos build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGNING_IDENTITY=""
 
       - name: Package into IPA
         run: |
