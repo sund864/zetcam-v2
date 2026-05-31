@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  background-color: #0a0510;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0a0510;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevents pull-to-refresh bouncing on mobile */
+  overscroll-behavior-y: none; 
+}
+
+/* Ensure the absolute root div takes full height */
+#root {
+  width: 100%;
+  height: 100%;
+}

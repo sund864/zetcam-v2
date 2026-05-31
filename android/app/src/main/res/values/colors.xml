@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Standard Android System Colors -->
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- ZetNet v2.0.0 Branding (The missing pieces) -->
+    <color name="zetnet_bg">#0a0510</color>
+    <color name="zetnet_bg_dark">#050208</color>
+    <color name="zetnet_accent">#ec4899</color>
+    <color name="zetnet_purple">#a855f7</color>
+    <color name="zetnet_blue">#3b82f6</color>
+    <color name="zetnet_black">#000000</color>
+    <color name="zetnet_white">#ffffff</color>
+    <color name="zetnet_gray">#1f2937</color>
+    <color name="zetnet_text">#f3f4f6</color>
+    <color name="zetnet_surface">#111827</color>
+</resources>

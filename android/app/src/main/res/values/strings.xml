@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Zetcam Pro</string>
+    <string name="title_activity_main">Zetcam Pro</string>
+    <string name="package_name">com.zetnet.zetcam</string>
+    <string name="custom_url_scheme">com.zetnet.zetcam</string>
+</resources>

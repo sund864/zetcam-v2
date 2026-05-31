@@ -1,0 +1,16 @@
+{
+  "appId": "com.zetnet.zetcampro",
+  "appName": "Zetcam Pro",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "backgroundColor": "#0a0510",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "launchAutoHide": false,
+      "backgroundColor": "#0a0510",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "FIT_CENTER" 
+    }
+  }
+}
