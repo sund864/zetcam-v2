@@ -1,0 +1,47 @@
+name: iOS Unsigned Build
+
+on:
+  push:
+    branches: [ "main", "v2.0-stable" ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Web Assets
+        run: npm run build
+
+      - name: Sync Capacitor iOS
+        run: npx cap sync ios
+
+      - name: Build Unsigned iOS App
+        run: |
+          cd ios/App
+          # Compile the app without requiring an Apple Developer Certificate
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -sdk iphoneos build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGNING_IDENTITY=""
+
+      - name: Package into IPA
+        run: |
+          # Convert the raw Xcode build into an installable .ipa file
+          mkdir -p Payload
+          cp -R ios/App/build/Release-iphoneos/App.app Payload/
+          zip -qr ZetNet-iOS.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ZetNet-iOS-App
+          path: ZetNet-iOS.ipa
