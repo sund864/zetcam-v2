@@ -300,21 +300,21 @@ export default function App() {
 
             /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
             .home-logo-text {
-              font-size: 2.5rem !important; /* Adjusted to fit nicely into yellow box */
+              font-size: 2.5rem !important; 
               line-height: 1.2 !important;
-              margin-top: 2rem !important; /* Pulled up closer to the top */
+              margin-top: 2rem !important; 
               margin-bottom: 0 !important;
             }
             .home-tile-container {
-              max-width: 85% !important; /* Forces width to match green box */
+              max-width: 70% !important; /* Decreased from 85% to shrink horizontal length */
               width: 100% !important;
-              gap: 2rem !important; /* Cleaner spacing */
-              margin-top: -10vh !important; /* Pulls the block up from the bottom */
+              gap: 4.5rem !important; /* Doubled gap to push the bottom card down */
+              margin-top: -5vh !important; 
             }
             .home-tile {
               width: 100% !important;
               max-width: 100% !important;
-              min-height: 220px !important; /* Deep wide rectangle like green box */
+              min-height: 220px !important; 
               border-radius: 32px !important;
               display: flex !important;
               flex-direction: column !important;
