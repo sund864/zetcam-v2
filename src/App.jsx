@@ -379,20 +379,26 @@ export default function App() {
               z-index: 50 !important;
               background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
             }
+            
+            /* AUTO DISTRIBUTE HORIZONTAL SPACING */
+            .landscape-disconnected-container {
+               justify-content: space-evenly !important;
+               gap: 0 !important; 
+            }
 
-            /* SQUARE CARDS FIX: Shrunk perfectly centered tiles */
+            /* SQUARE CARDS FIX: Centered balanced tiles */
             .left-card-tile, .right-card-tile {
               width: 100% !important;
-              max-width: 300px !important; /* Shrunk from 340px */
-              height: 300px !important;    /* Shrunk to maintain perfect square */
+              max-width: 320px !important; 
+              height: 320px !important;    
               aspect-ratio: 1 / 1 !important;
-              margin: auto 0 !important; /* Let justify-evenly handle the horizontal spread natively */
+              margin: auto 0 !important; 
               display: flex !important;
               flex-direction: column !important;
               justify-content: center !important;
               align-items: center !important;
-              gap: 1rem !important;
-              padding: 1.25rem !important;
+              gap: 1.5rem !important;
+              padding: 1.5rem !important;
             }
 
             /* Keep QR code elements proportional */
@@ -520,7 +526,7 @@ export default function App() {
         <div className={
           "w-full z-10 relative " +
           (isNativeApp && isConnected ? "landscape:max-w-none landscape:flex landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center flex flex-col items-center gap-3 md:gap-4 " : "") +
-          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:justify-evenly landscape:items-stretch flex-1 flex flex-col items-center gap-4 md:gap-6 pb-24" : "")
+          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:justify-center landscape:items-stretch flex-1 flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container" : "")
         }>
           
           {/* Disconnected Camera (Left Card) */}
@@ -528,13 +534,13 @@ export default function App() {
             <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
               
               {/* Top Inner Card */}
-              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
               </div>
 
               {/* Bottom Inner Card */}
-              <div className="flex flex-col items-center justify-center gap-4 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+              <div className="flex flex-col items-center justify-center gap-4 bg-black/60 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
                   <div className="flex items-center justify-center gap-3 w-full opacity-50">
                     <div className="h-px bg-white/20 flex-1"></div>
                     <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
@@ -700,7 +706,7 @@ export default function App() {
         <div className={
           "w-full z-10 relative " +
           (isNativeApp && isConnected ? "landscape:max-w-none landscape:flex landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center flex flex-col items-center gap-3 md:gap-4 " : "") +
-          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:justify-evenly landscape:items-stretch flex-1 flex flex-col items-center gap-4 md:gap-6 pb-24" : "")
+          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:justify-center landscape:items-stretch flex-1 flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container" : "")
         }>
             
           {/* Disconnected Receiver (Left Card) */}
@@ -708,13 +714,13 @@ export default function App() {
             <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
               
               {/* Top Inner Card */}
-              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
               </div>
 
               {/* Bottom Inner Card */}
-              <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+              <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
                 <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
                 <code className="text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
               </div>
@@ -837,6 +843,23 @@ export default function App() {
 
         </div>
       )}
+
+      {!isFullscreen && (
+        isNativeApp ? (
+          <div className={`absolute left-0 w-full flex justify-center pointer-events-none z-20 transition-all duration-700 ease-in-out ${mode === 'home' ? 'bottom-24 landscape:bottom-12' : 'bottom-12 landscape:hidden'}`}>
+            <div className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-gray-100 via-white to-gray-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] opacity-60">
+              V2.0 by ZetNet Architecture
+            </div>
+          </div>
+        ) : (
+          <div className="absolute bottom-24 landscape:bottom-12 left-0 w-full flex justify-center pointer-events-none z-20 transition-all duration-700 ease-in-out">
+            <div className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-gray-100 via-white to-gray-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] opacity-60">
+              V2.0 by ZetNet Architecture
+            </div>
+          </div>
+        )
+      )}
+
     </div>
   );
 }
