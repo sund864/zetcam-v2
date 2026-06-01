@@ -385,19 +385,19 @@ export default function App() {
               align-items: center !important; 
             }
 
-            /* Absolute 400x400 symmetry lock for Left and Right Tiles */
+            /* Absolute symmetry lock for Left and Right Tiles with trimmed size for more spacing */
             .left-card-tile, .right-card-tile {
               width: 100% !important;
-              max-width: 400px !important;
-              height: 400px !important;
+              max-width: 340px !important; /* Trimmed from 400px to add space */
+              height: 340px !important;    /* Trimmed from 400px to maintain square */
               aspect-ratio: 1 / 1 !important;
-              margin: auto 0 !important; 
+              margin: auto !important; 
               display: flex !important;
               flex-direction: column !important;
               justify-content: center !important;
               align-items: center !important;
               gap: 1.5rem !important;
-              padding: 2rem !important;
+              padding: 1.5rem !important;
             }
 
             .landscape\\:aspect-auto {
@@ -725,20 +725,18 @@ export default function App() {
             </div>
           )}
 
-          <div className={
-            "portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] order-first " +
-            (isNativeApp && isConnected ? "landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden" : "") +
-            (isNativeApp && !isConnected ? "landscape:hidden" : "")
-          }>
-            <span className="text-xs md:text-sm font-semibold text-purple-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0">
-              <Monitor size={16} className="animate-pulse shrink-0" /> <span className="truncate">Awaiting Stream Link</span>
-            </span>
-          </div>
+          {isNativeApp && !isConnected && (
+            <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] landscape:hidden">
+              <span className="text-xs md:text-sm font-semibold text-purple-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">
+                <Monitor size={16} className="animate-pulse shrink-0" /> <span className="truncate">Awaiting Stream Link</span>
+              </span>
+            </div>
+          )}
 
           <div className={
             "flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile " +
             (!isConnected ? 'flex ' : 'hidden ') +
-            (isNativeApp && !isConnected ? 'z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0' : 'flex-1 md:flex-none md:w-1/3')
+            (isNativeApp ? "z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0" : "flex-1 md:flex-none md:w-1/3")
           }>
             <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md landscape:hidden">Pair Device</h3>
             <p className="shrink-0 text-[11px] text-white/50 mb-4 font-light landscape:hidden">Point mobile lens at this matrix</p>
@@ -765,9 +763,10 @@ export default function App() {
             className={
               isFullscreen 
                 ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default" 
-                : "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] " +
-                  (!isConnected ? 'hidden ' : 'block ') +
-                  (isNativeApp && isConnected ? "landscape:w-[70%] landscape:flex-none" : "")
+                : (!isConnected && isNativeApp)
+                  ? "hidden"
+                  : "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] " +
+                    (isNativeApp && isConnected ? "landscape:w-[70%] landscape:flex-none" : "")
             }
             onMouseMove={handleFsInteraction}
             onClick={handleFsInteraction}
