@@ -94,7 +94,7 @@ export default function App() {
   };
 
   const renderSettingsDropdown = () => (
-    <div className="absolute top-12 right-0 w-64 bg-black/90 backdrop-blur-3xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50 max-h-[80dvh] overflow-y-auto custom-scrollbar">
+    <div className="absolute top-12 right-0 w-64 bg-black/90 backdrop-blur-3xl border border-white/10 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-1 z-50 max-h-[80dvh] overflow-y-auto custom-scrollbar text-left">
       <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">
         {mode === 'camera' ? 'Local Controls' : 'Remote Controls'}
       </div>
@@ -169,6 +169,19 @@ export default function App() {
             </div>
             <span className="text-[10px] text-white/40 group-hover:text-white/70">OLED Blackout</span>
           </button>
+          
+          {/* CAMERA FULL SCREEN BUTTON */}
+          {!isFullscreen && (
+            <button 
+              onClick={() => { setIsSettingsOpen(false); setIsFullscreen(true); }}
+              className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+            >
+              <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                <Maximize size={14} className="text-pink-400" /> Theater Mode
+              </div>
+              <span className="text-[10px] text-white/40 group-hover:text-white/70">Full Screen</span>
+            </button>
+          )}
         </>
       )}
 
@@ -260,25 +273,41 @@ export default function App() {
           
           /* 1. iPad Portrait Fixes */
           @media (orientation: portrait) and (min-width: 768px) {
-            /* Force the PC Monitor out of desktop side-by-side mode into a vertical stack */
-            .md\\:flex-row {
-              flex-direction: column !important;
-            }
-            /* Allow the cards to fill the vertical space naturally */
-            .md\\:w-1\\/3 {
-              width: 100% !important;
-              max-width: 450px !important;
-            }
-            /* Upscale the QR Code and Scanner reticle to fit the larger tablet screen */
-            .aspect-square {
-              max-width: 350px !important;
-              min-height: 350px !important;
-            }
+            .md\\:flex-row { flex-direction: column !important; }
+            .md\\:w-1\\/3 { width: 100% !important; max-width: 450px !important; }
+            .max-w-sm.backdrop-blur-2xl { max-width: 450px !important; padding: 1.25rem !important; border-radius: 32px !important; }
+            .max-w-\\[260px\\] { max-width: 350px !important; }
+            .aspect-square { min-height: 350px !important; }
           }
 
           /* 2. iPad Landscape Fixes */
           @media (orientation: landscape) {
-            /* Stop the QR code and Scanner from stretching across the entire screen */
+            /* Allow the main video block to naturally fill the available space */
+            .landscape\\:w-\\[70\\%\\] {
+              width: 100% !important;
+              max-width: 100% !important;
+              flex: 1 !important;
+            }
+
+            /* Hide the ugly fixed sidebars entirely on iPad */
+            .landscape\\:w-\\[25\\%\\] {
+              display: none !important;
+            }
+
+            /* Restore the floating header and icons at the top of the screen */
+            header.landscape\\:hidden {
+              display: flex !important;
+              position: absolute !important;
+              top: 0 !important;
+              left: 0 !important;
+              width: 100% !important;
+              max-width: 100% !important;
+              padding: 1.5rem 2rem !important;
+              z-index: 50 !important;
+              background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
+            }
+
+            /* Keep QR code elements proportional */
             .landscape\\:aspect-auto {
               max-width: 320px !important;
               max-height: 320px !important;
@@ -287,10 +316,7 @@ export default function App() {
               margin-right: auto !important;
               flex: none !important;
             }
-            /* Center the main interface cards */
-            .landscape\\:flex-1 {
-              max-width: 500px !important;
-            }
+            .landscape\\:flex-1 { max-width: 500px !important; }
           }
         }
       `}</style>
@@ -488,6 +514,10 @@ export default function App() {
                   <button onClick={toggleBatterySaver} className="flex items-center justify-between px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
                     <div className="flex items-center gap-2"><Battery size={14} className="text-gray-400" /> <span className="text-xs font-medium">Battery</span></div>
                   </button>
+
+                  <button onClick={() => setIsFullscreen(true)} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors mt-2">
+                    <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
+                  </button>
                 </div>
                 
                 <div className="hidden landscape:flex shrink-0 pt-3 border-t border-white/10 mt-auto">
@@ -499,7 +529,7 @@ export default function App() {
             )}
           </div>
 
-         {/* Disconnected Camera (Scanner Box) - Right Tile */}
+          {/* Disconnected Camera (Scanner Box) - Right Tile */}
           <div className={
             "flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full " +
             (isConnected ? 'hidden ' : 'flex ') +
@@ -508,7 +538,6 @@ export default function App() {
             <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md landscape:hidden">Scan Matrix</h3>
             <p className="shrink-0 text-[11px] text-white/50 mb-4 font-light landscape:hidden">Align PC matrix inside the frame</p>
             
-            {/* Restored Dark Scanner Box Structure */}
             <div className="w-full max-w-[260px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] mb-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-0 landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:aspect-auto">
                <div id="reader" className="absolute inset-0 w-full h-full z-10 flex items-center justify-center"></div>
                <span className="text-[10px] text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
