@@ -170,8 +170,8 @@ export default function App() {
             <span className="text-[10px] text-white/40 group-hover:text-white/70">OLED Blackout</span>
           </button>
           
-          {/* CAMERA FULL SCREEN BUTTON */}
-          {!isFullscreen && (
+          {/* DYNAMIC THEATER MODE BUTTON */}
+          {!isFullscreen ? (
             <button 
               onClick={() => { setIsSettingsOpen(false); setIsFullscreen(true); }}
               className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
@@ -180,6 +180,16 @@ export default function App() {
                 <Maximize size={14} className="text-pink-400" /> Theater Mode
               </div>
               <span className="text-[10px] text-white/40 group-hover:text-white/70">Full Screen</span>
+            </button>
+          ) : (
+            <button 
+              onClick={() => { setIsSettingsOpen(false); setIsFullscreen(false); }}
+              className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+            >
+              <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                <Minimize size={14} className="text-pink-400" /> Exit Theater
+              </div>
+              <span className="text-[10px] text-white/40 group-hover:text-white/70">Close</span>
             </button>
           )}
         </>
@@ -207,7 +217,8 @@ export default function App() {
             <span className="text-[10px] text-white/40 group-hover:text-white/70">PiP Mode</span>
           </button>
 
-          {!isFullscreen && (
+          {/* DYNAMIC THEATER MODE BUTTON */}
+          {!isFullscreen ? (
             <button 
               onClick={() => { setIsSettingsOpen(false); setIsFullscreen(true); }}
               className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
@@ -216,6 +227,16 @@ export default function App() {
                 <Maximize size={14} className="text-pink-400" /> Theater Mode
               </div>
               <span className="text-[10px] text-white/40 group-hover:text-white/70">Full Screen</span>
+            </button>
+          ) : (
+            <button 
+              onClick={() => { setIsSettingsOpen(false); setIsFullscreen(false); }}
+              className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+            >
+              <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                <Minimize size={14} className="text-pink-400" /> Exit Theater
+              </div>
+              <span className="text-[10px] text-white/40 group-hover:text-white/70">Close</span>
             </button>
           )}
         </>
@@ -515,9 +536,12 @@ export default function App() {
                     <div className="flex items-center gap-2"><Battery size={14} className="text-gray-400" /> <span className="text-xs font-medium">Battery</span></div>
                   </button>
 
-                  <button onClick={() => setIsFullscreen(true)} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors mt-2">
-                    <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
-                  </button>
+                  {/* CAMERA FULL SCREEN BUTTON */}
+                  {!isFullscreen && (
+                    <button onClick={() => { setIsSettingsOpen(false); setIsFullscreen(true); }} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors mt-2">
+                      <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
+                    </button>
+                  )}
                 </div>
                 
                 <div className="hidden landscape:flex shrink-0 pt-3 border-t border-white/10 mt-auto">
@@ -563,20 +587,43 @@ export default function App() {
             </div>
           </div>
 
-          <div className={
-            "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
-            (!isConnected ? 'hidden ' : 'block ') +
-            (isNativeApp && isConnected ? "landscape:w-[70%] landscape:flex-none" : "")
-          }>
+          <div 
+            className={
+              isFullscreen 
+                ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default" 
+                : "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
+                  (!isConnected ? 'hidden ' : 'block ') +
+                  (isNativeApp && isConnected ? "landscape:w-[70%] landscape:flex-none" : "")
+            }
+            onMouseMove={handleFsInteraction}
+            onClick={handleFsInteraction}
+          >
             <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-            <div className={
-              "absolute top-4 right-4 bg-black/50 backdrop-blur-xl border border-white/10 text-emerald-400 text-[10px] md:text-[11px] font-bold " +
-              "uppercase px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)] " +
-              (isNativeApp && isConnected ? "landscape:hidden" : "") 
-            }>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span>
-              Live
-            </div>
+            
+            {isFullscreen && (
+              <div className={`absolute top-6 right-6 flex items-center gap-3 transition-opacity duration-500 ${fsControlsVisible || isSettingsOpen ? 'opacity-100' : 'opacity-0'}`}>
+                <div className="relative">
+                  <button onClick={(e) => { e.stopPropagation(); setIsSettingsOpen(!isSettingsOpen); }} className="flex items-center justify-center w-10 h-10 text-white bg-black/60 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/10 transition-all shadow-lg active:scale-95">
+                    <Settings size={18} className={isSettingsOpen ? "animate-spin-slow" : ""} />
+                  </button>
+                  {isSettingsOpen && renderSettingsDropdown()}
+                </div>
+                <button onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }} className="flex items-center justify-center w-10 h-10 text-white bg-red-500/20 backdrop-blur-md rounded-full border border-red-500/30 hover:bg-red-500/40 hover:border-red-400 transition-all shadow-lg active:scale-95">
+                  <Minimize size={18} />
+                </button>
+              </div>
+            )}
+
+            {!isFullscreen && (
+              <div className={
+                "absolute top-4 right-4 bg-black/50 backdrop-blur-xl border border-white/10 text-emerald-400 text-[10px] md:text-[11px] font-bold " +
+                "uppercase px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)] " +
+                (isNativeApp && isConnected ? "landscape:hidden" : "") 
+              }>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span>
+                Live
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -668,13 +715,13 @@ export default function App() {
             {isFullscreen && (
               <div className={`absolute top-6 right-6 flex items-center gap-3 transition-opacity duration-500 ${fsControlsVisible || isSettingsOpen ? 'opacity-100' : 'opacity-0'}`}>
                 <div className="relative">
-                  <button onClick={() => setIsSettingsOpen(!isSettingsOpen)} className="flex items-center gap-2 text-xs font-bold text-white bg-black/60 backdrop-blur-md px-4 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition-all shadow-lg">
-                    <Settings size={16} className={isSettingsOpen ? "animate-spin-slow" : ""} /> Settings
+                  <button onClick={(e) => { e.stopPropagation(); setIsSettingsOpen(!isSettingsOpen); }} className="flex items-center justify-center w-10 h-10 text-white bg-black/60 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/10 transition-all shadow-lg active:scale-95">
+                    <Settings size={18} className={isSettingsOpen ? "animate-spin-slow" : ""} />
                   </button>
                   {isSettingsOpen && renderSettingsDropdown()}
                 </div>
-                <button onClick={() => setIsFullscreen(false)} className="flex items-center gap-2 text-xs font-bold text-white bg-red-500/20 backdrop-blur-md px-4 py-3 rounded-xl border border-red-500/30 hover:bg-red-500/40 hover:border-red-400 transition-all shadow-lg">
-                  <Minimize size={16} /> Exit Theater
+                <button onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }} className="flex items-center justify-center w-10 h-10 text-white bg-red-500/20 backdrop-blur-md rounded-full border border-red-500/30 hover:bg-red-500/40 hover:border-red-400 transition-all shadow-lg active:scale-95">
+                  <Minimize size={18} />
                 </button>
               </div>
             )}
