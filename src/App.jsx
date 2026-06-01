@@ -298,6 +298,14 @@ export default function App() {
             .max-w-\\[260px\\] { max-width: 350px !important; }
             .aspect-square { min-height: 350px !important; }
 
+            /* Match portrait QR/Scanner tile to the Home screen's 70% width */
+            .right-card-tile, .portrait-status-pill {
+              width: 70% !important;
+              max-width: 70% !important;
+              margin-left: auto !important;
+              margin-right: auto !important;
+            }
+
             /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
             .home-logo-text {
               font-size: 2.5rem !important; 
@@ -306,9 +314,9 @@ export default function App() {
               margin-bottom: 0 !important;
             }
             .home-tile-container {
-              max-width: 70% !important; /* Decreased from 85% to shrink horizontal length */
+              max-width: 70% !important; 
               width: 100% !important;
-              gap: 4.5rem !important; /* Doubled gap to push the bottom card down */
+              gap: 4.5rem !important; 
               margin-top: -5vh !important; 
             }
             .home-tile {
@@ -551,7 +559,7 @@ export default function App() {
           )}
 
           <div className={
-            "shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] order-first " +
+            "portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] order-first " +
             (isNativeApp && isConnected ? "landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden" : "") +
             (isNativeApp && !isConnected ? "landscape:hidden" : "")
           }>
@@ -717,7 +725,7 @@ export default function App() {
           )}
 
           {isNativeApp && !isConnected && (
-            <div className="shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] landscape:hidden">
+            <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] landscape:hidden">
               <span className="text-xs md:text-sm font-semibold text-purple-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">
                 <Monitor size={16} className="animate-pulse shrink-0" /> <span className="truncate">Awaiting Stream Link</span>
               </span>
