@@ -379,19 +379,14 @@ export default function App() {
               z-index: 50 !important;
               background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
             }
-            
-            /* INCREASE HORIZONTAL SPACING: Force massive gap */
-            .landscape-disconnected-container {
-               gap: 6rem !important; /* Increased horizontal gap between the two tiles */
-            }
 
             /* SQUARE CARDS FIX: Shrunk perfectly centered tiles */
             .left-card-tile, .right-card-tile {
               width: 100% !important;
-              max-width: 300px !important; /* Shrunk from 340px to add massive horizontal space */
+              max-width: 300px !important; /* Shrunk from 340px */
               height: 300px !important;    /* Shrunk to maintain perfect square */
               aspect-ratio: 1 / 1 !important;
-              margin: auto 0 !important; /* Only use auto margin vertically so gap handles horizontal space */
+              margin: auto 0 !important; /* Let justify-evenly handle the horizontal spread natively */
               display: flex !important;
               flex-direction: column !important;
               justify-content: center !important;
@@ -525,7 +520,7 @@ export default function App() {
         <div className={
           "w-full z-10 relative " +
           (isNativeApp && isConnected ? "landscape:max-w-none landscape:flex landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center flex flex-col items-center gap-3 md:gap-4 " : "") +
-          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:justify-center landscape:items-stretch flex-1 flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container" : "")
+          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:justify-evenly landscape:items-stretch flex-1 flex flex-col items-center gap-4 md:gap-6 pb-24" : "")
         }>
           
           {/* Disconnected Camera (Left Card) */}
@@ -539,7 +534,7 @@ export default function App() {
               </div>
 
               {/* Bottom Inner Card */}
-              <div className="flex flex-col items-center justify-center gap-3 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+              <div className="flex flex-col items-center justify-center gap-4 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
                   <div className="flex items-center justify-center gap-3 w-full opacity-50">
                     <div className="h-px bg-white/20 flex-1"></div>
                     <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
@@ -705,7 +700,7 @@ export default function App() {
         <div className={
           "w-full z-10 relative " +
           (isNativeApp && isConnected ? "landscape:max-w-none landscape:flex landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center flex flex-col items-center gap-3 md:gap-4 " : "") +
-          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:justify-center landscape:items-stretch flex-1 flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container" : "")
+          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:justify-evenly landscape:items-stretch flex-1 flex flex-col items-center gap-4 md:gap-6 pb-24" : "")
         }>
             
           {/* Disconnected Receiver (Left Card) */}
