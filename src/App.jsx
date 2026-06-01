@@ -331,41 +331,22 @@ export default function App() {
               background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
             }
             
-            /* SQUARE CARDS FIX: Force Disconnected Cards to have perfectly equal Height/Width and center them */
+            /* SQUARE CARDS FIX: Force identical perfectly centered tiles */
             .landscape\\:items-stretch {
-              align-items: center !important; /* Stop stretching so they can be squares */
+              align-items: center !important; 
             }
 
-            /* 50-50 Split for Left Card contents */
-            .left-card-tile {
+            .left-card-tile, .right-card-tile {
               aspect-ratio: 1 / 1 !important;
               height: auto !important;
-              margin: auto 0 !important; 
-              display: flex !important;
-              flex-direction: column !important;
-            }
-            
-            .left-card-tile > div:nth-of-type(1),
-            .left-card-tile > div:nth-of-type(2) {
-              flex: 1 !important;
-              display: flex !important;
-              flex-direction: column !important;
-              justify-content: center !important;
-              align-items: center !important;
-              height: 50% !important;
-              margin: 0 auto !important;
               width: 100% !important;
-            }
-
-            /* Center align QR and Scanner inside Right Card */
-            .right-card-tile {
-              aspect-ratio: 1 / 1 !important;
-              height: auto !important;
+              max-width: 450px !important;
               margin: auto 0 !important; 
               display: flex !important;
               flex-direction: column !important;
               justify-content: center !important;
               align-items: center !important;
+              gap: 1.5rem !important;
             }
 
             /* Keep QR code elements proportional */
@@ -501,15 +482,16 @@ export default function App() {
           
           {/* Disconnected Camera (Left Card) */}
           {isNativeApp && !isConnected && (
-            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
-              <button onClick={executeExit} className="absolute top-6 left-6 flex items-center justify-center text-white/70 hover:text-white bg-white/5 w-10 h-10 rounded-full border border-white/10 hover:bg-white/10 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)] active:scale-95">
-                <ArrowLeft size={18} />
-              </button>
-              <div className="flex flex-col items-center text-center gap-2 my-auto justify-center">
+            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+              
+              {/* Top Inner Card */}
+              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
               </div>
-              <div className="w-full flex flex-col gap-4 mt-auto mb-2">
+
+              {/* Bottom Inner Card */}
+              <div className="flex flex-col items-center justify-center gap-4 bg-black/60 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
                   <div className="flex items-center justify-center gap-3 w-full opacity-50">
                     <div className="h-px bg-white/20 flex-1"></div>
                     <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
@@ -518,7 +500,7 @@ export default function App() {
                   <div className="flex flex-col gap-3 w-full group justify-center">
                     <input 
                       type="text" placeholder="Target PIN" value={remoteId} onChange={(e) => setRemoteId(e.target.value)}
-                      className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white placeholder:text-white/30 text-center focus:outline-none focus:border-pink-500/50 shadow-inner font-mono tracking-widest"
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white placeholder:text-white/30 text-center focus:outline-none focus:border-pink-500/50 shadow-inner font-mono tracking-widest"
                     />
                     <button 
                       onClick={executeManualConnect}
@@ -681,19 +663,18 @@ export default function App() {
             
           {/* Disconnected Receiver (Left Card) */}
           {isNativeApp && !isConnected && (
-            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
-              <button onClick={executeExit} className="absolute top-6 left-6 flex items-center justify-center text-white/70 hover:text-white bg-white/5 w-10 h-10 rounded-full border border-white/10 hover:bg-white/10 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)] active:scale-95">
-                <ArrowLeft size={18} />
-              </button>
-
-              <div className="flex flex-col items-center text-center gap-2 my-auto justify-center">
+            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+              
+              {/* Top Inner Card */}
+              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
               </div>
 
-              <div className="w-full max-w-[260px] bg-black/60 rounded-xl p-3 border border-white/10 overflow-hidden shadow-inner flex flex-col items-center gap-1 mt-auto">
-                <span className="text-[8px] text-white/30 uppercase tracking-widest font-bold">Secure PIN</span>
-                <code className="text-sm text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
+              {/* Bottom Inner Card */}
+              <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+                <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
+                <code className="text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
               </div>
             </div>
           )}
