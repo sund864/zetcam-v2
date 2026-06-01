@@ -256,6 +256,45 @@ export default function App() {
         video::-webkit-media-controls-start-playback-button { display: none !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        /* --- iOS IPAD LAYOUT PATCH --- */
+        @supports (-webkit-touch-callout: none) {
+          
+          /* 1. iPad Portrait Fixes */
+          @media (orientation: portrait) and (min-width: 768px) {
+            /* Force the PC Monitor out of desktop side-by-side mode into a vertical stack */
+            .md\\:flex-row {
+              flex-direction: column !important;
+            }
+            /* Allow the cards to fill the vertical space naturally */
+            .md\\:w-1\\/3 {
+              width: 100% !important;
+              max-width: 450px !important;
+            }
+            /* Upscale the QR Code and Scanner reticle to fit the larger tablet screen */
+            .aspect-square {
+              max-width: 350px !important;
+              min-height: 350px !important;
+            }
+          }
+
+          /* 2. iPad Landscape Fixes */
+          @media (orientation: landscape) {
+            /* Stop the QR code and Scanner from stretching across the entire screen */
+            .landscape\\:aspect-auto {
+              max-width: 320px !important;
+              max-height: 320px !important;
+              aspect-ratio: 1 / 1 !important;
+              margin-left: auto !important;
+              margin-right: auto !important;
+              flex: none !important;
+            }
+            /* Center the main interface cards */
+            .landscape\\:flex-1 {
+              max-width: 500px !important;
+            }
+          }
+        }
       `}</style>
 
       {batterySaver && (
