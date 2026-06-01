@@ -536,12 +536,9 @@ export default function App() {
                     <div className="flex items-center gap-2"><Battery size={14} className="text-gray-400" /> <span className="text-xs font-medium">Battery</span></div>
                   </button>
 
-                  {/* CAMERA FULL SCREEN BUTTON */}
-                  {!isFullscreen && (
-                    <button onClick={() => { setIsSettingsOpen(false); setIsFullscreen(true); }} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors mt-2">
-                      <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
-                    </button>
-                  )}
+                  <button onClick={() => setIsFullscreen(true)} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors mt-2">
+                    <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
+                  </button>
                 </div>
                 
                 <div className="hidden landscape:flex shrink-0 pt-3 border-t border-white/10 mt-auto">
@@ -608,9 +605,6 @@ export default function App() {
                   </button>
                   {isSettingsOpen && renderSettingsDropdown()}
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }} className="flex items-center justify-center w-10 h-10 text-white bg-red-500/20 backdrop-blur-md rounded-full border border-red-500/30 hover:bg-red-500/40 hover:border-red-400 transition-all shadow-lg active:scale-95">
-                  <Minimize size={18} />
-                </button>
               </div>
             )}
 
@@ -720,9 +714,6 @@ export default function App() {
                   </button>
                   {isSettingsOpen && renderSettingsDropdown()}
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }} className="flex items-center justify-center w-10 h-10 text-white bg-red-500/20 backdrop-blur-md rounded-full border border-red-500/30 hover:bg-red-500/40 hover:border-red-400 transition-all shadow-lg active:scale-95">
-                  <Minimize size={18} />
-                </button>
               </div>
             )}
             
