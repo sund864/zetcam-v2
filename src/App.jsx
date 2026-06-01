@@ -297,6 +297,40 @@ export default function App() {
             .max-w-sm.backdrop-blur-2xl { max-width: 450px !important; padding: 1.25rem !important; border-radius: 32px !important; }
             .max-w-\\[260px\\] { max-width: 350px !important; }
             .aspect-square { min-height: 350px !important; }
+
+            /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
+            .home-logo-text {
+              font-size: 3.5rem !important; /* Huge logo */
+              line-height: 1.2 !important;
+              margin-top: 4rem !important; /* Push down into yellow box area */
+              margin-bottom: 2rem !important;
+            }
+            .home-tile-container {
+              max-width: 600px !important; /* Match green box width */
+              gap: 3rem !important; /* Massive gap to distribute weight */
+              padding-top: 2rem !important;
+            }
+            .home-tile {
+              min-height: 280px !important; /* Match green box height */
+              border-radius: 40px !important;
+              display: flex !important;
+              flex-direction: column !important;
+              justify-content: center !important;
+              align-items: center !important;
+            }
+            .home-tile .icon-wrapper {
+              width: 5.5rem !important; 
+              height: 5.5rem !important;
+              margin-bottom: 1.5rem !important; /* Lock spacing between icon and text */
+              border-radius: 1.5rem !important;
+            }
+            .home-tile .icon-wrapper svg {
+              width: 2.5rem !important;
+              height: 2.5rem !important;
+            }
+            .home-tile h3 {
+              font-size: 1.8rem !important;
+            }
           }
 
           /* 2. iPad Landscape Fixes */
@@ -391,9 +425,9 @@ export default function App() {
             : "flex-row justify-between items-center pt-10 md:pt-4 mb-3 md:mb-6 border-b border-white/5 pb-3") +
           (mode !== 'home' && isNativeApp ? " landscape:hidden" : "") 
         }>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2 mb-0.5">
-              <h1 className="font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg text-lg md:text-2xl">
+          <div className="flex flex-col text-center">
+            <div className="flex items-center gap-2 mb-0.5 justify-center">
+              <h1 className={`font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg ${mode === 'home' ? 'home-logo-text text-2xl md:text-3xl' : 'text-lg md:text-2xl'}`}>
                 ZETCAM PRO
               </h1>
             </div>
@@ -437,15 +471,15 @@ export default function App() {
 
       {/* --- ZERO TOUCH HOME SCREEN --- */}
       {mode === 'home' && (
-        <div className="w-full max-w-sm md:max-w-md landscape:max-w-4xl mx-auto flex flex-col landscape:flex-row gap-4 md:gap-6 justify-center items-center flex-1 min-h-[60vh] z-10 relative pb-28 landscape:pb-0 landscape:h-full landscape:absolute landscape:inset-0 landscape:justify-center landscape:items-center landscape:my-auto landscape:px-6 transition-all duration-700 ease-in-out">
+        <div className="home-tile-container w-full max-w-sm md:max-w-md landscape:max-w-4xl mx-auto flex flex-col landscape:flex-row gap-4 md:gap-6 justify-center items-center flex-1 min-h-[60vh] z-10 relative pb-28 landscape:pb-0 landscape:h-full landscape:absolute landscape:inset-0 landscape:justify-center landscape:items-center landscape:my-auto landscape:px-6 transition-all duration-700 ease-in-out">
           <button 
             onClick={() => setMode('camera')}
             className={
-              "w-full landscape:flex-1 flex flex-col landscape:flex-row items-center justify-center landscape:justify-start min-h-[140px] landscape:min-h-[200px] landscape:h-[200px] bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 landscape:p-0 landscape:px-8 text-center landscape:text-left " +
+              "home-tile w-full landscape:flex-1 flex flex-col landscape:flex-row items-center justify-center landscape:justify-start min-h-[140px] landscape:min-h-[200px] landscape:h-[200px] bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 landscape:p-0 landscape:px-8 text-center landscape:text-left " +
               "transition-all duration-700 ease-in-out hover:border-pink-500/40 hover:bg-pink-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(236,72,153,0.25)] group relative overflow-hidden"
             }
           >
-            <div className="w-12 h-12 md:w-14 md:h-14 landscape:w-12 landscape:h-12 shrink-0 rounded-2xl bg-gradient-to-br from-pink-500/20 to-pink-500/5 flex items-center justify-center text-pink-400 mb-3 landscape:mb-0 landscape:mr-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-500 border border-pink-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+            <div className="icon-wrapper w-12 h-12 md:w-14 md:h-14 landscape:w-12 landscape:h-12 shrink-0 rounded-2xl bg-gradient-to-br from-pink-500/20 to-pink-500/5 flex items-center justify-center text-pink-400 mb-3 landscape:mb-0 landscape:mr-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-500 border border-pink-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
               <Camera className="w-6 h-6 md:w-7 md:h-7 landscape:w-6 landscape:h-6 transition-all duration-500" />
             </div>
             <h3 className="text-lg md:text-xl landscape:text-xl font-bold tracking-tight group-hover:text-pink-100 transition-colors duration-500">I am the Camera</h3>
@@ -457,11 +491,11 @@ export default function App() {
           <button 
             onClick={() => setMode('receiver')}
             className={
-              "w-full landscape:flex-1 flex flex-col landscape:flex-row items-center justify-center landscape:justify-start min-h-[140px] landscape:min-h-[200px] landscape:h-[200px] bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 landscape:p-0 landscape:px-8 text-center landscape:text-left " +
+              "home-tile w-full landscape:flex-1 flex flex-col landscape:flex-row items-center justify-center landscape:justify-start min-h-[140px] landscape:min-h-[200px] landscape:h-[200px] bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 landscape:p-0 landscape:px-8 text-center landscape:text-left " +
               "transition-all duration-700 ease-in-out hover:border-purple-500/40 hover:bg-purple-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.25)] group relative overflow-hidden"
             }
           >
-            <div className="w-12 h-12 md:w-14 md:h-14 landscape:w-12 landscape:h-12 shrink-0 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center text-purple-400 mb-3 landscape:mb-0 landscape:mr-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-500 border border-purple-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+            <div className="icon-wrapper w-12 h-12 md:w-14 md:h-14 landscape:w-12 landscape:h-12 shrink-0 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center text-purple-400 mb-3 landscape:mb-0 landscape:mr-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-500 border border-purple-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
               <Monitor className="w-6 h-6 md:w-7 md:h-7 landscape:w-6 landscape:h-6 transition-all duration-500" />
             </div>
             <h3 className="text-lg md:text-xl landscape:text-xl font-bold tracking-tight group-hover:text-purple-100 transition-colors duration-500">I am the PC Monitor</h3>
