@@ -301,19 +301,14 @@ export default function App() {
 
           /* 2. iPad Landscape Fixes */
           @media (orientation: landscape) {
-            /* Allow the main video block to naturally fill the available space */
             .landscape\\:w-\\[70\\%\\] {
               width: 100% !important;
               max-width: 100% !important;
               flex: 1 !important;
             }
-
-            /* Hide the ugly fixed sidebars entirely on iPad */
             .landscape\\:w-\\[25\\%\\] {
               display: none !important;
             }
-
-            /* Restore the floating header and icons at the top of the screen */
             header.landscape\\:hidden {
               display: flex !important;
               position: absolute !important;
@@ -325,8 +320,6 @@ export default function App() {
               z-index: 50 !important;
               background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
             }
-
-            /* Keep QR code elements proportional */
             .landscape\\:aspect-auto {
               max-width: 320px !important;
               max-height: 320px !important;
@@ -459,13 +452,10 @@ export default function App() {
           
           {/* Disconnected Camera (Left Card) */}
           {isNativeApp && !isConnected && (
-            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative">
-              <button onClick={executeExit} className="absolute top-6 left-6 flex items-center justify-center text-white/70 hover:text-white bg-white/5 w-10 h-10 rounded-full border border-white/10 hover:bg-white/10 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)] active:scale-95">
-                <ArrowLeft size={18} />
-              </button>
-              <div className="flex flex-col items-center text-center gap-2 mt-4">
-                <h1 className="font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg text-2xl">ZETCAM PRO</h1>
-                <h4 className="text-lg font-bold tracking-tight text-white drop-shadow-md mt-2">Align Scanner to PC Screen</h4>
+            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative">
+              <div className="flex flex-col items-center text-center gap-2 my-auto justify-center">
+                <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
+                <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
               </div>
               <div className="w-full flex flex-col gap-4 mt-auto mb-2">
                   <div className="flex items-center justify-center gap-3 w-full opacity-50">
@@ -539,9 +529,12 @@ export default function App() {
                     <div className="flex items-center gap-2"><Battery size={14} className="text-gray-400" /> <span className="text-xs font-medium">Battery</span></div>
                   </button>
 
-                  <button onClick={() => setIsFullscreen(true)} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors mt-2">
-                    <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
-                  </button>
+                  {/* CAMERA FULL SCREEN BUTTON */}
+                  {!isFullscreen && (
+                    <button onClick={() => { setIsSettingsOpen(false); setIsFullscreen(true); }} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors mt-2">
+                      <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
+                    </button>
+                  )}
                 </div>
                 
                 <div className="hidden landscape:flex shrink-0 pt-3 border-t border-white/10 mt-auto">
