@@ -320,6 +320,14 @@ export default function App() {
               z-index: 50 !important;
               background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
             }
+            
+            /* SQUARE CARDS FIX: Force Disconnected Cards to have equal Height/Width */
+            .landscape\\:max-w-\\[450px\\] {
+              aspect-ratio: 1 / 1 !important;
+              height: auto !important;
+              margin-top: 4rem !important; /* Push down cleanly below the header */
+            }
+
             .landscape\\:aspect-auto {
               max-width: 320px !important;
               max-height: 320px !important;
