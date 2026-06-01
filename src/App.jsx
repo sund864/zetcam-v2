@@ -38,8 +38,6 @@ export default function App() {
       if (isNativeApp) {
         try {
           await SplashScreen.hide();
-          // ZERO TOUCH FIX: The One-Two Punch for true immersive full screen
-          // Forces the webview to the absolute hardware edges, then kills the native status bar overlay
           if (Capacitor.isPluginAvailable('StatusBar')) {
             await Capacitor.Plugins.StatusBar.setOverlaysWebView({ overlay: true });
             await Capacitor.Plugins.StatusBar.hide();
@@ -323,8 +321,6 @@ export default function App() {
                 ? "flex-col justify-center items-center pt-16 landscape:pt-4 pb-8 border-none" 
                 : "flex-col justify-center items-center pt-16 pb-8 border-none")
             : "flex-row justify-between items-center pt-10 md:pt-4 mb-3 md:mb-6 border-b border-white/5 pb-3") +
-          // ZERO TOUCH FIX: Removed the `!isConnected` dependency entirely. 
-          // The header is now strictly eradicated in ALL non-home landscape states.
           (mode !== 'home' && isNativeApp ? " landscape:hidden" : "") 
         }>
           <div className={`flex flex-col ${mode === 'home' ? 'items-center text-center' : ''}`}>
@@ -341,11 +337,12 @@ export default function App() {
                 <button 
                   onClick={executeExit}
                   className={
-                    "flex items-center gap-1.5 md:gap-2 text-[11px] md:text-xs font-medium text-white/70 hover:text-white " +
-                    "bg-white/5 backdrop-blur-xl px-3 md:px-4 py-2 rounded-full border border-white/10 hover:border-white/30 hover:bg-white/10 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)]"
+                    "flex items-center justify-center text-white/70 hover:text-white " +
+                    "bg-white/5 backdrop-blur-xl w-10 h-10 rounded-full border border-white/10 hover:border-white/30 hover:bg-white/20 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)] active:scale-95"
                   }
+                  title="Exit"
                 >
-                  <ArrowLeft size={14} /> Exit
+                  <ArrowLeft size={18} />
                 </button>
               ) : (
                 <button 
@@ -504,37 +501,39 @@ export default function App() {
 
           {/* Disconnected Camera (Scanner Box) - Right Tile */}
           <div className={
-            "w-full max-w-sm mx-auto bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] p-4 flex flex-col justify-center gap-3 shadow-[0_20px_50px_rgba(0,0,0,0.6)] " +
+            "flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full " +
             (isConnected ? 'hidden ' : 'flex ') +
-            (isNativeApp && !isConnected ? 'z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0' : 'flex-1 min-h-0')
+            (isNativeApp && !isConnected ? 'z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0' : 'flex-1 md:flex-none md:w-1/3')
           }>
-            <h4 className="shrink-0 text-base font-bold tracking-tight text-center text-white drop-shadow-md landscape:hidden mb-2">Align Scanner to PC Screen</h4>
+            <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md landscape:hidden">Scan Matrix</h3>
+            <p className="shrink-0 text-[11px] text-white/50 mb-4 font-light landscape:hidden">Align PC matrix inside the frame</p>
             
-            <div className="w-full max-w-[260px] aspect-square mx-auto overflow-hidden rounded-[24px] bg-black/80 border border-white/10 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative flex items-center justify-center landscape:max-w-none landscape:w-full landscape:h-full landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:p-0 landscape:aspect-auto">
-               <div id="reader" className="absolute inset-0 w-full h-full z-10 flex items-center justify-center"></div>
-               <span className="text-xs text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
+            <div className="w-full max-w-[260px] aspect-square mx-auto bg-white p-4 rounded-[24px] mb-4 shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
+              <div className="absolute inset-0 bg-gradient-to-tr from-pink-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+              
+              <div className="w-full h-full relative z-10 overflow-hidden rounded-[12px] bg-black/80 flex items-center justify-center border border-black/10">
+                 <div id="reader" className="absolute inset-0 w-full h-full"></div>
+                 <span className="text-[10px] text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
+              </div>
             </div>
             
-            <div className="shrink-0 flex items-center gap-3 w-full my-2 opacity-50 landscape:hidden">
-              <div className="h-px bg-white/20 flex-1"></div>
-              <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
-              <div className="h-px bg-white/20 flex-1"></div>
-            </div>
-            
-            <div className="shrink-0 flex gap-2 w-full group landscape:hidden">
-              <input 
-                type="text" 
-                placeholder="Paste Target PIN" 
-                value={remoteId} 
-                onChange={(e) => setRemoteId(e.target.value)}
-                className="flex-1 min-w-0 bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-pink-500/50 shadow-inner font-mono tracking-widest"
-              />
-              <button 
-                onClick={executeManualConnect}
-                className="shrink-0 bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold text-xs px-6 py-3 rounded-xl hover:shadow-[0_0_25px_rgba(236,72,153,0.6)] active:scale-95 transition-all"
-              >
-                Link
-              </button>
+            <div className="shrink-0 w-full max-w-[260px] bg-black/60 rounded-xl p-3 border border-white/10 overflow-hidden shadow-inner flex flex-col items-center gap-2 landscape:hidden">
+              <span className="text-[8px] text-white/30 uppercase tracking-widest font-bold w-full text-left">Manual Override</span>
+              <div className="flex w-full items-center gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Target PIN" 
+                  value={remoteId} 
+                  onChange={(e) => setRemoteId(e.target.value)}
+                  className="flex-1 min-w-0 bg-transparent border-none px-1 py-1 text-sm text-pink-400 placeholder:text-pink-400/30 focus:outline-none font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]"
+                />
+                <button 
+                  onClick={executeManualConnect}
+                  className="shrink-0 bg-white/10 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg hover:bg-white/20 active:scale-95 transition-all"
+                >
+                  LINK
+                </button>
+              </div>
             </div>
           </div>
 
