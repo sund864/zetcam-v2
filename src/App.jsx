@@ -380,26 +380,27 @@ export default function App() {
               background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
             }
             
-            /* SQUARE CARDS FIX: Force identical perfectly centered tiles */
-            .landscape\\:items-stretch {
-              align-items: center !important; 
+            /* INCREASE HORIZONTAL SPACING: Force massive gap */
+            .landscape-disconnected-container {
+               gap: 6rem !important; /* Increased horizontal gap between the two tiles */
             }
 
-            /* Absolute symmetry lock for Left and Right Tiles with trimmed size for more spacing */
+            /* SQUARE CARDS FIX: Shrunk perfectly centered tiles */
             .left-card-tile, .right-card-tile {
               width: 100% !important;
-              max-width: 340px !important; /* Trimmed from 400px to add space */
-              height: 340px !important;    /* Trimmed from 400px to maintain square */
+              max-width: 300px !important; /* Shrunk from 340px to add massive horizontal space */
+              height: 300px !important;    /* Shrunk to maintain perfect square */
               aspect-ratio: 1 / 1 !important;
-              margin: auto !important; 
+              margin: auto 0 !important; /* Only use auto margin vertically so gap handles horizontal space */
               display: flex !important;
               flex-direction: column !important;
               justify-content: center !important;
               align-items: center !important;
-              gap: 1.5rem !important;
-              padding: 1.5rem !important;
+              gap: 1rem !important;
+              padding: 1.25rem !important;
             }
 
+            /* Keep QR code elements proportional */
             .landscape\\:aspect-auto {
               max-width: 320px !important;
               max-height: 320px !important;
@@ -524,7 +525,7 @@ export default function App() {
         <div className={
           "w-full z-10 relative " +
           (isNativeApp && isConnected ? "landscape:max-w-none landscape:flex landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center flex flex-col items-center gap-3 md:gap-4 " : "") +
-          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:gap-6 md:landscape:gap-10 landscape:justify-center landscape:items-stretch flex-1 flex flex-col items-center justify-center gap-4 md:gap-6 pb-24" : "")
+          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:justify-center landscape:items-stretch flex-1 flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container" : "")
         }>
           
           {/* Disconnected Camera (Left Card) */}
@@ -532,13 +533,13 @@ export default function App() {
             <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
               
               {/* Top Inner Card */}
-              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
               </div>
 
               {/* Bottom Inner Card */}
-              <div className="flex flex-col items-center justify-center gap-4 bg-black/60 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+              <div className="flex flex-col items-center justify-center gap-3 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
                   <div className="flex items-center justify-center gap-3 w-full opacity-50">
                     <div className="h-px bg-white/20 flex-1"></div>
                     <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
@@ -704,7 +705,7 @@ export default function App() {
         <div className={
           "w-full z-10 relative " +
           (isNativeApp && isConnected ? "landscape:max-w-none landscape:flex landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center flex flex-col items-center gap-3 md:gap-4 " : "") +
-          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:gap-6 md:landscape:gap-10 landscape:justify-center landscape:items-stretch flex-1 flex flex-col items-center justify-center gap-4 md:gap-6 pb-24" : "")
+          (isNativeApp && !isConnected ? "landscape:absolute landscape:inset-0 landscape:h-full landscape:w-full landscape:flex landscape:flex-row landscape:p-6 md:landscape:p-10 landscape:justify-center landscape:items-stretch flex-1 flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container" : "")
         }>
             
           {/* Disconnected Receiver (Left Card) */}
@@ -712,13 +713,13 @@ export default function App() {
             <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
               
               {/* Top Inner Card */}
-              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
               </div>
 
               {/* Bottom Inner Card */}
-              <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+              <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
                 <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
                 <code className="text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
               </div>
