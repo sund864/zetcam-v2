@@ -300,36 +300,39 @@ export default function App() {
 
             /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
             .home-logo-text {
-              font-size: 3.5rem !important; /* Huge logo */
+              font-size: 2.5rem !important; /* Adjusted to fit nicely into yellow box */
               line-height: 1.2 !important;
-              margin-top: 4rem !important; /* Push down into yellow box area */
-              margin-bottom: 2rem !important;
+              margin-top: 2rem !important; /* Pulled up closer to the top */
+              margin-bottom: 0 !important;
             }
             .home-tile-container {
-              max-width: 600px !important; /* Match green box width */
-              gap: 3rem !important; /* Massive gap to distribute weight */
-              padding-top: 2rem !important;
+              max-width: 85% !important; /* Forces width to match green box */
+              width: 100% !important;
+              gap: 2rem !important; /* Cleaner spacing */
+              margin-top: -10vh !important; /* Pulls the block up from the bottom */
             }
             .home-tile {
-              min-height: 280px !important; /* Match green box height */
-              border-radius: 40px !important;
+              width: 100% !important;
+              max-width: 100% !important;
+              min-height: 220px !important; /* Deep wide rectangle like green box */
+              border-radius: 32px !important;
               display: flex !important;
               flex-direction: column !important;
               justify-content: center !important;
               align-items: center !important;
             }
             .home-tile .icon-wrapper {
-              width: 5.5rem !important; 
-              height: 5.5rem !important;
-              margin-bottom: 1.5rem !important; /* Lock spacing between icon and text */
-              border-radius: 1.5rem !important;
+              width: 4.5rem !important; 
+              height: 4.5rem !important;
+              margin-bottom: 1rem !important; 
+              border-radius: 1.2rem !important;
             }
             .home-tile .icon-wrapper svg {
-              width: 2.5rem !important;
-              height: 2.5rem !important;
+              width: 2.2rem !important;
+              height: 2.2rem !important;
             }
             .home-tile h3 {
-              font-size: 1.8rem !important;
+              font-size: 1.5rem !important;
             }
           }
 
@@ -425,14 +428,14 @@ export default function App() {
             : "flex-row justify-between items-center pt-10 md:pt-4 mb-3 md:mb-6 border-b border-white/5 pb-3") +
           (mode !== 'home' && isNativeApp ? " landscape:hidden" : "") 
         }>
-          <div className="flex flex-col text-center">
+          <div className="flex flex-col text-center w-full">
             <div className="flex items-center gap-2 mb-0.5 justify-center">
               <h1 className={`font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg ${mode === 'home' ? 'home-logo-text text-2xl md:text-3xl' : 'text-lg md:text-2xl'}`}>
                 ZETCAM PRO
               </h1>
             </div>
             {mode !== 'home' && (
-              <div className="text-[10px] font-bold tracking-widest uppercase text-white/40 hidden landscape:block mt-0.5">
+              <div className="text-[10px] font-bold tracking-widest uppercase text-white/40 hidden landscape:block mt-0.5 text-left">
                 V2.0 by ZetNet Architecture
               </div>
             )}
