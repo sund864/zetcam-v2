@@ -170,7 +170,6 @@ export default function App() {
             <span className="text-[10px] text-white/40 group-hover:text-white/70">OLED Blackout</span>
           </button>
           
-          {/* DYNAMIC THEATER MODE BUTTON */}
           {!isFullscreen ? (
             <button 
               onClick={() => { setIsSettingsOpen(false); setIsFullscreen(true); }}
@@ -217,7 +216,6 @@ export default function App() {
             <span className="text-[10px] text-white/40 group-hover:text-white/70">PiP Mode</span>
           </button>
 
-          {/* DYNAMIC THEATER MODE BUTTON */}
           {!isFullscreen ? (
             <button 
               onClick={() => { setIsSettingsOpen(false); setIsFullscreen(true); }}
@@ -370,12 +368,17 @@ export default function App() {
             : "flex-row justify-between items-center pt-10 md:pt-4 mb-3 md:mb-6 border-b border-white/5 pb-3") +
           (mode !== 'home' && isNativeApp ? " landscape:hidden" : "") 
         }>
-          <div className={`flex flex-col ${mode === 'home' ? 'items-center text-center' : ''}`}>
+          <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-0.5">
-              <h1 className={`font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg ${mode === 'home' ? 'text-2xl md:text-3xl' : 'text-lg md:text-2xl'}`}>
+              <h1 className="font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg text-lg md:text-2xl">
                 ZETCAM PRO
               </h1>
             </div>
+            {mode !== 'home' && (
+              <div className="text-[10px] font-bold tracking-widest uppercase text-white/40 hidden landscape:block mt-0.5">
+                V2.0 by ZetNet Architecture
+              </div>
+            )}
           </div>
 
           {mode !== 'home' && (
@@ -587,7 +590,7 @@ export default function App() {
           <div 
             className={
               isFullscreen 
-                ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default" 
+                ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default" + (mode === 'camera' ? ' h-full w-full' : '')
                 : "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative " +
                   (!isConnected ? 'hidden ' : 'block ') +
                   (isNativeApp && isConnected ? "landscape:w-[70%] landscape:flex-none" : "")
@@ -633,21 +636,15 @@ export default function App() {
             
           {/* Disconnected Receiver (Left Card) */}
           {isNativeApp && !isConnected && (
-            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative">
-              
-              <button onClick={executeExit} className="absolute top-6 left-6 flex items-center justify-center text-white/70 hover:text-white bg-white/5 w-10 h-10 rounded-full border border-white/10 hover:bg-white/10 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)] active:scale-95">
-                <ArrowLeft size={18} />
-              </button>
-
-              <div className="flex flex-col items-center text-center gap-2 mt-4">
-                <h1 className="font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg text-2xl">ZETCAM PRO</h1>
-                <h3 className="text-xl font-bold tracking-tight drop-shadow-md mt-2">Pair Device</h3>
-                <p className="text-xs text-white/50 font-light">Point mobile lens at this matrix</p>
+            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative">
+              <div className="flex flex-col items-center text-center gap-2 my-auto justify-center">
+                <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
+                <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
               </div>
 
-              <div className="w-full bg-black/60 rounded-2xl p-4 border border-white/10 overflow-hidden shadow-inner flex flex-col items-center justify-center gap-2 mt-auto mb-2">
-                <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Secure PIN</span>
-                <code className="text-xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
+              <div className="w-full max-w-[260px] bg-black/60 rounded-xl p-3 border border-white/10 overflow-hidden shadow-inner flex flex-col items-center gap-1 mt-auto">
+                <span className="text-[8px] text-white/30 uppercase tracking-widest font-bold">Secure PIN</span>
+                <code className="text-sm text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
               </div>
             </div>
           )}
