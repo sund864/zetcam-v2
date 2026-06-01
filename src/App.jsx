@@ -336,13 +336,36 @@ export default function App() {
               align-items: center !important; /* Stop stretching so they can be squares */
             }
 
-            .landscape\\:max-w-\\[450px\\] {
+            /* 50-50 Split for Left Card contents */
+            .left-card-tile {
               aspect-ratio: 1 / 1 !important;
               height: auto !important;
-              margin: auto 0 !important; /* Centers the square vertically */
+              margin: auto 0 !important; 
               display: flex !important;
               flex-direction: column !important;
-              justify-content: space-between !important; /* Forces PIN to bottom, text to center */
+            }
+            
+            .left-card-tile > div:nth-of-type(1),
+            .left-card-tile > div:nth-of-type(2) {
+              flex: 1 !important;
+              display: flex !important;
+              flex-direction: column !important;
+              justify-content: center !important;
+              align-items: center !important;
+              height: 50% !important;
+              margin: 0 auto !important;
+              width: 100% !important;
+            }
+
+            /* Center align QR and Scanner inside Right Card */
+            .right-card-tile {
+              aspect-ratio: 1 / 1 !important;
+              height: auto !important;
+              margin: auto 0 !important; 
+              display: flex !important;
+              flex-direction: column !important;
+              justify-content: center !important;
+              align-items: center !important;
             }
 
             /* Keep QR code elements proportional */
@@ -478,7 +501,10 @@ export default function App() {
           
           {/* Disconnected Camera (Left Card) */}
           {isNativeApp && !isConnected && (
-            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative">
+            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+              <button onClick={executeExit} className="absolute top-6 left-6 flex items-center justify-center text-white/70 hover:text-white bg-white/5 w-10 h-10 rounded-full border border-white/10 hover:bg-white/10 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)] active:scale-95">
+                <ArrowLeft size={18} />
+              </button>
               <div className="flex flex-col items-center text-center gap-2 my-auto justify-center">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
@@ -574,7 +600,7 @@ export default function App() {
 
           {/* Disconnected Camera (Scanner Box) - Right Tile */}
           <div className={
-            "flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full " +
+            "flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile " +
             (isConnected ? 'hidden ' : 'flex ') +
             (isNativeApp && !isConnected ? 'z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0' : 'flex-1 md:flex-none md:w-1/3')
           }>
@@ -655,7 +681,11 @@ export default function App() {
             
           {/* Disconnected Receiver (Left Card) */}
           {isNativeApp && !isConnected && (
-            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative">
+            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+              <button onClick={executeExit} className="absolute top-6 left-6 flex items-center justify-center text-white/70 hover:text-white bg-white/5 w-10 h-10 rounded-full border border-white/10 hover:bg-white/10 transition-all shadow-[0_4px_15px_rgba(0,0,0,0.5)] active:scale-95">
+                <ArrowLeft size={18} />
+              </button>
+
               <div className="flex flex-col items-center text-center gap-2 my-auto justify-center">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
@@ -677,7 +707,7 @@ export default function App() {
           )}
 
           <div className={
-            "flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full " +
+            "flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile " +
             (!isConnected ? 'flex ' : 'hidden ') +
             (isNativeApp ? "z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0" : "flex-1 md:flex-none md:w-1/3")
           }>
