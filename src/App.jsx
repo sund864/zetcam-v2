@@ -301,14 +301,24 @@ export default function App() {
 
           /* 2. iPad Landscape Fixes */
           @media (orientation: landscape) {
+            /* GLOBAL: Add top spacing to prevent overlapping the iPad status bar */
+            .landscape\\:pt-4 { padding-top: 3.5rem !important; }
+            .top-6 { top: 3.5rem !important; }
+            .top-4 { top: 3.5rem !important; }
+
+            /* Allow the main video block to naturally fill the available space */
             .landscape\\:w-\\[70\\%\\] {
               width: 100% !important;
               max-width: 100% !important;
               flex: 1 !important;
             }
+
+            /* Hide the ugly fixed sidebars entirely on iPad */
             .landscape\\:w-\\[25\\%\\] {
               display: none !important;
             }
+
+            /* Restore the floating header and push it down below status bar */
             header.landscape\\:hidden {
               display: flex !important;
               position: absolute !important;
@@ -316,18 +326,26 @@ export default function App() {
               left: 0 !important;
               width: 100% !important;
               max-width: 100% !important;
-              padding: 1.5rem 2rem !important;
+              padding: 3.5rem 2rem 1.5rem !important;
               z-index: 50 !important;
               background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
             }
             
-            /* SQUARE CARDS FIX: Force Disconnected Cards to have equal Height/Width */
+            /* SQUARE CARDS FIX: Force Disconnected Cards to have perfectly equal Height/Width and center them */
+            .landscape\\:items-stretch {
+              align-items: center !important; /* Stop stretching so they can be squares */
+            }
+
             .landscape\\:max-w-\\[450px\\] {
               aspect-ratio: 1 / 1 !important;
               height: auto !important;
-              margin-top: 4rem !important; /* Push down cleanly below the header */
+              margin: auto 0 !important; /* Centers the square vertically */
+              display: flex !important;
+              flex-direction: column !important;
+              justify-content: space-between !important; /* Forces PIN to bottom, text to center */
             }
 
+            /* Keep QR code elements proportional */
             .landscape\\:aspect-auto {
               max-width: 320px !important;
               max-height: 320px !important;
@@ -460,7 +478,7 @@ export default function App() {
           
           {/* Disconnected Camera (Left Card) */}
           {isNativeApp && !isConnected && (
-            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative">
+            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative">
               <div className="flex flex-col items-center text-center gap-2 my-auto justify-center">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
@@ -637,7 +655,7 @@ export default function App() {
             
           {/* Disconnected Receiver (Left Card) */}
           {isNativeApp && !isConnected && (
-            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative">
+            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center gap-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative">
               <div className="flex flex-col items-center text-center gap-2 my-auto justify-center">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
