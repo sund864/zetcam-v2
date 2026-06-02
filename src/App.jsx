@@ -380,17 +380,17 @@ export default function App() {
               background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
             }
             
-            /* AUTO DISTRIBUTE HORIZONTAL SPACING */
+            /* FORCE EXPLICIT MASSIVE GAP & MATCH HOME TILE WIDTH */
             .landscape-disconnected-container {
-               justify-content: space-evenly !important;
-               gap: 0 !important; 
+               justify-content: center !important;
+               gap: 5rem !important; /* Huge gap perfectly squeezing the tiles apart */
             }
 
-            /* SQUARE CARDS FIX: Centered balanced tiles */
+            /* Exact match to Home screen tile width (340px) */
             .left-card-tile, .right-card-tile {
               width: 100% !important;
-              max-width: 320px !important; 
-              height: 320px !important;    
+              max-width: 340px !important; 
+              height: 340px !important;    
               aspect-ratio: 1 / 1 !important;
               margin: auto 0 !important; 
               display: flex !important;
@@ -843,23 +843,6 @@ export default function App() {
 
         </div>
       )}
-
-      {!isFullscreen && (
-        isNativeApp ? (
-          <div className={`absolute left-0 w-full flex justify-center pointer-events-none z-20 transition-all duration-700 ease-in-out ${mode === 'home' ? 'bottom-24 landscape:bottom-12' : 'bottom-12 landscape:hidden'}`}>
-            <div className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-gray-100 via-white to-gray-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] opacity-60">
-              V2.0 by ZetNet Architecture
-            </div>
-          </div>
-        ) : (
-          <div className="absolute bottom-24 landscape:bottom-12 left-0 w-full flex justify-center pointer-events-none z-20 transition-all duration-700 ease-in-out">
-            <div className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-gray-100 via-white to-gray-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] opacity-60">
-              V2.0 by ZetNet Architecture
-            </div>
-          </div>
-        )
-      )}
-
     </div>
   );
 }
