@@ -132,12 +132,12 @@ export default function App() {
       {mode === 'camera' && (
         <button 
           onClick={toggleLens}
-          className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group active:scale-95"
+          className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
         >
           <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-            <Repeat size={14} className="text-blue-400 group-hover:rotate-180 transition-transform duration-500" /> Switch Lens
+            <Repeat size={14} className="text-blue-400" /> Switch Lens
           </div>
-          <span className="text-[10px] text-white/40 group-hover:text-white/70 uppercase font-bold tracking-wider">
+          <span className="text-[10px] text-white/40 uppercase font-bold tracking-wider">
             {facingMode === 'environment' ? 'Back' : 'Front'}
           </span>
         </button>
@@ -153,7 +153,7 @@ export default function App() {
             className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
           >
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-              <Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40 group-hover:text-emerald-400/50"} /> Stay Awake
+              <Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40"} /> Stay Awake
             </div>
             <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${stayAwake ? 'bg-emerald-500' : 'bg-white/10'}`}>
               <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${stayAwake ? 'left-4' : 'left-0 bg-white/40'}`}></div>
@@ -167,7 +167,7 @@ export default function App() {
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
               <Battery size={14} className="text-gray-400 group-hover:text-white" /> Battery Saver
             </div>
-            <span className="text-[10px] text-white/40 group-hover:text-white/70">OLED Blackout</span>
+            <span className="text-[10px] text-white/40">OLED Blackout</span>
           </button>
           
           {!isFullscreen ? (
@@ -178,7 +178,7 @@ export default function App() {
               <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
                 <Maximize size={14} className="text-pink-400" /> Theater Mode
               </div>
-              <span className="text-[10px] text-white/40 group-hover:text-white/70">Full Screen</span>
+              <span className="text-[10px] text-white/40">Full Screen</span>
             </button>
           ) : (
             <button 
@@ -188,7 +188,7 @@ export default function App() {
               <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
                 <Minimize size={14} className="text-pink-400" /> Exit Theater
               </div>
-              <span className="text-[10px] text-white/40 group-hover:text-white/70">Close</span>
+              <span className="text-[10px] text-white/40">Close</span>
             </button>
           )}
         </>
@@ -203,7 +203,7 @@ export default function App() {
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
               <Monitor size={14} className="text-emerald-400" /> UI Rotation
             </div>
-            <span className="text-[10px] text-white/40 group-hover:text-white/70">{uiRotation}°</span>
+            <span className="text-[10px] text-white/40">{uiRotation}°</span>
           </button>
           
           <button 
@@ -213,7 +213,7 @@ export default function App() {
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
               <PictureInPicture size={14} className="text-blue-400" /> Pop-out Player
             </div>
-            <span className="text-[10px] text-white/40 group-hover:text-white/70">PiP Mode</span>
+            <span className="text-[10px] text-white/40">PiP Mode</span>
           </button>
 
           {!isFullscreen ? (
@@ -224,7 +224,7 @@ export default function App() {
               <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
                 <Maximize size={14} className="text-pink-400" /> Theater Mode
               </div>
-              <span className="text-[10px] text-white/40 group-hover:text-white/70">Full Screen</span>
+              <span className="text-[10px] text-white/40">Full Screen</span>
             </button>
           ) : (
             <button 
@@ -234,7 +234,7 @@ export default function App() {
               <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
                 <Minimize size={14} className="text-pink-400" /> Exit Theater
               </div>
-              <span className="text-[10px] text-white/40 group-hover:text-white/70">Close</span>
+              <span className="text-[10px] text-white/40">Close</span>
             </button>
           )}
         </>
@@ -393,6 +393,7 @@ export default function App() {
                margin-left: auto !important;
                margin-right: auto !important;
                justify-content: center !important;
+               flex-direction: row !important;
                gap: 3rem !important; 
                padding-left: 1.5rem !important;
                padding-right: 1.5rem !important;
@@ -536,257 +537,246 @@ export default function App() {
 
       {/* --- CAMERA SCREEN --- */}
       {mode === 'camera' && (
-        <div className={
-          "w-full z-10 relative flex-1 flex flex-col items-center justify-center"
-        }>
+        <div className="w-full z-10 relative flex-1 flex flex-col items-center justify-center">
           
-          {/* Disconnected Camera (Configuration Setup View) */}
-          {!isConnected && (
-            <div className="w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row">
-              <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] left-card-tile">
-                {/* Top Inner Card */}
-                <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
-                  <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
-                  <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
-                </div>
-
-                {/* Bottom Inner Card */}
-                <div className="flex flex-col items-center justify-center gap-3 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
-                    <div className="flex items-center justify-center gap-3 w-full opacity-50">
-                      <div className="h-px bg-white/20 flex-1"></div>
-                      <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
-                      <div className="h-px bg-white/20 flex-1"></div>
-                    </div>
-                    <div className="flex flex-col gap-3 w-full group justify-center">
-                      <input 
-                        type="text" placeholder="Target PIN" value={remoteId} onChange={(e) => setRemoteId(e.target.value)}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white placeholder:text-white/30 text-center focus:outline-none focus:border-pink-500/50 shadow-inner font-mono tracking-widest"
-                      />
-                      <button 
-                        onClick={executeManualConnect}
-                        className="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:shadow-[0_0_25px_rgba(236,72,153,0.6)] active:scale-95 transition-all"
-                      >
-                        Link
-                      </button>
-                    </div>
-                </div>
+          {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
+          <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
+            <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] left-card-tile">
+              {/* Top Inner Card */}
+              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+                <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
+                <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
               </div>
 
-              {/* Disconnected Camera (Scanner Box) - Right Tile */}
-              <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile">
-                <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md landscape:hidden">Scan Matrix</h3>
-                <p className="shrink-0 text-[11px] text-white/50 mb-4 font-light landscape:hidden">Align PC matrix inside the frame</p>
-                
-                <div className="w-full max-w-[260px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] mb-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-0 landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:aspect-auto">
-                   <div id="reader" className="absolute inset-0 w-full h-full z-10 flex items-center justify-center"></div>
-                   <span className="text-[10px] text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
-                </div>
+              {/* Bottom Inner Card */}
+              <div className="flex flex-col items-center justify-center gap-3 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+                  <div className="flex items-center justify-center gap-3 w-full opacity-50">
+                    <div className="h-px bg-white/20 flex-1"></div>
+                    <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
+                    <div className="h-px bg-white/20 flex-1"></div>
+                  </div>
+                  <div className="flex flex-col gap-3 w-full group justify-center">
+                    <input 
+                      type="text" placeholder="Target PIN" value={remoteId} onChange={(e) => setRemoteId(e.target.value)}
+                      className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white placeholder:text-white/30 text-center focus:outline-none focus:border-pink-500/50 shadow-inner font-mono tracking-widest"
+                    />
+                    <button 
+                      onClick={executeManualConnect}
+                      className="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:shadow-[0_0_25px_rgba(236,72,153,0.6)] active:scale-95 transition-all"
+                    >
+                      Link
+                    </button>
+                  </div>
               </div>
             </div>
-          )}
 
-          {/* Active Stream Layout Container */}
-          {isConnected && (
-            <div className="w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4">
-              <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] order-first landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden">
-                <span className="text-xs md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0">
-                  <Radio size={16} className="animate-pulse shrink-0" /> <span className="truncate">{status}</span>
-                </span>
-
-                <div className="hidden landscape:flex flex-col gap-2 mt-4 flex-1 overflow-y-auto custom-scrollbar pr-1 pb-2">
-                  <div className="flex flex-col gap-2 px-3 py-3 bg-white/5 rounded-xl">
-                    <div className="flex items-center gap-2 text-xs font-medium text-white/80"><Video size={14} className="text-indigo-400" /> Resolution</div>
-                    <select value={videoQuality} onChange={(e) => changeQuality(e.target.value)} className="bg-black/60 border border-white/10 rounded-lg text-[10px] text-white/80 font-bold px-2 py-1.5 outline-none focus:border-indigo-500/50 cursor-pointer">
-                      <option value="720p">720p</option>
-                      <option value="1080p">1080p (HD)</option>
-                      <option value="1440p">1440p (2K)</option>
-                      <option value="4K">4K (Ultra)</option>
-                    </select>
-                  </div>
-
-                  <button onClick={toggleLens} className="flex items-center justify-between gap-3 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
-                    <div className="flex items-center gap-2"><Repeat size={14} className="text-blue-400" /> <span className="text-xs font-medium">Lens</span></div>
-                    <span className="text-[9px] text-white/40 uppercase font-bold">{facingMode === 'environment' ? 'Back' : 'Front'}</span>
-                  </button>
-
-                  <button onClick={handleTorchToggle} className="flex items-center justify-between px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
-                    <div className="flex items-center gap-2"><Zap size={14} className={displayTorch ? "text-yellow-400" : "text-white/40"} /> <span className="text-xs font-medium">Light</span></div>
-                    <div className={`w-7 h-3.5 rounded-full border border-white/5 relative transition-colors ${displayTorch ? 'bg-pink-500' : 'bg-white/10'}`}>
-                      <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${displayTorch ? 'left-3.5' : 'left-0 bg-white/40'}`}></div>
-                    </div>
-                  </button>
-
-                  <div className="flex flex-col gap-2 px-3 py-3 bg-white/5 rounded-xl">
-                    <div className="flex items-center gap-2 text-xs font-medium text-white/80"><Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Exposure</div>
-                    <input type="range" min="0" max="100" value={displayExposure} onChange={(e) => handleExposureChange(e.target.value)} className="w-full h-1 bg-white/10 rounded-lg appearance-none accent-orange-400" />
-                  </div>
-
-                  <button onClick={toggleStayAwake} className="flex items-center justify-between px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
-                    <div className="flex items-center gap-2"><Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40"} /> <span className="text-xs font-medium">Awake</span></div>
-                    <div className={`w-7 h-3.5 rounded-full border border-white/5 relative transition-colors ${stayAwake ? 'bg-emerald-500' : 'bg-white/10'}`}>
-                      <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${stayAwake ? 'left-3.5' : 'left-0 bg-white/40'}`}></div>
-                    </div>
-                  </button>
-
-                  <button onClick={toggleBatterySaver} className="flex items-center justify-between px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
-                    <div className="flex items-center gap-2"><Battery size={14} className="text-gray-400" /> <span className="text-xs font-medium">Battery</span></div>
-                  </button>
-
-                  {!isFullscreen && (
-                    <button onClick={() => { setIsSettingsOpen(false); setIsFullscreen(true); }} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors mt-2">
-                      <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
-                    </button>
-                  )}
-                </div>
-                
-                <div className="hidden landscape:flex shrink-0 pt-3 border-t border-white/10 mt-auto">
-                  <button onClick={executeExit} className="flex items-center justify-center gap-2 w-full px-3 py-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 font-bold text-xs transition-colors border border-red-500/20">
-                    <LogOut size={14} /> Terminate
-                  </button>
-                </div>
+            {/* Disconnected Camera (Scanner Box) - Right Tile */}
+            <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile">
+              <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md landscape:hidden">Scan Matrix</h3>
+              <p className="shrink-0 text-[11px] text-white/50 mb-4 font-light landscape:hidden">Align PC matrix inside the frame</p>
+              
+              <div className="w-full max-w-[260px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] mb-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-0 landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:aspect-auto">
+                 <div id="reader" className="absolute inset-0 w-full h-full z-10 flex items-center justify-center"></div>
+                 <span className="text-[10px] text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
               </div>
+            </div>
+          </div>
 
-              <div 
-                className={
-                  isFullscreen 
-                    ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default h-full w-full"
-                    : "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative landscape:w-[70%] landscape:flex-none"
-                }
-                onMouseMove={handleFsInteraction}
-                onClick={handleFsInteraction}
-              >
-                <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                
-                {isFullscreen && (
-                  <div className={`absolute top-6 right-6 flex items-center gap-3 transition-opacity duration-500 ${fsControlsVisible || isSettingsOpen ? 'opacity-100' : 'opacity-0'}`}>
-                    <div className="relative">
-                      <button onClick={(e) => { e.stopPropagation(); setIsSettingsOpen(!isSettingsOpen); }} className="flex items-center justify-center w-10 h-10 text-white bg-black/60 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/10 transition-all shadow-lg active:scale-95">
-                        <Settings size={18} className={isSettingsOpen ? "animate-spin-slow" : ""} />
-                      </button>
-                      {isSettingsOpen && renderSettingsDropdown()}
-                    </div>
+          {/* Active Live Stream Video Previews (Never Unmounted) */}
+          <div className={`w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
+            <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] order-first landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden">
+              <span className="text-xs md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0">
+                <Radio size={16} className="animate-pulse shrink-0" /> <span className="truncate">{status}</span>
+              </span>
+
+              <div className="hidden landscape:flex flex-col gap-2 mt-4 flex-1 overflow-y-auto custom-scrollbar pr-1 pb-2">
+                <div className="flex flex-col gap-2 px-3 py-3 bg-white/5 rounded-xl">
+                  <div className="flex items-center gap-2 text-xs font-medium text-white/80"><Video size={14} className="text-indigo-400" /> Resolution</div>
+                  <select value={videoQuality} onChange={(e) => changeQuality(e.target.value)} className="bg-black/60 border border-white/10 rounded-lg text-[10px] text-white/80 font-bold px-2 py-1.5 outline-none focus:border-indigo-500/50 cursor-pointer">
+                    <option value="720p">720p</option>
+                    <option value="1080p">1080p (HD)</option>
+                    <option value="1440p">1440p (2K)</option>
+                    <option value="4K">4K (Ultra)</option>
+                  </select>
+                </div>
+
+                <button onClick={toggleLens} className="flex items-center justify-between gap-3 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
+                  <div className="flex items-center gap-2"><Repeat size={14} className="text-blue-400" /> <span className="text-xs font-medium">Lens</span></div>
+                  <span className="text-[9px] text-white/40 uppercase font-bold">{facingMode === 'environment' ? 'Back' : 'Front'}</span>
+                </button>
+
+                <button onClick={handleTorchToggle} className="flex items-center justify-between px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
+                  <div className="flex items-center gap-2"><Zap size={14} className={displayTorch ? "text-yellow-400" : "text-white/40"} /> <span className="text-xs font-medium">Light</span></div>
+                  <div className={`w-7 h-3.5 rounded-full border border-white/5 relative transition-colors ${displayTorch ? 'bg-pink-500' : 'bg-white/10'}`}>
+                    <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${displayTorch ? 'left-3.5' : 'left-0 bg-white/40'}`}></div>
                   </div>
-                )}
+                </button>
+
+                <div className="flex flex-col gap-2 px-3 py-3 bg-white/5 rounded-xl">
+                  <div className="flex items-center gap-2 text-xs font-medium text-white/80"><Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Exposure</div>
+                  <input type="range" min="0" max="100" value={displayExposure} onChange={(e) => handleExposureChange(e.target.value)} className="w-full h-1 bg-white/10 rounded-lg appearance-none accent-orange-400" />
+                </div>
+
+                <button onClick={toggleStayAwake} className="flex items-center justify-between px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
+                  <div className="flex items-center gap-2"><Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40"} /> <span className="text-xs font-medium">Awake</span></div>
+                  <div className={`w-7 h-3.5 rounded-full border border-white/5 relative transition-colors ${stayAwake ? 'bg-emerald-500' : 'bg-white/10'}`}>
+                    <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${stayAwake ? 'left-3.5' : 'left-0 bg-white/40'}`}></div>
+                  </div>
+                </button>
+
+                <button onClick={toggleBatterySaver} className="flex items-center justify-between px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
+                  <div className="flex items-center gap-2"><Battery size={14} className="text-gray-400" /> <span className="text-xs font-medium">Battery</span></div>
+                </button>
 
                 {!isFullscreen && (
-                  <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-xl border border-white/10 text-emerald-400 text-[10px] md:text-[11px] font-bold uppercase px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)] landscape:hidden">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span>
-                    Live
-                  </div>
+                  <button onClick={() => { setIsSettingsOpen(false); setIsFullscreen(true); }} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors mt-2">
+                    <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
+                  </button>
                 )}
               </div>
+              
+              <div className="hidden landscape:flex shrink-0 pt-3 border-t border-white/10 mt-auto">
+                <button onClick={executeExit} className="flex items-center justify-center gap-2 w-full px-3 py-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 font-bold text-xs transition-colors border border-red-500/20">
+                  <LogOut size={14} /> Terminate
+                </button>
+              </div>
             </div>
-          )}
+
+            <div 
+              className={
+                isFullscreen 
+                  ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default h-full w-full"
+                  : "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative landscape:w-[70%] landscape:flex-none"
+              }
+              onMouseMove={handleFsInteraction}
+              onClick={handleFsInteraction}
+            >
+              <video ref={myVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+              
+              {isFullscreen && (
+                <div className={`absolute top-6 right-6 flex items-center gap-3 transition-opacity duration-500 ${fsControlsVisible || isSettingsOpen ? 'opacity-100' : 'opacity-0'}`}>
+                  <div className="relative">
+                    <button onClick={(e) => { e.stopPropagation(); setIsSettingsOpen(!isSettingsOpen); }} className="flex items-center justify-center w-10 h-10 text-white bg-black/60 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/10 transition-all shadow-lg active:scale-95">
+                      <Settings size={18} className={isSettingsOpen ? "animate-spin-slow" : ""} />
+                    </button>
+                    {isSettingsOpen && renderSettingsDropdown()}
+                  </div>
+                </div>
+              )}
+
+              {!isFullscreen && (
+                <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-xl border border-white/10 text-emerald-400 text-[10px] md:text-[11px] font-bold uppercase px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)] landscape:hidden">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span>
+                  Live
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
       {/* --- RECEIVER SCREEN --- */}
       {mode === 'receiver' && (
-        <div className={
-          "w-full z-10 relative flex-1 flex flex-col items-center justify-center"
-        }>
+        <div className="w-full z-10 relative flex-1 flex flex-col items-center justify-center">
             
-          {/* Disconnected Receiver (Configuration Setup View) */}
-          {!isConnected && (
-            <div className="w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row">
-              <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
-                {/* Top Inner Card */}
-                <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
-                  <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
-                  <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
-                </div>
-
-                {/* Bottom Inner Card */}
-                <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
-                  <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
-                  <code className="text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
-                </div>
+          {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
+          <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
+            <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+              
+              {/* Top Inner Card */}
+              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+                <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
+                <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
               </div>
 
-              {/* Disconnected Receiver (QR Code Box) - Right Tile */}
-              <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile">
-                <div className="w-full max-w-[260px] aspect-square mx-auto bg-white p-4 rounded-[24px] shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                  {peerId ? (
-                    <QRCodeSVG value={peerId} className="w-full h-full max-w-[240px] landscape:max-w-none aspect-square relative z-10 drop-shadow-sm" />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center w-full h-full max-w-[240px] aspect-square text-black/40 gap-2 relative z-10">
-                      <RefreshCw className="animate-spin text-purple-600 w-6 h-6 landscape:w-10 landscape:h-10" />
-                      <span className="text-[10px] landscape:text-xs font-bold uppercase tracking-wider text-center">Generating<br/>Key</span>
-                    </div>
-                  )}
-                </div>
+              {/* Bottom Inner Card */}
+              <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+                <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
+                <code className="text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
               </div>
             </div>
-          )}
 
-          {/* Active Live Receiver Output Panel Container */}
-          {isConnected && (
-            <div className="w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4">
-              <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden">
-                <span className="text-xs md:text-sm font-semibold text-purple-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0">
-                  <Monitor size={16} className="animate-pulse shrink-0" /> <span className="truncate">Awaiting Stream Link</span>
-                </span>
-                
-                <div className="hidden landscape:flex flex-col gap-2 mt-2 flex-1 overflow-y-auto custom-scrollbar pr-1 pb-2 text-left">
-                  <button onClick={() => setUiRotation((prev) => (prev + 90) % 360)} className="flex items-center justify-between px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
-                    <div className="flex items-center gap-2"><Monitor size={14} className="text-emerald-400" /> <span className="text-xs font-medium">Rotate UI</span></div>
-                    <span className="text-[10px] text-white/50">{uiRotation}°</span>
-                  </button>
-                  
-                  <button onClick={togglePiP} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
-                    <PictureInPicture size={14} className="text-blue-400 shrink-0" /> <span className="text-xs font-medium truncate">Pop-out Player</span>
-                  </button>
-
-                  <button onClick={() => setIsFullscreen(true)} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
-                    <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
-                  </button>
-
-                  <div className="flex flex-col gap-2 px-3 py-3 bg-white/5 rounded-xl">
-                    <div className="flex items-center gap-2 text-xs font-medium text-white/80"><Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Remote Exp</div>
-                    <input type="range" min="0" max="100" value={displayExposure} onChange={(e) => handleExposureChange(e.target.value)} className="w-full h-1 bg-white/10 rounded-lg appearance-none accent-orange-400" />
-                  </div>
-                </div>
-
-                <div className="hidden landscape:flex shrink-0 pt-3 border-t border-white/10 mt-auto">
-                  <button onClick={executeExit} className="flex items-center justify-center gap-2 w-full px-3 py-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 font-bold text-xs transition-colors border border-red-500/20">
-                    <LogOut size={14} /> Terminate
-                  </button>
-                </div>
-              </div>
-
-              <div 
-                className={
-                  isFullscreen 
-                    ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default h-full w-full" 
-                    : "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] landscape:w-[70%] landscape:flex-none"
-                }
-                onMouseMove={handleFsInteraction}
-                onClick={handleFsInteraction}
-              >
-                <video 
-                  ref={remoteVideoRef} 
-                  autoPlay 
-                  playsInline 
-                  className="w-full h-full object-contain"
-                  style={{ transform: `rotate(${uiRotation}deg)`, transition: 'transform 0.3s ease-in-out' }}
-                />
-
-                {isFullscreen && (
-                  <div className={`absolute top-6 right-6 flex items-center gap-3 transition-opacity duration-500 ${fsControlsVisible || isSettingsOpen ? 'opacity-100' : 'opacity-0'}`}>
-                    <div className="relative">
-                      <button onClick={(e) => { e.stopPropagation(); setIsSettingsOpen(!isSettingsOpen); }} className="flex items-center justify-center w-10 h-10 text-white bg-black/60 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/10 transition-all shadow-lg active:scale-95">
-                        <Settings size={18} className={isSettingsOpen ? "animate-spin-slow" : ""} />
-                      </button>
-                      {isSettingsOpen && renderSettingsDropdown()}
-                    </div>
+            {/* Disconnected Receiver (QR Code Box) - Right Tile */}
+            <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile">
+              <div className="w-full max-w-[260px] aspect-square mx-auto bg-white p-4 rounded-[24px] shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
+                <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                {peerId ? (
+                  <QRCodeSVG value={peerId} className="w-full h-full max-w-[240px] landscape:max-w-none aspect-square relative z-10 drop-shadow-sm" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center w-full h-full max-w-[240px] aspect-square text-black/40 gap-2 relative z-10">
+                    <RefreshCw className="animate-spin text-purple-600 w-6 h-6 landscape:w-10 landscape:h-10" />
+                    <span className="text-[10px] landscape:text-xs font-bold uppercase tracking-wider text-center">Generating<br/>Key</span>
                   </div>
                 )}
               </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+
+          {/* Active Live Receiver Output Panel Container (Never Unmounted) */}
+          <div className={`w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
+            <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden">
+              <span className="text-xs md:text-sm font-semibold text-purple-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0">
+                <Monitor size={16} className="animate-pulse shrink-0" /> <span className="truncate">Awaiting Stream Link</span>
+              </span>
+              
+              <div className="hidden landscape:flex flex-col gap-2 mt-2 flex-1 overflow-y-auto custom-scrollbar pr-1 pb-2 text-left">
+                <button onClick={() => setUiRotation((prev) => (prev + 90) % 360)} className="flex items-center justify-between px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
+                  <div className="flex items-center gap-2"><Monitor size={14} className="text-emerald-400" /> <span className="text-xs font-medium">Rotate UI</span></div>
+                  <span className="text-[10px] text-white/50">{uiRotation}°</span>
+                </button>
+                
+                <button onClick={togglePiP} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
+                  <PictureInPicture size={14} className="text-blue-400 shrink-0" /> <span className="text-xs font-medium truncate">Pop-out Player</span>
+                </button>
+
+                <button onClick={() => setIsFullscreen(true)} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
+                  <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
+                </button>
+
+                <div className="flex flex-col gap-2 px-3 py-3 bg-white/5 rounded-xl">
+                  <div className="flex items-center gap-2 text-xs font-medium text-white/80"><Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Remote Exp</div>
+                  <input type="range" min="0" max="100" value={displayExposure} onChange={(e) => handleExposureChange(e.target.value)} className="w-full h-1 bg-white/10 rounded-lg appearance-none accent-orange-400" />
+                </div>
+              </div>
+
+              <div className="hidden landscape:flex shrink-0 pt-3 border-t border-white/10 mt-auto">
+                <button onClick={executeExit} className="flex items-center justify-center gap-2 w-full px-3 py-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 font-bold text-xs transition-colors border border-red-500/20">
+                  <LogOut size={14} /> Terminate
+                </button>
+              </div>
+            </div>
+
+            <div 
+              className={
+                isFullscreen 
+                  ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default h-full w-full" 
+                  : "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] landscape:w-[70%] landscape:flex-none"
+              }
+              onMouseMove={handleFsInteraction}
+              onClick={handleFsInteraction}
+            >
+              <video 
+                ref={remoteVideoRef} 
+                autoPlay 
+                playsInline 
+                className="w-full h-full object-contain"
+                style={{ transform: `rotate(${uiRotation}deg)`, transition: 'transform 0.3s ease-in-out' }}
+              />
+
+              {isFullscreen && (
+                <div className={`absolute top-6 right-6 flex items-center gap-3 transition-opacity duration-500 ${fsControlsVisible || isSettingsOpen ? 'opacity-100' : 'opacity-0'}`}>
+                  <div className="relative">
+                    <button onClick={(e) => { e.stopPropagation(); setIsSettingsOpen(!isSettingsOpen); }} className="flex items-center justify-center w-10 h-10 text-white bg-black/60 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/10 transition-all shadow-lg active:scale-95">
+                      <Settings size={18} className={isSettingsOpen ? "animate-spin-slow" : ""} />
+                    </button>
+                    {isSettingsOpen && renderSettingsDropdown()}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* RE-ANCHORED UNIVERSAL HOME SCREEN FOOTER */}
       {mode === 'home' && (
