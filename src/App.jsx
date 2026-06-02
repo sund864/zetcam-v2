@@ -132,12 +132,12 @@ export default function App() {
       {mode === 'camera' && (
         <button 
           onClick={toggleLens}
-          className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+          className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group active:scale-95"
         >
           <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-            <Repeat size={14} className="text-blue-400" /> Switch Lens
+            <Repeat size={14} className="text-blue-400 group-hover:rotate-180 transition-transform duration-500" /> Switch Lens
           </div>
-          <span className="text-[10px] text-white/40 uppercase font-bold tracking-wider">
+          <span className="text-[10px] text-white/40 group-hover:text-white/70 uppercase font-bold tracking-wider">
             {facingMode === 'environment' ? 'Back' : 'Front'}
           </span>
         </button>
@@ -153,7 +153,7 @@ export default function App() {
             className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
           >
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-              <Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40"} /> Stay Awake
+              <Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40 group-hover:text-emerald-400/50"} /> Stay Awake
             </div>
             <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${stayAwake ? 'bg-emerald-500' : 'bg-white/10'}`}>
               <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${stayAwake ? 'left-4' : 'left-0 bg-white/40'}`}></div>
@@ -167,7 +167,7 @@ export default function App() {
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
               <Battery size={14} className="text-gray-400 group-hover:text-white" /> Battery Saver
             </div>
-            <span className="text-[10px] text-white/40">OLED Blackout</span>
+            <span className="text-[10px] text-white/40 group-hover:text-white/70">OLED Blackout</span>
           </button>
           
           {!isFullscreen ? (
@@ -178,7 +178,7 @@ export default function App() {
               <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
                 <Maximize size={14} className="text-pink-400" /> Theater Mode
               </div>
-              <span className="text-[10px] text-white/40">Full Screen</span>
+              <span className="text-[10px] text-white/40 group-hover:text-white/70">Full Screen</span>
             </button>
           ) : (
             <button 
@@ -188,7 +188,7 @@ export default function App() {
               <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
                 <Minimize size={14} className="text-pink-400" /> Exit Theater
               </div>
-              <span className="text-[10px] text-white/40">Close</span>
+              <span className="text-[10px] text-white/40 group-hover:text-white/70">Close</span>
             </button>
           )}
         </>
@@ -203,7 +203,7 @@ export default function App() {
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
               <Monitor size={14} className="text-emerald-400" /> UI Rotation
             </div>
-            <span className="text-[10px] text-white/40">{uiRotation}°</span>
+            <span className="text-[10px] text-white/40 group-hover:text-white/70">{uiRotation}°</span>
           </button>
           
           <button 
@@ -213,7 +213,7 @@ export default function App() {
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
               <PictureInPicture size={14} className="text-blue-400" /> Pop-out Player
             </div>
-            <span className="text-[10px] text-white/40">PiP Mode</span>
+            <span className="text-[10px] text-white/40 group-hover:text-white/70">PiP Mode</span>
           </button>
 
           {!isFullscreen ? (
@@ -224,7 +224,7 @@ export default function App() {
               <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
                 <Maximize size={14} className="text-pink-400" /> Theater Mode
               </div>
-              <span className="text-[10px] text-white/40">Full Screen</span>
+              <span className="text-[10px] text-white/40 group-hover:text-white/70">Full Screen</span>
             </button>
           ) : (
             <button 
@@ -234,7 +234,7 @@ export default function App() {
               <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
                 <Minimize size={14} className="text-pink-400" /> Exit Theater
               </div>
-              <span className="text-[10px] text-white/40">Close</span>
+              <span className="text-[10px] text-white/40 group-hover:text-white/70">Close</span>
             </button>
           )}
         </>
@@ -267,167 +267,169 @@ export default function App() {
     </div>
   );
 
+  const iosCustomStyles = `
+    html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+    #reader { width: 100% !important; height: 100% !important; border: none !important; padding: 0 !important; background: transparent !important; display: flex; align-items: center; justify-content: center; }
+    #reader > div { width: 100% !important; height: 100% !important; }
+    #reader video { object-fit: cover !important; border-radius: 24px !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; }
+    #reader img, #reader svg { display: none !important; }
+    #reader__dashboard_section_csr { display: none !important; }
+    video::-webkit-media-controls { display: none !important; }
+    video::-webkit-media-controls-enclosure { display: none !important; }
+    video::-webkit-media-controls-play-button { display: none !important; }
+    video::-webkit-media-controls-start-playback-button { display: none !important; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+    /* --- iOS IPAD LAYOUT PATCH --- */
+    @supports (-webkit-touch-callout: none) {
+      
+      /* 1. iPad Portrait Fixes */
+      @media (orientation: portrait) and (min-width: 768px) {
+        .md\\:flex-row { flex-direction: column !important; }
+        .md\\:w-1\\/3 { width: 100% !important; max-width: 450px !important; }
+        .max-w-sm.backdrop-blur-2xl { max-width: 450px !important; padding: 1.25rem !important; border-radius: 32px !important; }
+        .max-w-\\[260px\\] { max-width: 350px !important; }
+        .aspect-square { min-height: 350px !important; }
+
+        /* Match portrait QR/Scanner tile to perfectly mimic the others */
+        .right-card-tile, .portrait-status-pill {
+          width: 70% !important;
+          max-width: 70% !important;
+          margin-left: auto !important;
+          margin-right: auto !important;
+        }
+        .right-card-tile {
+          aspect-ratio: 1 / 1 !important;
+          height: auto !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+          align-items: center !important;
+        }
+
+        /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
+        .home-logo-text {
+          font-size: 2.5rem !important; 
+          line-height: 1.2 !important;
+          margin-top: 2rem !important; 
+          margin-bottom: 0 !important;
+        }
+        .home-tile-container {
+          max-width: 70% !important; 
+          width: 100% !important;
+          gap: 4.5rem !important; 
+          margin-top: -5vh !important; 
+        }
+        .home-tile {
+          width: 100% !important;
+          max-width: 100% !important;
+          min-height: 220px !important; 
+          border-radius: 32px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+          align-items: center !important;
+        }
+        .home-tile .icon-wrapper {
+          width: 4.5rem !important; 
+          height: 4.5rem !important;
+          margin-bottom: 1rem !important; 
+          border-radius: 1.2rem !important;
+        }
+        .home-tile .icon-wrapper svg {
+          width: 2.2rem !important;
+          height: 2.2rem !important;
+        }
+        .home-tile h3 {
+          font-size: 1.5rem !important;
+        }
+      }
+
+      /* 2. iPad Landscape Fixes */
+      @media (orientation: landscape) {
+        .landscape\\:pt-4 { padding-top: 3.5rem !important; }
+        .top-6 { top: 3.5rem !important; }
+        .top-4 { top: 3.5rem !important; }
+
+        .landscape\\:w-\\[70\\%\\] {
+          width: 100% !important;
+          max-width: 100% !important;
+          flex: 1 !important;
+        }
+
+        .landscape\\:w-\\[25\\%\\] {
+          display: none !important;
+        }
+
+        header.landscape\\:hidden {
+          display: flex !important;
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          padding: 3.5rem 2rem 1.5rem !important;
+          z-index: 50 !important;
+          background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
+        }
+
+        /* HOME SCREEN TILES HEIGHT EXTRA BALANCE */
+        .home-tile {
+          height: calc(200px + 5rem) !important;
+          min-height: calc(200px + 5rem) !important;
+        }
+        
+        /* MATCH HOME SCREEN WIDTH & ADD 3REM GAP */
+        .landscape-disconnected-container {
+           width: 100% !important;
+           max-width: 56rem !important; 
+           margin-left: auto !important;
+           margin-right: auto !important;
+           justify-content: center !important;
+           flex-direction: row !important;
+           gap: 3rem !important; 
+           padding-left: 1.5rem !important;
+           padding-right: 1.5rem !important;
+        }
+
+        /* SQUARE CARDS FIX: Flex-1 configuration matching home length */
+        .left-card-tile, .right-card-tile {
+          flex: 1 1 0% !important;
+          width: 100% !important;
+          max-width: 100% !important; 
+          height: auto !important;    
+          aspect-ratio: 1 / 1 !important;
+          margin: auto 0 !important; 
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+          align-items: center !important;
+          gap: 1.5rem !important;
+          padding: 1.5rem !important;
+        }
+
+        /* Keep QR code elements proportional */
+        .landscape\\:aspect-auto {
+          max-width: 320px !important;
+          max-height: 320px !important;
+          aspect-ratio: 1 / 1 !important;
+          margin-left: auto !important;
+          margin-right: auto !important;
+          flex: none !important;
+        }
+        .landscape\\:flex-1 { max-width: 500px !important; }
+      }
+    }
+  `;
+
   return (
     <div className={
       "h-[100dvh] w-full bg-[#0a0510] text-white font-sans antialiased " +
       "p-3 md:p-6 flex flex-col items-center justify-start overflow-hidden selection:bg-pink-500/30 relative"
     }>
       
-      <style>{`
-        html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-        #reader { width: 100% !important; height: 100% !important; border: none !important; padding: 0 !important; background: transparent !important; display: flex; align-items: center; justify-content: center; }
-        #reader > div { width: 100% !important; height: 100% !important; }
-        #reader video { object-fit: cover !important; border-radius: 24px !important; width: 100% !important; height: 100% !important; position: absolute !important; inset: 0 !important; }
-        #reader img, #reader svg { display: none !important; }
-        #reader__dashboard_section_csr { display: none !important; }
-        video::-webkit-media-controls { display: none !important; }
-        video::-webkit-media-controls-enclosure { display: none !important; }
-        video::-webkit-media-controls-play-button { display: none !important; }
-        video::-webkit-media-controls-start-playback-button { display: none !important; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-
-        /* --- iOS IPAD LAYOUT PATCH --- */
-        @supports (-webkit-touch-callout: none) {
-          
-          /* 1. iPad Portrait Fixes */
-          @media (orientation: portrait) and (min-width: 768px) {
-            .md\\:flex-row { flex-direction: column !important; }
-            .md\\:w-1\\/3 { width: 100% !important; max-width: 450px !important; }
-            .max-w-sm.backdrop-blur-2xl { max-width: 450px !important; padding: 1.25rem !important; border-radius: 32px !important; }
-            .max-w-\\[260px\\] { max-width: 350px !important; }
-            .aspect-square { min-height: 350px !important; }
-
-            /* Match portrait QR/Scanner tile to perfectly mimic the others */
-            .right-card-tile, .portrait-status-pill {
-              width: 70% !important;
-              max-width: 70% !important;
-              margin-left: auto !important;
-              margin-right: auto !important;
-            }
-            .right-card-tile {
-              aspect-ratio: 1 / 1 !important;
-              height: auto !important;
-              display: flex !important;
-              flex-direction: column !important;
-              justify-content: center !important;
-              align-items: center !important;
-            }
-
-            /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
-            .home-logo-text {
-              font-size: 2.5rem !important; 
-              line-height: 1.2 !important;
-              margin-top: 2rem !important; 
-              margin-bottom: 0 !important;
-            }
-            .home-tile-container {
-              max-width: 70% !important; 
-              width: 100% !important;
-              gap: 4.5rem !important; 
-              margin-top: -5vh !important; 
-            }
-            .home-tile {
-              width: 100% !important;
-              max-width: 100% !important;
-              min-height: 220px !important; 
-              border-radius: 32px !important;
-              display: flex !important;
-              flex-direction: column !important;
-              justify-content: center !important;
-              align-items: center !important;
-            }
-            .home-tile .icon-wrapper {
-              width: 4.5rem !important; 
-              height: 4.5rem !important;
-              margin-bottom: 1rem !important; 
-              border-radius: 1.2rem !important;
-            }
-            .home-tile .icon-wrapper svg {
-              width: 2.2rem !important;
-              height: 2.2rem !important;
-            }
-            .home-tile h3 {
-              font-size: 1.5rem !important;
-            }
-          }
-
-          /* 2. iPad Landscape Fixes */
-          @media (orientation: landscape) {
-            .landscape\\:pt-4 { padding-top: 3.5rem !important; }
-            .top-6 { top: 3.5rem !important; }
-            .top-4 { top: 3.5rem !important; }
-
-            .landscape\\:w-\\[70\\%\\] {
-              width: 100% !important;
-              max-width: 100% !important;
-              flex: 1 !important;
-            }
-
-            .landscape\\:w-\\[25\\%\\] {
-              display: none !important;
-            }
-
-            header.landscape\\:hidden {
-              display: flex !important;
-              position: absolute !important;
-              top: 0 !important;
-              left: 0 !important;
-              width: 100% !important;
-              max-width: 100% !important;
-              padding: 3.5rem 2rem 1.5rem !important;
-              z-index: 50 !important;
-              background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
-            }
-
-            /* HOME SCREEN TILES HEIGHT EXTRA BALANCE */
-            .home-tile {
-              height: calc(200px + 5rem) !important;
-              min-height: calc(200px + 5rem) !important;
-            }
-            
-            /* MATCH HOME SCREEN WIDTH & ADD 3REM GAP */
-            .landscape-disconnected-container {
-               width: 100% !important;
-               max-width: 56rem !important; 
-               margin-left: auto !important;
-               margin-right: auto !important;
-               justify-content: center !important;
-               flex-direction: row !important;
-               gap: 3rem !important; 
-               padding-left: 1.5rem !important;
-               padding-right: 1.5rem !important;
-            }
-
-            /* SQUARE CARDS FIX: Flex-1 configuration matching home length */
-            .left-card-tile, .right-card-tile {
-              flex: 1 1 0% !important;
-              width: 100% !important;
-              max-width: 100% !important; 
-              height: auto !important;    
-              aspect-ratio: 1 / 1 !important;
-              margin: auto 0 !important; 
-              display: flex !important;
-              flex-direction: column !important;
-              justify-content: center !important;
-              align-items: center !important;
-              gap: 1.5rem !important;
-              padding: 1.5rem !important;
-            }
-
-            /* Keep QR code elements proportional */
-            .landscape\\:aspect-auto {
-              max-width: 320px !important;
-              max-height: 320px !important;
-              aspect-ratio: 1 / 1 !important;
-              margin-left: auto !important;
-              margin-right: auto !important;
-              flex: none !important;
-            }
-            .landscape\\:flex-1 { max-width: 500px !important; }
-          }
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{ __html: iosCustomStyles }} />
 
       {batterySaver && (
         <div 
@@ -773,10 +775,24 @@ export default function App() {
                   </div>
                 </div>
               )}
+              
+              {!isConnected && !isNativeApp && (
+                  <div className="absolute inset-0 flex flex-row md:flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-4 md:gap-6 text-left md:text-center p-4 md:p-8">
+                    <div className="shrink-0 p-4 md:p-6 bg-purple-500/10 rounded-full border border-purple-500/30 text-purple-400 animate-pulse shadow-[0_0_40px_rgba(168,85,247,0.3)]">
+                      <Monitor className="w-6 h-6 md:w-12 md:h-12 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-base md:text-2xl font-bold tracking-tight drop-shadow-md">Awaiting Stream Link</h4>
+                      <p className="hidden md:block text-base text-white/60 max-w-md mx-auto leading-relaxed font-light mt-2">
+                        Remote video frames will mount directly to this viewport the moment your phone confirms the authentication matrix.
+                      </p>
+                    </div>
+                  </div>
+              )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* RE-ANCHORED UNIVERSAL HOME SCREEN FOOTER */}
       {mode === 'home' && (
