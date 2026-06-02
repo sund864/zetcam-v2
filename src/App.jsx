@@ -379,6 +379,12 @@ export default function App() {
               z-index: 50 !important;
               background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
             }
+
+            /* ADD 5REM HEIGHT TO HOME TILES IN LANDSCAPE */
+            .home-tile {
+              height: calc(200px + 5rem) !important;
+              min-height: calc(200px + 5rem) !important;
+            }
             
             /* MATCH HOME SCREEN WIDTH & ADD 3REM GAP */
             .landscape-disconnected-container {
