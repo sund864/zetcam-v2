@@ -135,7 +135,7 @@ export default function App() {
           className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group active:scale-95"
         >
           <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-            <Repeat size={14} className="text-blue-400" /> Switch Lens
+            <Repeat size={14} className="text-blue-400 group-hover:rotate-180 transition-transform duration-500" /> Switch Lens
           </div>
           <span className="text-[10px] text-white/40 group-hover:text-white/70 uppercase font-bold tracking-wider">
             {facingMode === 'environment' ? 'Back' : 'Front'}
@@ -153,7 +153,7 @@ export default function App() {
             className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
           >
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-              <Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40"} /> Stay Awake
+              <Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40 group-hover:text-emerald-400/50"} /> Stay Awake
             </div>
             <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${stayAwake ? 'bg-emerald-500' : 'bg-white/10'}`}>
               <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${stayAwake ? 'left-4' : 'left-0 bg-white/40'}`}></div>
@@ -306,22 +306,20 @@ export default function App() {
         .max-w-\\[260px\\] { max-width: 350px !important; }
         .aspect-square { min-height: 350px !important; }
 
-        /* Match portrait Left/Right tiles perfectly */
-        .left-card-tile, .right-card-tile, .portrait-status-pill {
+        /* Match portrait QR/Scanner tile to perfectly mimic the others */
+        .right-card-tile, .portrait-status-pill {
           width: 70% !important;
           max-width: 70% !important;
           margin-left: auto !important;
           margin-right: auto !important;
         }
-        .left-card-tile, .right-card-tile {
+        .right-card-tile {
           aspect-ratio: 1 / 1 !important;
           height: auto !important;
           display: flex !important;
           flex-direction: column !important;
           justify-content: center !important;
           align-items: center !important;
-          gap: 1.5rem !important;
-          padding: 1.5rem !important;
         }
 
         /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
@@ -556,8 +554,8 @@ export default function App() {
         <div className="w-full z-10 relative flex-1 min-h-0 flex flex-col items-center justify-center">
           
           {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
-          <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
-            <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+          <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container landscape:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
+            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
               {/* Top Inner Card */}
               <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
@@ -587,7 +585,7 @@ export default function App() {
             </div>
 
             {/* Disconnected Camera (Scanner Box) - Right Tile */}
-            <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile">
+            <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0">
               <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md landscape:hidden">Scan Matrix</h3>
               <p className="shrink-0 text-[11px] text-white/50 mb-4 font-light landscape:hidden">Align PC matrix inside the frame</p>
               
@@ -696,8 +694,8 @@ export default function App() {
         <div className="w-full z-10 relative flex-1 min-h-0 flex flex-col items-center justify-center">
             
           {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
-          <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
-            <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+          <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container landscape:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
+            <div className="hidden landscape:flex landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
               
               {/* Top Inner Card */}
               <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
@@ -713,7 +711,7 @@ export default function App() {
             </div>
 
             {/* Disconnected Receiver (QR Code Box) - Right Tile */}
-            <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile">
+            <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0">
               <div className="w-full max-w-[260px] aspect-square mx-auto bg-white p-4 rounded-[24px] shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 {peerId ? (
