@@ -405,15 +405,6 @@ export default function App() {
            padding-right: 1.5rem !important;
         }
 
-        /* PERFECT ACTIVE VIDEO SAFE AREA (Equal Spacing) */
-        .ipad-active-stream-container {
-          padding-top: 5.5rem !important; /* Clear absolute header */
-          padding-bottom: 2.5rem !important; /* Equal bottom spacing */
-          padding-left: 2.5rem !important; /* Equal left spacing */
-          padding-right: 2.5rem !important; /* Equal right spacing */
-          box-sizing: border-box !important;
-        }
-
         .left-card-tile, .right-card-tile {
           flex: 1 1 0% !important;
           width: 100% !important;
@@ -604,7 +595,7 @@ export default function App() {
           </div>
 
           {/* Active Live Stream Video Previews (Never Unmounted) */}
-          <div className={`ipad-active-stream-container w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
+          <div className={`w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
             <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] order-first landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden">
               <span className="text-xs md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0">
                 <Radio size={16} className="animate-pulse shrink-0" /> <span className="truncate">{status}</span>
@@ -734,7 +725,7 @@ export default function App() {
           </div>
 
           {/* Active Live Receiver Output Panel Container (Never Unmounted) */}
-          <div className={`ipad-active-stream-container w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
+          <div className={`w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
             <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden">
               <span className="text-xs md:text-sm font-semibold text-purple-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0">
                 <Monitor size={16} className="animate-pulse shrink-0" /> <span className="truncate">Awaiting Stream Link</span>
@@ -773,7 +764,7 @@ export default function App() {
               className={
                 isFullscreen 
                   ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default h-full w-full" 
-                  : "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] landscape:w-[70%] landscape:flex-none"
+                  : "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative landscape:w-[70%] landscape:flex-none"
               }
               onMouseMove={handleFsInteraction}
               onClick={handleFsInteraction}
@@ -795,20 +786,6 @@ export default function App() {
                     {isSettingsOpen && renderSettingsDropdown()}
                   </div>
                 </div>
-              )}
-              
-              {!isConnected && !isNativeApp && (
-                  <div className="absolute inset-0 flex flex-row md:flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-4 md:gap-6 text-left md:text-center p-4 md:p-8">
-                    <div className="shrink-0 p-4 md:p-6 bg-purple-500/10 rounded-full border border-purple-500/30 text-purple-400 animate-pulse shadow-[0_0_40px_rgba(168,85,247,0.3)]">
-                      <Monitor className="w-6 h-6 md:w-12 md:h-12 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-base md:text-2xl font-bold tracking-tight drop-shadow-md">Awaiting Stream Link</h4>
-                      <p className="hidden md:block text-base text-white/60 max-w-md mx-auto leading-relaxed font-light mt-2">
-                        Remote video frames will mount directly to this viewport the moment your phone confirms the authentication matrix.
-                      </p>
-                    </div>
-                  </div>
               )}
             </div>
           </div>
