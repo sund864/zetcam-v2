@@ -135,7 +135,7 @@ export default function App() {
           className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group active:scale-95"
         >
           <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-            <Repeat size={14} className="text-blue-400 group-hover:rotate-180 transition-transform duration-500" /> Switch Lens
+            <Repeat size={14} className="text-blue-400" /> Switch Lens
           </div>
           <span className="text-[10px] text-white/40 group-hover:text-white/70 uppercase font-bold tracking-wider">
             {facingMode === 'environment' ? 'Back' : 'Front'}
@@ -153,7 +153,7 @@ export default function App() {
             className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
           >
             <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-              <Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40 group-hover:text-emerald-400/50"} /> Stay Awake
+              <Smartphone size={14} className={stayAwake ? "text-emerald-400" : "text-white/40"} /> Stay Awake
             </div>
             <div className={`w-8 h-4 rounded-full border border-white/5 relative transition-colors ${stayAwake ? 'bg-emerald-500' : 'bg-white/10'}`}>
               <div className={`w-4 h-4 bg-white rounded-full absolute top-[-1px] transition-all shadow-md ${stayAwake ? 'left-4' : 'left-0 bg-white/40'}`}></div>
@@ -320,6 +320,8 @@ export default function App() {
           flex-direction: column !important;
           justify-content: center !important;
           align-items: center !important;
+          gap: 1.5rem !important;
+          padding: 1.5rem !important;
         }
 
         /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
@@ -555,7 +557,7 @@ export default function App() {
           
           {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
           <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
-            <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] left-card-tile">
+            <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
               {/* Top Inner Card */}
               <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
@@ -695,7 +697,7 @@ export default function App() {
             
           {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
           <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
-            <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+            <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
               
               {/* Top Inner Card */}
               <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
@@ -766,7 +768,7 @@ export default function App() {
               className={
                 isFullscreen 
                   ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default h-full w-full" 
-                  : "flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] landscape:w-[70%] landscape:flex-none"
+                  : "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] landscape:w-[70%] landscape:flex-none"
               }
               onMouseMove={handleFsInteraction}
               onClick={handleFsInteraction}
