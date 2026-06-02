@@ -367,9 +367,7 @@ export default function App() {
         .landscape\\:w-\\[70\\%\\] {
           width: 100% !important;
           max-width: 100% !important;
-          height: 100% !important;
-          flex: 1 1 0% !important;
-          margin: 0 !important;
+          flex: 1 !important;
         }
 
         .landscape\\:w-\\[25\\%\\] {
@@ -764,7 +762,7 @@ export default function App() {
               className={
                 isFullscreen 
                   ? "fixed inset-0 z-[100] bg-[#05020a] flex items-center justify-center cursor-default h-full w-full" 
-                  : "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] border border-white/10 relative landscape:w-[70%] landscape:flex-none"
+                  : "w-full flex-1 min-h-0 bg-black rounded-[24px] md:rounded-[32px] border border-white/10 relative overflow-hidden flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.7)] landscape:w-[70%] landscape:flex-none"
               }
               onMouseMove={handleFsInteraction}
               onClick={handleFsInteraction}
