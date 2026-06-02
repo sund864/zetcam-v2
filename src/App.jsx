@@ -367,7 +367,9 @@ export default function App() {
         .landscape\\:w-\\[70\\%\\] {
           width: 100% !important;
           max-width: 100% !important;
-          flex: 1 !important;
+          height: 100% !important;
+          flex: 1 1 0% !important;
+          margin: 0 !important;
         }
 
         .landscape\\:w-\\[25\\%\\] {
@@ -401,6 +403,15 @@ export default function App() {
            gap: 3rem !important; 
            padding-left: 1.5rem !important;
            padding-right: 1.5rem !important;
+        }
+
+        /* PERFECT ACTIVE VIDEO SAFE AREA (Equal Spacing) */
+        .ipad-active-stream-container {
+          padding-top: 5.5rem !important; /* Clear absolute header */
+          padding-bottom: 2.5rem !important; /* Equal bottom spacing */
+          padding-left: 2.5rem !important; /* Equal left spacing */
+          padding-right: 2.5rem !important; /* Equal right spacing */
+          box-sizing: border-box !important;
         }
 
         .left-card-tile, .right-card-tile {
@@ -593,7 +604,7 @@ export default function App() {
           </div>
 
           {/* Active Live Stream Video Previews (Never Unmounted) */}
-          <div className={`w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
+          <div className={`ipad-active-stream-container w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
             <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] order-first landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden">
               <span className="text-xs md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0">
                 <Radio size={16} className="animate-pulse shrink-0" /> <span className="truncate">{status}</span>
@@ -723,7 +734,7 @@ export default function App() {
           </div>
 
           {/* Active Live Receiver Output Panel Container (Never Unmounted) */}
-          <div className={`w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
+          <div className={`ipad-active-stream-container w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
             <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden">
               <span className="text-xs md:text-sm font-semibold text-purple-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0">
                 <Monitor size={16} className="animate-pulse shrink-0" /> <span className="truncate">Awaiting Stream Link</span>
@@ -784,6 +795,20 @@ export default function App() {
                     {isSettingsOpen && renderSettingsDropdown()}
                   </div>
                 </div>
+              )}
+              
+              {!isConnected && !isNativeApp && (
+                  <div className="absolute inset-0 flex flex-row md:flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-4 md:gap-6 text-left md:text-center p-4 md:p-8">
+                    <div className="shrink-0 p-4 md:p-6 bg-purple-500/10 rounded-full border border-purple-500/30 text-purple-400 animate-pulse shadow-[0_0_40px_rgba(168,85,247,0.3)]">
+                      <Monitor className="w-6 h-6 md:w-12 md:h-12 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-base md:text-2xl font-bold tracking-tight drop-shadow-md">Awaiting Stream Link</h4>
+                      <p className="hidden md:block text-base text-white/60 max-w-md mx-auto leading-relaxed font-light mt-2">
+                        Remote video frames will mount directly to this viewport the moment your phone confirms the authentication matrix.
+                      </p>
+                    </div>
+                  </div>
               )}
             </div>
           </div>
