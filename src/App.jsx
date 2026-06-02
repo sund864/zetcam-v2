@@ -206,15 +206,17 @@ export default function App() {
             <span className="text-[10px] text-white/40 group-hover:text-white/70">{uiRotation}°</span>
           </button>
           
-          <button 
-            onClick={() => { setIsSettingsOpen(false); togglePiP(); }}
-            className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
-          >
-            <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
-              <PictureInPicture size={14} className="text-blue-400" /> Pop-out Player
-            </div>
-            <span className="text-[10px] text-white/40 group-hover:text-white/70">PiP Mode</span>
-          </button>
+          {(!isNativeApp) && (
+            <button 
+              onClick={() => { setIsSettingsOpen(false); togglePiP(); }}
+              className="flex items-center justify-between w-full px-3 py-3 rounded-xl hover:bg-white/5 transition-colors group"
+            >
+              <div className="flex items-center gap-3 text-xs font-medium text-white/80 group-hover:text-white">
+                <PictureInPicture size={14} className="text-blue-400" /> Pop-out Player
+              </div>
+              <span className="text-[10px] text-white/40 group-hover:text-white/70">PiP Mode</span>
+            </button>
+          )}
 
           {!isFullscreen ? (
             <button 
@@ -733,9 +735,11 @@ export default function App() {
                   <span className="text-[10px] text-white/50">{uiRotation}°</span>
                 </button>
                 
-                <button onClick={togglePiP} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
-                  <PictureInPicture size={14} className="text-blue-400 shrink-0" /> <span className="text-xs font-medium truncate">Pop-out Player</span>
-                </button>
+                {(!isNativeApp) && (
+                  <button onClick={togglePiP} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
+                    <PictureInPicture size={14} className="text-blue-400 shrink-0" /> <span className="text-xs font-medium truncate">Pop-out Player</span>
+                  </button>
+                )}
 
                 <button onClick={() => setIsFullscreen(true)} className="flex items-center gap-2 px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
                   <Maximize size={14} className="text-pink-400 shrink-0" /> <span className="text-xs font-medium truncate">Full Screen</span>
