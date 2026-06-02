@@ -856,6 +856,16 @@ export default function App() {
 
         </div>
       )}
+
+      {/* RE-ANCHORED UNIVERSAL HOME SCREEN FOOTER */}
+      {mode === 'home' && (
+        <div className="absolute bottom-10 left-0 w-full flex justify-center pointer-events-none z-50">
+          <div className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-gray-100 via-white to-gray-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] opacity-60">
+            V2.0 by ZetNet Architecture
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
