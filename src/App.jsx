@@ -380,17 +380,24 @@ export default function App() {
               background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
             }
             
-            /* FORCE EXPLICIT MASSIVE GAP & MATCH HOME TILE WIDTH */
+            /* MATCH HOME SCREEN WIDTH & ADD 3REM GAP */
             .landscape-disconnected-container {
+               width: 100% !important;
+               max-width: 56rem !important; /* Exact match to home screen landscape:max-w-4xl */
+               margin-left: auto !important;
+               margin-right: auto !important;
                justify-content: center !important;
-               gap: 5rem !important; /* Huge gap perfectly squeezing the tiles apart */
+               gap: 3rem !important; 
+               padding-left: 1.5rem !important;
+               padding-right: 1.5rem !important;
             }
 
-            /* Exact match to Home screen tile width (340px) */
+            /* SQUARE CARDS FIX: Flex-1 to mirror home screen horizontal length */
             .left-card-tile, .right-card-tile {
+              flex: 1 1 0% !important;
               width: 100% !important;
-              max-width: 340px !important; 
-              height: 340px !important;    
+              max-width: 100% !important; 
+              height: auto !important;    
               aspect-ratio: 1 / 1 !important;
               margin: auto 0 !important; 
               display: flex !important;
