@@ -252,7 +252,7 @@ export default function App() {
           max="100" 
           value={displayExposure}
           onChange={(e) => handleExposureChange(e.target.value)}
-          className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-orange-400" 
+          className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-orange-400 touch-none custom-range-slider" 
         />
       </div>
 
@@ -284,6 +284,18 @@ export default function App() {
     /* --- iOS IPAD LAYOUT PATCH --- */
     @supports (-webkit-touch-callout: none) {
       
+      /* FIX iOS RANGE SLIDER THUMB WHEN APPEARANCE IS NONE */
+      .custom-range-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        background: #fb923c;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+      }
+
       /* 1. iPad Portrait Fixes */
       @media (orientation: portrait) and (min-width: 768px) {
         .md\\:flex-row { flex-direction: column !important; }
@@ -292,7 +304,6 @@ export default function App() {
         .max-w-\\[260px\\] { max-width: 350px !important; }
         .aspect-square { min-height: 350px !important; }
 
-        /* Match portrait QR/Scanner tile to perfectly mimic the others */
         .right-card-tile, .portrait-status-pill {
           width: 70% !important;
           max-width: 70% !important;
@@ -308,7 +319,6 @@ export default function App() {
           align-items: center !important;
         }
 
-        /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
         .home-logo-text {
           font-size: 2.5rem !important; 
           line-height: 1.2 !important;
@@ -374,13 +384,11 @@ export default function App() {
           background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
         }
 
-        /* HOME SCREEN TILES HEIGHT EXTRA BALANCE */
         .home-tile {
           height: calc(200px + 5rem) !important;
           min-height: calc(200px + 5rem) !important;
         }
         
-        /* MATCH HOME SCREEN WIDTH & ADD 3REM GAP */
         .landscape-disconnected-container {
            width: 100% !important;
            max-width: 56rem !important; 
@@ -393,7 +401,6 @@ export default function App() {
            padding-right: 1.5rem !important;
         }
 
-        /* SQUARE CARDS FIX: Flex-1 configuration matching home length */
         .left-card-tile, .right-card-tile {
           flex: 1 1 0% !important;
           width: 100% !important;
@@ -409,7 +416,6 @@ export default function App() {
           padding: 1.5rem !important;
         }
 
-        /* Keep QR code elements proportional */
         .landscape\\:aspect-auto {
           max-width: 320px !important;
           max-height: 320px !important;
@@ -616,7 +622,7 @@ export default function App() {
 
                 <div className="flex flex-col gap-2 px-3 py-3 bg-white/5 rounded-xl">
                   <div className="flex items-center gap-2 text-xs font-medium text-white/80"><Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Exposure</div>
-                  <input type="range" min="0" max="100" value={displayExposure} onChange={(e) => handleExposureChange(e.target.value)} className="w-full h-1 bg-white/10 rounded-lg appearance-none accent-orange-400" />
+                  <input type="range" min="0" max="100" value={displayExposure} onChange={(e) => handleExposureChange(e.target.value)} className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-orange-400 touch-none custom-range-slider" />
                 </div>
 
                 <button onClick={toggleStayAwake} className="flex items-center justify-between px-3 py-3 bg-white/5 rounded-xl text-white/80 hover:bg-white/10 transition-colors">
@@ -737,7 +743,7 @@ export default function App() {
 
                 <div className="flex flex-col gap-2 px-3 py-3 bg-white/5 rounded-xl">
                   <div className="flex items-center gap-2 text-xs font-medium text-white/80"><Sun size={14} className={displayExposure > 50 ? "text-orange-400" : "text-white/40"} /> Remote Exp</div>
-                  <input type="range" min="0" max="100" value={displayExposure} onChange={(e) => handleExposureChange(e.target.value)} className="w-full h-1 bg-white/10 rounded-lg appearance-none accent-orange-400" />
+                  <input type="range" min="0" max="100" value={displayExposure} onChange={(e) => handleExposureChange(e.target.value)} className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-orange-400 touch-none custom-range-slider" />
                 </div>
               </div>
 
@@ -774,20 +780,6 @@ export default function App() {
                     {isSettingsOpen && renderSettingsDropdown()}
                   </div>
                 </div>
-              )}
-              
-              {!isConnected && !isNativeApp && (
-                  <div className="absolute inset-0 flex flex-row md:flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-4 md:gap-6 text-left md:text-center p-4 md:p-8">
-                    <div className="shrink-0 p-4 md:p-6 bg-purple-500/10 rounded-full border border-purple-500/30 text-purple-400 animate-pulse shadow-[0_0_40px_rgba(168,85,247,0.3)]">
-                      <Monitor className="w-6 h-6 md:w-12 md:h-12 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-base md:text-2xl font-bold tracking-tight drop-shadow-md">Awaiting Stream Link</h4>
-                      <p className="hidden md:block text-base text-white/60 max-w-md mx-auto leading-relaxed font-light mt-2">
-                        Remote video frames will mount directly to this viewport the moment your phone confirms the authentication matrix.
-                      </p>
-                    </div>
-                  </div>
               )}
             </div>
           </div>
