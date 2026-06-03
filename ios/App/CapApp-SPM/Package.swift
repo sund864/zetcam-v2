@@ -13,7 +13,6 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.3.4"),
         .package(name: "CapacitorSplashScreen", path: "..\..\..\node_modules\@capacitor\splash-screen"),
-        .package(name: "CordovaPluginBackgroundMode", path: "../../capacitor-cordova-ios-plugins/sources/CordovaPluginBackgroundMode"),
         .package(name: "CordovaPluginBrightness", path: "../../capacitor-cordova-ios-plugins/sources/CordovaPluginBrightness"),
         .package(name: "CordovaPluginDevice", path: "../../capacitor-cordova-ios-plugins/sources/CordovaPluginDevice")
     ],
@@ -24,7 +23,6 @@ let package = Package(
                 .product(name: "Capacitor", package: "capacitor-swift-pm"),
                 .product(name: "Cordova", package: "capacitor-swift-pm"),
                 .product(name: "CapacitorSplashScreen", package: "CapacitorSplashScreen"),
-                .product(name: "CordovaPluginBackgroundMode", package: "CordovaPluginBackgroundMode"),
                 .product(name: "CordovaPluginBrightness", package: "CordovaPluginBrightness"),
                 .product(name: "CordovaPluginDevice", package: "CordovaPluginDevice")
             ]
