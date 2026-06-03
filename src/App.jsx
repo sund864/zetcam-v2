@@ -306,47 +306,27 @@ export default function App() {
         .max-w-\\[260px\\] { max-width: 350px !important; }
         .aspect-square { min-height: 350px !important; }
 
-        /* Unified 3-Tier Portrait Structure */
-        .right-card-tile {
-          background: transparent !important;
-          border: none !important;
-          box-shadow: none !important;
-          backdrop-filter: none !important;
-          padding: 0 !important;
-          gap: 1.25rem !important;
-          aspect-ratio: auto !important; 
-          width: 70% !important;
-          max-width: 70% !important;
-          margin-left: auto !important;
-          margin-right: auto !important;
-        }
-
-        .portrait-header-box {
-          background: rgba(0,0,0,0.4) !important;
-          border: 1px solid rgba(255,255,255,0.1) !important;
-          border-radius: 24px !important;
-          padding: 1.5rem !important;
-          width: 100% !important;
-          max-width: 300px !important;
-          box-shadow: inset 0 4px 30px rgba(0,0,0,0.4) !important;
-          margin-bottom: 0 !important;
-        }
-
-        .portrait-squeezed-box {
-          max-width: 300px !important; 
-          margin-bottom: 0 !important;
-        }
-
-        .portrait-pin-box {
-          max-width: 300px !important;
-          margin-top: 0 !important;
-        }
-
+        /* Unified Vertical Portrait Setup */
         .portrait-status-pill {
-          width: 70% !important;
-          max-width: 70% !important;
+          width: 75% !important;
+          max-width: 75% !important;
           margin-left: auto !important;
           margin-right: auto !important;
+        }
+
+        .left-card-tile, .right-card-tile {
+          width: 75% !important;
+          max-width: 450px !important;
+          margin-left: auto !important;
+          margin-right: auto !important;
+          aspect-ratio: auto !important; /* UNLOCKED: Let it flow vertically to wrap the 3 items */
+          height: auto !important;
+          min-height: 400px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: space-between !important;
+          align-items: center !important;
+          padding: 2.5rem 1.5rem !important; /* Thick top/bottom padding inside the surrounding tile */
         }
 
         /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
@@ -434,6 +414,7 @@ export default function App() {
            padding-right: 1.5rem !important;
         }
 
+        /* LOCKED: Landscape cards stay perfect squares */
         .left-card-tile, .right-card-tile {
           flex: 1 1 0% !important;
           width: 100% !important;
@@ -612,23 +593,23 @@ export default function App() {
               </div>
             </div>
 
-            {/* Disconnected Camera (Scanner Box) - Right Tile */}
+            {/* Disconnected Camera (UNIFIED SURROUNDING TILE FOR PORTRAIT, QR Box for Landscape) */}
             <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0">
               
-              {/* 3-Tier Portrait Stack: Tier 1 */}
-              <div className="portrait-header-box flex flex-col items-center justify-center mb-4 landscape:hidden w-full max-w-[260px]">
+              {/* Top Block: Text (Portrait only) */}
+              <div className="landscape:hidden flex flex-col items-center justify-center mb-6 w-full">
                 <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md">Scan Matrix</h3>
                 <p className="shrink-0 text-[11px] text-white/50 font-light">Align PC matrix inside the frame</p>
               </div>
-
-              {/* 3-Tier Portrait Stack: Tier 2 (Squeezed Matrix) */}
-              <div className="portrait-squeezed-box w-full max-w-[260px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] mb-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-0 landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:aspect-auto">
+              
+              {/* Middle Block: Squeezed Scanner */}
+              <div className="w-[80%] max-w-[280px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-0 landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:aspect-auto">
                  <div id="reader" className="absolute inset-0 w-full h-full z-10 flex items-center justify-center"></div>
                  <span className="text-[10px] text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
               </div>
 
-              {/* 3-Tier Portrait Stack: Tier 3 */}
-              <div className="portrait-pin-box shrink-0 w-full max-w-[260px] bg-black/60 rounded-xl p-3 border border-white/10 overflow-hidden shadow-inner flex flex-col items-center gap-2 landscape:hidden mt-4">
+              {/* Bottom Block: Squeezed PIN Entry (Portrait only) */}
+              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 rounded-xl p-3 border border-white/10 overflow-hidden shadow-inner flex flex-col items-center gap-2 mt-6">
                 <span className="text-[8px] text-white/30 uppercase tracking-widest font-bold w-full text-left">Manual Override</span>
                 <div className="flex w-full items-center gap-2">
                   <input 
@@ -650,7 +631,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Active Live Stream Video Previews (Never Unmounted) */}
+          {/* Active Live Stream Video Previews */}
           <div className={`w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
             <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] order-first landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden">
               <span className="text-xs md:text-sm font-semibold text-pink-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(236,72,153,0.8)] shrink-0">
@@ -764,17 +745,17 @@ export default function App() {
               </div>
             </div>
 
-            {/* Disconnected Receiver (QR Code Box) - Right Tile */}
+            {/* Disconnected Receiver (UNIFIED SURROUNDING TILE FOR PORTRAIT, QR Box for Landscape) */}
             <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0">
               
-              {/* 3-Tier Portrait Stack: Tier 1 */}
-              <div className="portrait-header-box flex flex-col items-center justify-center mb-4 landscape:hidden w-full max-w-[260px]">
+              {/* Top Block: Text (Portrait only) */}
+              <div className="landscape:hidden flex flex-col items-center justify-center mb-6 w-full">
                 <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md">Pair Device</h3>
                 <p className="shrink-0 text-[11px] text-white/50 font-light">Point mobile lens at this matrix</p>
               </div>
 
-              {/* 3-Tier Portrait Stack: Tier 2 (Squeezed Matrix) */}
-              <div className="portrait-squeezed-box w-full max-w-[260px] aspect-square mx-auto bg-white p-4 rounded-[24px] mb-4 shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
+              {/* Middle Block: Squeezed QR Code */}
+              <div className="w-[80%] max-w-[280px] aspect-square mx-auto bg-white p-4 rounded-[24px] shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 {peerId ? (
                   <QRCodeSVG value={peerId} className="w-full h-full max-w-[240px] landscape:max-w-none aspect-square relative z-10 drop-shadow-sm" />
@@ -786,8 +767,8 @@ export default function App() {
                 )}
               </div>
 
-              {/* 3-Tier Portrait Stack: Tier 3 */}
-              <div className="portrait-pin-box shrink-0 w-full max-w-[260px] bg-black/60 rounded-xl p-3 border border-white/10 overflow-hidden shadow-inner flex flex-col items-center gap-1 landscape:hidden mt-4">
+              {/* Bottom Block: Squeezed PIN (Portrait only) */}
+              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 rounded-xl p-3 border border-white/10 overflow-hidden shadow-inner flex flex-col items-center gap-1 mt-6">
                 <span className="text-[8px] text-white/30 uppercase tracking-widest font-bold">Secure PIN</span>
                 <code className="text-sm text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
               </div>
@@ -795,7 +776,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Active Live Receiver Output Panel Container (Never Unmounted) */}
+          {/* Active Live Receiver Output Panel Container */}
           <div className={`w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
             <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] order-first landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden">
               <span className="text-xs md:text-sm font-semibold text-purple-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0">
