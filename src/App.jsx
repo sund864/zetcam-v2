@@ -289,7 +289,7 @@ export default function App() {
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
-    /* --- STRICT IPAD/TABLET LAYOUT CONTROL PATCH --- */
+    /* --- STRICT IPAD LAYOUT CONTROL PATCH --- */
     @supports (-webkit-touch-callout: none) {
       
       .custom-range-slider::-webkit-slider-thumb {
@@ -303,7 +303,6 @@ export default function App() {
         box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
       }
 
-      /* 1. Portrait Fixes */
       @media (orientation: portrait) and (min-width: 768px) {
         .md\\:flex-row { flex-direction: column !important; }
         .md\\:w-1\\/3 { width: 100% !important; max-width: 450px !important; }
@@ -311,7 +310,7 @@ export default function App() {
         .max-w-\\[260px\\] { max-width: 350px !important; }
         .aspect-square { min-height: 350px !important; }
 
-        /* UNIFIED IPAD PORTRAIT OVERRIDES (ONLY Triggered by isIOS && isIPad) */
+        /* UNIFIED IPAD PORTRAIT OVERRIDES */
         .ipad-unified-layout .left-card-tile {
           display: none !important;
         }
@@ -345,26 +344,6 @@ export default function App() {
           aspect-ratio: 1 / 1 !important;
           flex-shrink: 0 !important;
           margin: 1.5rem 0 !important;
-        }
-
-        /* GOLDEN MASTER ANDROID/IPHONE TABLET OVERRIDES (Safely Isolated) */
-        .golden-master-layout .left-card-tile, 
-        .golden-master-layout .right-card-tile, 
-        .golden-master-layout .portrait-status-pill {
-          width: 70% !important;
-          max-width: 70% !important;
-          margin-left: auto !important;
-          margin-right: auto !important;
-        }
-
-        .golden-master-layout .left-card-tile, 
-        .golden-master-layout .right-card-tile {
-          aspect-ratio: 1 / 1 !important;
-          height: auto !important;
-          display: flex !important;
-          flex-direction: column !important;
-          justify-content: center !important;
-          align-items: center !important;
         }
 
         /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
@@ -405,7 +384,6 @@ export default function App() {
         }
       }
 
-      /* 2. iPad Landscape Fixes */
       @media (orientation: landscape) {
         .landscape\\:pt-4 { padding-top: 3.5rem !important; }
         .top-6 { top: 3.5rem !important; }
@@ -452,7 +430,8 @@ export default function App() {
            padding-right: 1.5rem !important;
         }
 
-        .left-card-tile, .right-card-tile {
+        .ipad-unified-layout .left-card-tile, 
+        .ipad-unified-layout .right-card-tile {
           flex: 1 1 0% !important;
           width: 100% !important;
           max-width: 100% !important; 
@@ -556,7 +535,7 @@ export default function App() {
         </header>
       )}
 
-      {/* --- ZERO TOUCH HOME SCREEN (Golden Master Restored) --- */}
+      {/* --- ZERO TOUCH HOME SCREEN --- */}
       {mode === 'home' && (
         <div className="home-tile-container w-full max-w-sm md:max-w-md landscape:max-w-4xl mx-auto flex flex-col landscape:flex-row gap-4 md:gap-6 justify-center items-center flex-1 min-h-[60vh] z-10 relative pb-28 landscape:pb-0 landscape:h-full landscape:absolute landscape:inset-0 landscape:justify-center landscape:items-center landscape:my-auto landscape:px-6 transition-all duration-700 ease-in-out">
           <button 
@@ -651,9 +630,9 @@ export default function App() {
             </div>
           ) : (
             /* --- GOLDEN MASTER ANDROID / IPHONE LAYOUT --- */
-            <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
-              <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] left-card-tile">
-                <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+            <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
+              <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative w-full max-w-sm md:w-1/3">
+                <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)] mb-4">
                   <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
                   <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
                 </div>
@@ -677,10 +656,10 @@ export default function App() {
                     </div>
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile">
-                <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md landscape:hidden">Scan Matrix</h3>
-                <p className="shrink-0 text-[11px] text-white/50 mb-4 font-light landscape:hidden">Align PC matrix inside the frame</p>
-                <div className="w-full max-w-[260px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] mb-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-0 landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:aspect-auto">
+              <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full max-w-sm md:w-1/3">
+                <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md md:hidden">Scan Matrix</h3>
+                <p className="shrink-0 text-[11px] text-white/50 mb-4 font-light md:hidden">Align PC matrix inside the frame</p>
+                <div className="w-full max-w-[260px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:rounded-[24px]">
                    <div id="reader" className="absolute inset-0 w-full h-full z-10 flex items-center justify-center"></div>
                    <span className="text-[10px] text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
                 </div>
@@ -822,9 +801,9 @@ export default function App() {
             </div>
           ) : (
             /* --- GOLDEN MASTER ANDROID / IPHONE LAYOUT --- */
-            <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
-              <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
-                <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+            <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
+              <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative w-full max-w-sm md:w-1/3">
+                <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)] mb-4">
                   <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
                   <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
                 </div>
@@ -833,8 +812,10 @@ export default function App() {
                   <code className="text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile">
-                <div className="w-full max-w-[260px] aspect-square mx-auto bg-white p-4 rounded-[24px] shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
+              <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full max-w-sm md:w-1/3">
+                <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md md:hidden">Pair Device</h3>
+                <p className="shrink-0 text-[11px] text-white/50 mb-4 font-light md:hidden">Point mobile lens at this matrix</p>
+                <div className="w-full max-w-[260px] aspect-square mx-auto bg-white p-4 rounded-[24px] shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:rounded-[24px] landscape:p-6">
                   <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                   {peerId ? (
                     <QRCodeSVG value={peerId} className="w-full h-full max-w-[240px] landscape:max-w-none aspect-square relative z-10 drop-shadow-sm" />
