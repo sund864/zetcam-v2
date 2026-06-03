@@ -311,19 +311,20 @@ export default function App() {
           display: none !important;
         }
 
+        /* 85% Side Stretch for main containers */
         .portrait-status-pill {
-          width: 75% !important;
-          max-width: 75% !important;
+          width: 85% !important;
+          max-width: 550px !important;
           margin-left: auto !important;
           margin-right: auto !important;
         }
 
         .right-card-tile {
-          width: 75% !important;
-          max-width: 450px !important;
+          width: 85% !important;
+          max-width: 550px !important;
           margin-left: auto !important;
           margin-right: auto !important;
-          aspect-ratio: auto !important; /* UNLOCKED: Let it flow vertically to wrap the 3 items */
+          aspect-ratio: auto !important; /* UNLOCKED: Let it flow vertically */
           height: auto !important;
           min-height: 400px !important;
           display: flex !important;
@@ -331,6 +332,16 @@ export default function App() {
           justify-content: space-between !important;
           align-items: center !important;
           padding: 2.5rem 1.5rem !important; /* Thick top/bottom padding inside the surrounding tile */
+        }
+
+        /* Enforce perfect square on inner matrix items, stopping Safari vertical stretch */
+        .portrait-inner-square {
+          width: 75% !important;
+          max-width: 320px !important;
+          height: auto !important;
+          aspect-ratio: 1 / 1 !important;
+          flex-shrink: 0 !important;
+          margin: 1.5rem 0 !important;
         }
 
         /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
@@ -568,7 +579,6 @@ export default function App() {
           {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
           <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
             
-            {/* The Left Card (Hidden in portrait perfectly now) */}
             <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
               {/* Top Inner Card */}
               <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
@@ -602,19 +612,19 @@ export default function App() {
             <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0">
               
               {/* Top Block: Text (Portrait only) */}
-              <div className="landscape:hidden flex flex-col items-center justify-center mb-6 w-full">
+              <div className="landscape:hidden flex flex-col items-center justify-center mb-2 w-full">
                 <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md">Scan Screen</h3>
                 <p className="shrink-0 text-[11px] text-white/50 font-light">Align scanner to your PC monitor</p>
               </div>
               
-              {/* Middle Block: Squeezed Scanner */}
-              <div className="w-[80%] max-w-[280px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-0 landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:aspect-auto">
+              {/* Middle Block: Squeezed Scanner (Strict Square on Portrait) */}
+              <div className="portrait-inner-square w-[80%] max-w-[280px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-0 landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:aspect-auto">
                  <div id="reader" className="absolute inset-0 w-full h-full z-10 flex items-center justify-center"></div>
                  <span className="text-[10px] text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
               </div>
 
               {/* Bottom Block: Squeezed FULL PIN Entry (Portrait only) */}
-              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 border border-white/10 rounded-[24px] p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center gap-3 mt-6">
+              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 border border-white/10 rounded-[24px] p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center gap-3 mt-2">
                 <div className="flex items-center justify-center gap-3 w-full opacity-50">
                   <div className="h-px bg-white/20 flex-1"></div>
                   <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
@@ -736,14 +746,15 @@ export default function App() {
             
           {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
           <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
-            
-            {/* The Left Card (Hidden in portrait perfectly now) */}
             <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+              
+              {/* Top Inner Card */}
               <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
               </div>
 
+              {/* Bottom Inner Card */}
               <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
                 <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
                 <code className="text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
@@ -754,13 +765,13 @@ export default function App() {
             <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0">
               
               {/* Top Block: Text (Portrait only) */}
-              <div className="landscape:hidden flex flex-col items-center justify-center mb-6 w-full">
+              <div className="landscape:hidden flex flex-col items-center justify-center mb-2 w-full">
                 <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md">Pair Device</h3>
                 <p className="shrink-0 text-[11px] text-white/50 font-light">Point mobile lens at this matrix</p>
               </div>
 
-              {/* Middle Block: Squeezed QR Code */}
-              <div className="w-[80%] max-w-[280px] aspect-square mx-auto bg-white p-4 rounded-[24px] shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
+              {/* Middle Block: Squeezed QR Code (Strict Square on Portrait) */}
+              <div className="portrait-inner-square w-[80%] max-w-[280px] aspect-square mx-auto bg-white p-4 rounded-[24px] shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 {peerId ? (
                   <QRCodeSVG value={peerId} className="w-full h-full max-w-[240px] landscape:max-w-none aspect-square relative z-10 drop-shadow-sm" />
@@ -773,7 +784,7 @@ export default function App() {
               </div>
 
               {/* Bottom Block: Squeezed FULL PIN Display (Portrait only) */}
-              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 border border-white/10 rounded-[24px] p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center gap-2 mt-6">
+              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 border border-white/10 rounded-[24px] p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center gap-2 mt-2">
                 <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
                 <code className="text-xl md:text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
               </div>
