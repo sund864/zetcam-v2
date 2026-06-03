@@ -570,11 +570,13 @@ export default function App() {
             
             {/* The Left Card (Hidden in portrait perfectly now) */}
             <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+              {/* Top Inner Card */}
               <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
               </div>
 
+              {/* Bottom Inner Card */}
               <div className="flex flex-col items-center justify-center gap-3 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
                   <div className="flex items-center justify-center gap-3 w-full opacity-50">
                     <div className="h-px bg-white/20 flex-1"></div>
@@ -611,22 +613,23 @@ export default function App() {
                  <span className="text-[10px] text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
               </div>
 
-              {/* Bottom Block: Squeezed PIN Entry (Portrait only) */}
-              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 rounded-xl p-3 border border-white/10 overflow-hidden shadow-inner flex flex-col items-center gap-2 mt-6">
-                <span className="text-[8px] text-white/30 uppercase tracking-widest font-bold w-full text-left">Manual Override</span>
-                <div className="flex w-full items-center gap-2">
+              {/* Bottom Block: Squeezed FULL PIN Entry (Portrait only) */}
+              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 border border-white/10 rounded-[24px] p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center gap-3 mt-6">
+                <div className="flex items-center justify-center gap-3 w-full opacity-50">
+                  <div className="h-px bg-white/20 flex-1"></div>
+                  <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
+                  <div className="h-px bg-white/20 flex-1"></div>
+                </div>
+                <div className="flex flex-col gap-3 w-full group justify-center">
                   <input 
-                    type="text" 
-                    placeholder="Target PIN" 
-                    value={remoteId} 
-                    onChange={(e) => setRemoteId(e.target.value)}
-                    className="flex-1 min-w-0 bg-transparent border-none px-1 py-1 text-sm text-pink-400 placeholder:text-pink-400/30 focus:outline-none font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]"
+                    type="text" placeholder="Target PIN" value={remoteId} onChange={(e) => setRemoteId(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white placeholder:text-white/30 text-center focus:outline-none focus:border-pink-500/50 shadow-inner font-mono tracking-widest"
                   />
                   <button 
                     onClick={executeManualConnect}
-                    className="shrink-0 bg-white/10 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg hover:bg-white/20 active:scale-95 transition-all"
+                    className="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:shadow-[0_0_25px_rgba(236,72,153,0.6)] active:scale-95 transition-all"
                   >
-                    LINK
+                    Link
                   </button>
                 </div>
               </div>
@@ -769,10 +772,10 @@ export default function App() {
                 )}
               </div>
 
-              {/* Bottom Block: Squeezed PIN (Portrait only) */}
-              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 rounded-xl p-3 border border-white/10 overflow-hidden shadow-inner flex flex-col items-center gap-1 mt-6">
-                <span className="text-[8px] text-white/30 uppercase tracking-widest font-bold">Secure PIN</span>
-                <code className="text-sm text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
+              {/* Bottom Block: Squeezed FULL PIN Display (Portrait only) */}
+              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 border border-white/10 rounded-[24px] p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center gap-2 mt-6">
+                <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
+                <code className="text-xl md:text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
               </div>
 
             </div>
