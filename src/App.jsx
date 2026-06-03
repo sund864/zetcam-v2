@@ -307,6 +307,10 @@ export default function App() {
         .aspect-square { min-height: 350px !important; }
 
         /* Unified Vertical Portrait Setup */
+        .left-card-tile {
+          display: none !important;
+        }
+
         .portrait-status-pill {
           width: 75% !important;
           max-width: 75% !important;
@@ -314,7 +318,7 @@ export default function App() {
           margin-right: auto !important;
         }
 
-        .left-card-tile, .right-card-tile {
+        .right-card-tile {
           width: 75% !important;
           max-width: 450px !important;
           margin-left: auto !important;
@@ -564,14 +568,13 @@ export default function App() {
           {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
           <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
             
+            {/* The Left Card (Hidden in portrait perfectly now) */}
             <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
-              {/* Top Inner Card */}
               <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
               </div>
 
-              {/* Bottom Inner Card */}
               <div className="flex flex-col items-center justify-center gap-3 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
                   <div className="flex items-center justify-center gap-3 w-full opacity-50">
                     <div className="h-px bg-white/20 flex-1"></div>
@@ -598,8 +601,8 @@ export default function App() {
               
               {/* Top Block: Text (Portrait only) */}
               <div className="landscape:hidden flex flex-col items-center justify-center mb-6 w-full">
-                <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md">Scan Matrix</h3>
-                <p className="shrink-0 text-[11px] text-white/50 font-light">Align PC matrix inside the frame</p>
+                <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md">Scan Screen</h3>
+                <p className="shrink-0 text-[11px] text-white/50 font-light">Align scanner to your PC monitor</p>
               </div>
               
               {/* Middle Block: Squeezed Scanner */}
@@ -730,15 +733,14 @@ export default function App() {
             
           {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
           <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
+            
+            {/* The Left Card (Hidden in portrait perfectly now) */}
             <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
-              
-              {/* Top Inner Card */}
               <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
                 <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
                 <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
               </div>
 
-              {/* Bottom Inner Card */}
               <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
                 <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
                 <code className="text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
@@ -776,7 +778,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Active Live Receiver Output Panel Container */}
+          {/* Active Live Receiver Output Panel Container (Never Unmounted) */}
           <div className={`w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
             <div className="portrait-status-pill shrink-0 w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-3 md:p-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.5)] order-first landscape:w-[25%] landscape:order-last landscape:h-full landscape:rounded-[32px] landscape:bg-[#05020a] landscape:p-4 landscape:flex landscape:flex-col landscape:overflow-hidden">
               <span className="text-xs md:text-sm font-semibold text-purple-400 flex items-center justify-center gap-2 tracking-wide drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] shrink-0">
