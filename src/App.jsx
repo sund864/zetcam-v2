@@ -28,6 +28,12 @@ export default function App() {
   
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fsControlsVisible, setFsControlsVisible] = useState(true);
+
+  // --- HARDWARE ISOLATION DETECTOR ---
+  const platform = Capacitor.getPlatform();
+  const isIOS = platform === 'ios';
+  const isIPad = isIOS && (/iPad/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1));
+  const showUnifiedIPadLayout = isIOS && isIPad;
   
   const isStreamActive = isConnected;
   const displayTorch = mode === 'camera' ? isTorchOn : remoteTorch;
@@ -269,39 +275,6 @@ export default function App() {
     </div>
   );
 
-  // --- DYNAMIC HOME SCREEN CLASSES ---
-  const camBtnBase = "home-tile w-full landscape:flex-1 flex flex-col landscape:flex-row items-center justify-center landscape:justify-start min-h-[140px] landscape:min-h-[200px] landscape:h-[200px] backdrop-blur-xl rounded-[24px] md:rounded-[32px] p-5 landscape:p-0 landscape:px-8 text-center landscape:text-left transition-all duration-700 ease-in-out hover:-translate-y-2 group relative overflow-hidden ";
-  const camBtnColors = isNativeApp 
-    ? "bg-pink-500/[0.04] border border-pink-500/40 shadow-[0_20px_40px_-15px_rgba(236,72,153,0.25)] active:border-white/10 active:bg-white/[0.03] active:shadow-none" 
-    : "bg-white/[0.03] border border-white/10 hover:border-pink-500/40 hover:bg-pink-500/[0.04] hover:shadow-[0_20px_40px_-15px_rgba(236,72,153,0.25)]";
-    
-  const camIconWrapBase = "icon-wrapper w-12 h-12 md:w-14 md:h-14 landscape:w-12 landscape:h-12 shrink-0 rounded-2xl bg-gradient-to-br from-pink-500/20 to-pink-500/5 flex items-center justify-center text-pink-400 mb-3 landscape:mb-0 landscape:mr-5 transition-all duration-500 border border-pink-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] ";
-  const camIconWrapColors = isNativeApp
-    ? "scale-110 shadow-[0_0_20px_rgba(236,72,153,0.4)] group-active:scale-100 group-active:shadow-none"
-    : "group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(236,72,153,0.4)]";
-    
-  const camTitleBase = "text-lg md:text-xl landscape:text-xl font-bold tracking-tight transition-colors duration-500 ";
-  const camTitleColors = isNativeApp ? "text-pink-100 group-active:text-white" : "text-white group-hover:text-pink-100";
-  
-  const camBgIconBase = "absolute -bottom-6 -right-6 transition-colors duration-500 pointer-events-none ";
-  const camBgIconColors = isNativeApp ? "text-pink-500/[0.05] group-active:text-white/[0.02]" : "text-white/[0.02] group-hover:text-pink-500/[0.05]";
-
-  const rxBtnBase = "home-tile w-full landscape:flex-1 flex flex-col landscape:flex-row items-center justify-center landscape:justify-start min-h-[140px] landscape:min-h-[200px] landscape:h-[200px] backdrop-blur-xl rounded-[24px] md:rounded-[32px] p-5 landscape:p-0 landscape:px-8 text-center landscape:text-left transition-all duration-700 ease-in-out hover:-translate-y-2 group relative overflow-hidden ";
-  const rxBtnColors = isNativeApp
-    ? "bg-purple-500/[0.04] border border-purple-500/40 shadow-[0_20px_40px_-15px_rgba(168,85,247,0.25)] active:border-white/10 active:bg-white/[0.03] active:shadow-none"
-    : "bg-white/[0.03] border border-white/10 hover:border-purple-500/40 hover:bg-purple-500/[0.04] hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.25)]";
-    
-  const rxIconWrapBase = "icon-wrapper w-12 h-12 md:w-14 md:h-14 landscape:w-12 landscape:h-12 shrink-0 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center text-purple-400 mb-3 landscape:mb-0 landscape:mr-5 transition-all duration-500 border border-purple-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] ";
-  const rxIconWrapColors = isNativeApp
-    ? "scale-110 shadow-[0_0_20px_rgba(168,85,247,0.4)] group-active:scale-100 group-active:shadow-none"
-    : "group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]";
-
-  const rxTitleBase = "text-lg md:text-xl landscape:text-xl font-bold tracking-tight transition-colors duration-500 ";
-  const rxTitleColors = isNativeApp ? "text-purple-100 group-active:text-white" : "text-white group-hover:text-purple-100";
-
-  const rxBgIconBase = "absolute -bottom-6 -right-6 transition-colors duration-500 pointer-events-none ";
-  const rxBgIconColors = isNativeApp ? "text-purple-500/[0.05] group-active:text-white/[0.02]" : "text-white/[0.02] group-hover:text-purple-500/[0.05]";
-
   const iosCustomStyles = `
     html, body, #root { background-color: #0a0510 !important; margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
     #reader { width: 100% !important; height: 100% !important; border: none !important; padding: 0 !important; background: transparent !important; display: flex; align-items: center; justify-content: center; }
@@ -316,10 +289,9 @@ export default function App() {
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
-    /* --- iOS IPAD LAYOUT PATCH --- */
+    /* --- STRICT IPAD/TABLET LAYOUT CONTROL PATCH --- */
     @supports (-webkit-touch-callout: none) {
       
-      /* FIX iOS RANGE SLIDER THUMB WHEN APPEARANCE IS NONE */
       .custom-range-slider::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
@@ -331,7 +303,7 @@ export default function App() {
         box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
       }
 
-      /* 1. iPad Portrait Fixes */
+      /* 1. Portrait Fixes */
       @media (orientation: portrait) and (min-width: 768px) {
         .md\\:flex-row { flex-direction: column !important; }
         .md\\:w-1\\/3 { width: 100% !important; max-width: 450px !important; }
@@ -339,42 +311,60 @@ export default function App() {
         .max-w-\\[260px\\] { max-width: 350px !important; }
         .aspect-square { min-height: 350px !important; }
 
-        /* Unified Vertical Portrait Setup */
-        .left-card-tile {
+        /* UNIFIED IPAD PORTRAIT OVERRIDES (ONLY Triggered by isIOS && isIPad) */
+        .ipad-unified-layout .left-card-tile {
           display: none !important;
         }
 
-        /* 85% Side Stretch for main containers */
-        .portrait-status-pill {
+        .ipad-unified-layout .portrait-status-pill {
           width: 85% !important;
           max-width: 550px !important;
           margin-left: auto !important;
           margin-right: auto !important;
         }
 
-        .right-card-tile {
+        .ipad-unified-layout .right-card-tile {
           width: 85% !important;
           max-width: 550px !important;
           margin-left: auto !important;
           margin-right: auto !important;
-          aspect-ratio: auto !important; /* UNLOCKED: Let it flow vertically */
+          aspect-ratio: auto !important; 
           height: auto !important;
           min-height: 400px !important;
           display: flex !important;
           flex-direction: column !important;
           justify-content: space-between !important;
           align-items: center !important;
-          padding: 2.5rem 1.5rem !important; /* Thick top/bottom padding inside the surrounding tile */
+          padding: 2.5rem 1.5rem !important; 
         }
 
-        /* Enforce perfect square on inner matrix items, stopping Safari vertical stretch */
-        .portrait-inner-square {
+        .ipad-unified-layout .portrait-inner-square {
           width: 75% !important;
           max-width: 320px !important;
           height: auto !important;
           aspect-ratio: 1 / 1 !important;
           flex-shrink: 0 !important;
           margin: 1.5rem 0 !important;
+        }
+
+        /* GOLDEN MASTER ANDROID/IPHONE TABLET OVERRIDES (Safely Isolated) */
+        .golden-master-layout .left-card-tile, 
+        .golden-master-layout .right-card-tile, 
+        .golden-master-layout .portrait-status-pill {
+          width: 70% !important;
+          max-width: 70% !important;
+          margin-left: auto !important;
+          margin-right: auto !important;
+        }
+
+        .golden-master-layout .left-card-tile, 
+        .golden-master-layout .right-card-tile {
+          aspect-ratio: 1 / 1 !important;
+          height: auto !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+          align-items: center !important;
         }
 
         /* HOME SCREEN VERTICAL LAYOUT UPGRADES */
@@ -462,7 +452,6 @@ export default function App() {
            padding-right: 1.5rem !important;
         }
 
-        /* LOCKED: Landscape cards stay perfect squares */
         .left-card-tile, .right-card-tile {
           flex: 1 1 0% !important;
           width: 100% !important;
@@ -493,8 +482,7 @@ export default function App() {
 
   return (
     <div className={
-      "h-[100dvh] w-full bg-[#0a0510] text-white font-sans antialiased " +
-      "p-3 md:p-6 flex flex-col items-center justify-start overflow-hidden selection:bg-pink-500/30 relative"
+      `h-[100dvh] w-full bg-[#0a0510] text-white font-sans antialiased p-3 md:p-6 flex flex-col items-center justify-start overflow-hidden selection:bg-pink-500/30 relative ${showUnifiedIPadLayout ? "ipad-unified-layout" : "golden-master-layout"}`
     }>
       
       <style dangerouslySetInnerHTML={{ __html: iosCustomStyles }} />
@@ -568,31 +556,31 @@ export default function App() {
         </header>
       )}
 
-      {/* --- ZERO TOUCH HOME SCREEN --- */}
+      {/* --- ZERO TOUCH HOME SCREEN (Golden Master Restored) --- */}
       {mode === 'home' && (
         <div className="home-tile-container w-full max-w-sm md:max-w-md landscape:max-w-4xl mx-auto flex flex-col landscape:flex-row gap-4 md:gap-6 justify-center items-center flex-1 min-h-[60vh] z-10 relative pb-28 landscape:pb-0 landscape:h-full landscape:absolute landscape:inset-0 landscape:justify-center landscape:items-center landscape:my-auto landscape:px-6 transition-all duration-700 ease-in-out">
           <button 
             onClick={() => setMode('camera')}
-            className={camBtnBase + camBtnColors}
+            className="home-tile w-full landscape:flex-1 flex flex-col landscape:flex-row items-center justify-center landscape:justify-start min-h-[140px] landscape:min-h-[200px] landscape:h-[200px] bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 landscape:p-0 landscape:px-8 text-center landscape:text-left transition-all duration-700 ease-in-out hover:border-pink-500/40 hover:bg-pink-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(236,72,153,0.25)] group relative overflow-hidden"
           >
-            <div className={camIconWrapBase + camIconWrapColors}>
+            <div className="icon-wrapper w-12 h-12 md:w-14 md:h-14 landscape:w-12 landscape:h-12 shrink-0 rounded-2xl bg-gradient-to-br from-pink-500/20 to-pink-500/5 flex items-center justify-center text-pink-400 mb-3 landscape:mb-0 landscape:mr-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-500 border border-pink-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
               <Camera className="w-6 h-6 md:w-7 md:h-7 landscape:w-6 landscape:h-6 transition-all duration-500" />
             </div>
-            <h3 className={camTitleBase + camTitleColors}>I am the Camera</h3>
-            <div className={camBgIconBase + camBgIconColors}>
+            <h3 className="text-lg md:text-xl landscape:text-xl font-bold tracking-tight text-white group-hover:text-pink-100 transition-colors duration-500">I am the Camera</h3>
+            <div className="absolute -bottom-6 -right-6 text-white/[0.02] group-hover:text-pink-500/[0.05] transition-colors duration-500 pointer-events-none">
               <Scan className="w-[120px] h-[120px] landscape:w-[140px] landscape:h-[140px] transition-all duration-700" />
             </div>
           </button>
 
           <button 
             onClick={() => setMode('receiver')}
-            className={rxBtnBase + rxBtnColors}
+            className="home-tile w-full landscape:flex-1 flex flex-col landscape:flex-row items-center justify-center landscape:justify-start min-h-[140px] landscape:min-h-[200px] landscape:h-[200px] bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 landscape:p-0 landscape:px-8 text-center landscape:text-left transition-all duration-700 ease-in-out hover:border-purple-500/40 hover:bg-purple-500/[0.04] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.25)] group relative overflow-hidden"
           >
-            <div className={rxIconWrapBase + rxIconWrapColors}>
+            <div className="icon-wrapper w-12 h-12 md:w-14 md:h-14 landscape:w-12 landscape:h-12 shrink-0 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center text-purple-400 mb-3 landscape:mb-0 landscape:mr-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-500 border border-purple-500/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
               <Monitor className="w-6 h-6 md:w-7 md:h-7 landscape:w-6 landscape:h-6 transition-all duration-500" />
             </div>
-            <h3 className={rxTitleBase + rxTitleColors}>I am the PC Monitor</h3>
-            <div className={rxBgIconBase + rxBgIconColors}>
+            <h3 className="text-lg md:text-xl landscape:text-xl font-bold tracking-tight text-white group-hover:text-purple-100 transition-colors duration-500">I am the PC Monitor</h3>
+            <div className="absolute -bottom-6 -right-6 text-white/[0.02] group-hover:text-purple-500/[0.05] transition-colors duration-500 pointer-events-none">
               <CheckCircle className="w-[120px] h-[120px] landscape:w-[140px] landscape:h-[140px] transition-all duration-700" />
             </div>
           </button>
@@ -603,18 +591,44 @@ export default function App() {
       {mode === 'camera' && (
         <div className="w-full z-10 relative flex-1 min-h-0 flex flex-col items-center justify-center">
           
-          {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
-          <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
-            
-            <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
-              {/* Top Inner Card */}
-              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
-                <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
-                <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
+          {showUnifiedIPadLayout ? (
+            /* --- IPAD UNIFIED 3-TIER LAYOUT --- */
+            <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
+              <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+                <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+                  <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
+                  <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-3 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+                    <div className="flex items-center justify-center gap-3 w-full opacity-50">
+                      <div className="h-px bg-white/20 flex-1"></div>
+                      <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
+                      <div className="h-px bg-white/20 flex-1"></div>
+                    </div>
+                    <div className="flex flex-col gap-3 w-full group justify-center">
+                      <input 
+                        type="text" placeholder="Target PIN" value={remoteId} onChange={(e) => setRemoteId(e.target.value)}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white placeholder:text-white/30 text-center focus:outline-none focus:border-pink-500/50 shadow-inner font-mono tracking-widest"
+                      />
+                      <button 
+                        onClick={executeManualConnect}
+                        className="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:shadow-[0_0_25px_rgba(236,72,153,0.6)] active:scale-95 transition-all"
+                      >
+                        Link
+                      </button>
+                    </div>
+                </div>
               </div>
-
-              {/* Bottom Inner Card */}
-              <div className="flex flex-col items-center justify-center gap-3 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+              <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0">
+                <div className="landscape:hidden flex flex-col items-center justify-center mb-2 w-full">
+                  <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md">Scan Screen</h3>
+                  <p className="shrink-0 text-[11px] text-white/50 font-light">Align scanner to your PC monitor</p>
+                </div>
+                <div className="portrait-inner-square w-[80%] max-w-[280px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-0 landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:aspect-auto">
+                   <div id="reader" className="absolute inset-0 w-full h-full z-10 flex items-center justify-center"></div>
+                   <span className="text-[10px] text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
+                </div>
+                <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 border border-white/10 rounded-[24px] p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center gap-3 mt-2">
                   <div className="flex items-center justify-center gap-3 w-full opacity-50">
                     <div className="h-px bg-white/20 flex-1"></div>
                     <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
@@ -632,47 +646,47 @@ export default function App() {
                       Link
                     </button>
                   </div>
-              </div>
-            </div>
-
-            {/* Disconnected Camera (UNIFIED SURROUNDING TILE FOR PORTRAIT, QR Box for Landscape) */}
-            <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0">
-              
-              {/* Top Block: Text (Portrait only) */}
-              <div className="landscape:hidden flex flex-col items-center justify-center mb-2 w-full">
-                <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md">Scan Screen</h3>
-                <p className="shrink-0 text-[11px] text-white/50 font-light">Align scanner to your PC monitor</p>
-              </div>
-              
-              {/* Middle Block: Squeezed Scanner (Strict Square on Portrait) */}
-              <div className="portrait-inner-square w-[80%] max-w-[280px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-0 landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:aspect-auto">
-                 <div id="reader" className="absolute inset-0 w-full h-full z-10 flex items-center justify-center"></div>
-                 <span className="text-[10px] text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
-              </div>
-
-              {/* Bottom Block: Squeezed FULL PIN Entry (Portrait only) */}
-              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 border border-white/10 rounded-[24px] p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center gap-3 mt-2">
-                <div className="flex items-center justify-center gap-3 w-full opacity-50">
-                  <div className="h-px bg-white/20 flex-1"></div>
-                  <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
-                  <div className="h-px bg-white/20 flex-1"></div>
-                </div>
-                <div className="flex flex-col gap-3 w-full group justify-center">
-                  <input 
-                    type="text" placeholder="Target PIN" value={remoteId} onChange={(e) => setRemoteId(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white placeholder:text-white/30 text-center focus:outline-none focus:border-pink-500/50 shadow-inner font-mono tracking-widest"
-                  />
-                  <button 
-                    onClick={executeManualConnect}
-                    className="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:shadow-[0_0_25px_rgba(236,72,153,0.6)] active:scale-95 transition-all"
-                  >
-                    Link
-                  </button>
                 </div>
               </div>
-
             </div>
-          </div>
+          ) : (
+            /* --- GOLDEN MASTER ANDROID / IPHONE LAYOUT --- */
+            <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
+              <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] left-card-tile">
+                <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+                  <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Scan Screen</h3>
+                  <p className="text-xs text-white/50 font-light max-w-[240px]">Align scanner to your PC monitor</p>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-3 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+                    <div className="flex items-center justify-center gap-3 w-full opacity-50">
+                      <div className="h-px bg-white/20 flex-1"></div>
+                      <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Manual Override</span>
+                      <div className="h-px bg-white/20 flex-1"></div>
+                    </div>
+                    <div className="flex flex-col gap-3 w-full group justify-center">
+                      <input 
+                        type="text" placeholder="Target PIN" value={remoteId} onChange={(e) => setRemoteId(e.target.value)}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white placeholder:text-white/30 text-center focus:outline-none focus:border-pink-500/50 shadow-inner font-mono tracking-widest"
+                      />
+                      <button 
+                        onClick={executeManualConnect}
+                        className="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold text-xs px-6 py-3.5 rounded-xl hover:shadow-[0_0_25px_rgba(236,72,153,0.6)] active:scale-95 transition-all"
+                      >
+                        Link
+                      </button>
+                    </div>
+                </div>
+              </div>
+              <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile">
+                <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md landscape:hidden">Scan Matrix</h3>
+                <p className="shrink-0 text-[11px] text-white/50 mb-4 font-light landscape:hidden">Align PC matrix inside the frame</p>
+                <div className="w-full max-w-[260px] aspect-square mx-auto bg-black/80 border border-white/10 rounded-[24px] mb-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.8)] relative overflow-hidden flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-0 landscape:border-none landscape:bg-transparent landscape:shadow-none landscape:aspect-auto">
+                   <div id="reader" className="absolute inset-0 w-full h-full z-10 flex items-center justify-center"></div>
+                   <span className="text-[10px] text-white/40 absolute z-0 font-medium tracking-widest uppercase text-center px-4 pointer-events-none">Activating Lens...</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Active Live Stream Video Previews */}
           <div className={`w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
@@ -771,53 +785,69 @@ export default function App() {
       {mode === 'receiver' && (
         <div className="w-full z-10 relative flex-1 min-h-0 flex flex-col items-center justify-center">
             
-          {/* NON-DESTRUCTIVE DOM PERSISTENCE WRAPPER */}
-          <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
-            <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
-              
-              {/* Top Inner Card */}
-              <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
-                <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
-                <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
+          {showUnifiedIPadLayout ? (
+            /* --- IPAD UNIFIED 3-TIER LAYOUT --- */
+            <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
+              <div className="hidden landscape:flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+                <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+                  <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
+                  <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+                  <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
+                  <code className="text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
+                </div>
               </div>
-
-              {/* Bottom Inner Card */}
-              <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
-                <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
-                <code className="text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
+              <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0">
+                <div className="landscape:hidden flex flex-col items-center justify-center mb-2 w-full">
+                  <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md">Pair Device</h3>
+                  <p className="shrink-0 text-[11px] text-white/50 font-light">Point mobile lens at this matrix</p>
+                </div>
+                <div className="portrait-inner-square w-[80%] max-w-[280px] aspect-square mx-auto bg-white p-4 rounded-[24px] shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                  {peerId ? (
+                    <QRCodeSVG value={peerId} className="w-full h-full max-w-[240px] landscape:max-w-none aspect-square relative z-10 drop-shadow-sm" />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center w-full h-full max-w-[240px] aspect-square text-black/40 gap-2 relative z-10">
+                      <RefreshCw className="animate-spin text-purple-600 w-6 h-6 landscape:w-10 landscape:h-10" />
+                      <span className="text-[10px] landscape:text-xs font-bold uppercase tracking-wider text-center">Generating<br/>Key</span>
+                    </div>
+                  )}
+                </div>
+                <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 border border-white/10 rounded-[24px] p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center gap-2 mt-2">
+                  <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
+                  <code className="text-xl md:text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
+                </div>
               </div>
             </div>
-
-            {/* Disconnected Receiver (UNIFIED SURROUNDING TILE FOR PORTRAIT, QR Box for Landscape) */}
-            <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile z-20 shrink-0 landscape:flex-1 landscape:max-w-[450px] landscape:h-auto landscape:max-h-none landscape:w-auto landscape:p-6 md:landscape:p-8 landscape:m-0">
-              
-              {/* Top Block: Text (Portrait only) */}
-              <div className="landscape:hidden flex flex-col items-center justify-center mb-2 w-full">
-                <h3 className="shrink-0 text-xl font-bold mb-1 tracking-tight drop-shadow-md">Pair Device</h3>
-                <p className="shrink-0 text-[11px] text-white/50 font-light">Point mobile lens at this matrix</p>
+          ) : (
+            /* --- GOLDEN MASTER ANDROID / IPHONE LAYOUT --- */
+            <div className={`w-full z-10 relative flex flex-col items-center justify-center gap-4 md:gap-6 pb-24 landscape-disconnected-container md:flex-row ${isConnected ? 'hidden' : 'flex'}`}>
+              <div className="flex flex-col justify-center items-center text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative left-card-tile">
+                <div className="flex flex-col items-center text-center gap-2 justify-center bg-black/40 border border-white/10 rounded-[24px] p-6 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.4)]">
+                  <h3 className="text-xl font-bold tracking-tight drop-shadow-md">Pair Device</h3>
+                  <p className="text-xs text-white/50 font-light max-w-[240px]">Point mobile lens at this matrix</p>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-2 bg-black/60 border border-white/10 rounded-[24px] p-4 w-full max-w-[260px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)]">
+                  <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
+                  <code className="text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
+                </div>
               </div>
-
-              {/* Middle Block: Squeezed QR Code (Strict Square on Portrait) */}
-              <div className="portrait-inner-square w-[80%] max-w-[280px] aspect-square mx-auto bg-white p-4 rounded-[24px] shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
-                <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                {peerId ? (
-                  <QRCodeSVG value={peerId} className="w-full h-full max-w-[240px] landscape:max-w-none aspect-square relative z-10 drop-shadow-sm" />
-                ) : (
-                  <div className="flex flex-col items-center justify-center w-full h-full max-w-[240px] aspect-square text-black/40 gap-2 relative z-10">
-                    <RefreshCw className="animate-spin text-purple-600 w-6 h-6 landscape:w-10 landscape:h-10" />
-                    <span className="text-[10px] landscape:text-xs font-bold uppercase tracking-wider text-center">Generating<br/>Key</span>
-                  </div>
-                )}
+              <div className="flex flex-col items-center justify-center min-h-0 bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] md:rounded-[32px] p-5 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all w-full right-card-tile">
+                <div className="w-full max-w-[260px] aspect-square mx-auto bg-white p-4 rounded-[24px] shadow-[0_0_40px_rgba(255,255,255,0.15)] relative overflow-hidden group flex justify-center items-center landscape:w-full landscape:h-full landscape:max-w-none landscape:mb-0 landscape:rounded-[24px] landscape:p-6 landscape:aspect-auto">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                  {peerId ? (
+                    <QRCodeSVG value={peerId} className="w-full h-full max-w-[240px] landscape:max-w-none aspect-square relative z-10 drop-shadow-sm" />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center w-full h-full max-w-[240px] aspect-square text-black/40 gap-2 relative z-10">
+                      <RefreshCw className="animate-spin text-purple-600 w-6 h-6 landscape:w-10 landscape:h-10" />
+                      <span className="text-[10px] landscape:text-xs font-bold uppercase tracking-wider text-center">Generating<br/>Key</span>
+                    </div>
+                  )}
+                </div>
               </div>
-
-              {/* Bottom Block: Squeezed FULL PIN Display (Portrait only) */}
-              <div className="landscape:hidden shrink-0 w-[80%] max-w-[280px] bg-black/60 border border-white/10 rounded-[24px] p-4 shadow-[inset_0_4px_30px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center gap-2 mt-2">
-                <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-1">Secure PIN</span>
-                <code className="text-xl md:text-2xl text-pink-400 break-all block font-mono font-bold tracking-[0.3em] drop-shadow-[0_0_5px_rgba(236,72,153,0.4)]">{peerId || '...'}</code>
-              </div>
-
             </div>
-          </div>
+          )}
 
           {/* Active Live Receiver Output Panel Container (Never Unmounted) */}
           <div className={`w-full h-full flex flex-col landscape:flex-row landscape:p-4 md:landscape:p-6 landscape:gap-4 md:landscape:gap-6 landscape:justify-center flex-1 min-h-0 pb-2 md:pb-6 justify-center items-center gap-3 md:gap-4 ${!isConnected ? 'hidden' : 'flex'}`}>
